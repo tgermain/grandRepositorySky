@@ -5,8 +5,9 @@ import (
 )
 
 type DHTnode struct {
-	id   int
-	ring []*DHTnode
+	id       int
+	ring     []*DHTnode
+	ip, port string
 }
 
 func makeDHTNode(id int) DHTnode {
@@ -25,12 +26,13 @@ func (currentNode *DHTnode) addToRing(newNode DHTnode) {
 	case (currentNode.id == currentNode.ring[0].id):
 		{
 			//init case : currentNode looping on itself
-			newNode.ring[0] = currentNode
+			newNode.ring[0] = currentNode.ring[0]
 			currentNode.ring[0] = &newNode
 		}
-	case (currentNode.id < newNode.id) && (currentNode.ring[0].id > newNode.id):
+	case (currentNode.id < newNode.id) && (newNode.id < currentNode.ring[0].id):
 		{
 			//case of x->(x+2) and we want to add (x+1) node
+			newNode.ring[0] = currentNode.ring[0]
 			currentNode.ring[0] = &newNode
 		}
 	case (currentNode.id < newNode.id) && (currentNode.ring[0].id < currentNode.id):
