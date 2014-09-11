@@ -32,3 +32,7 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 
 
 
+## 1. Chord DHT playground 
+
+to run the playground test : 
+`go test dhtPlayground_test.go dhtPlayground.go -v`
