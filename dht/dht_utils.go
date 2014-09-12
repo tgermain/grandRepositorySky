@@ -23,9 +23,12 @@ func Distance(a, b []byte, bits int) *big.Int {
 	return &dist
 }
 
-func Between(id1, id2, key []byte) bool {
+func Between(Sid1, Sid2, Skey string) bool {
+	//convert string to []byte
+	id1 := []byte(Sid1)
+	id2 := []byte(Sid2)
+	key := []byte(Skey)
 	// 0 if a==b, -1 if a < b, and +1 if a > b
-
 	if bytes.Compare(key, id1) == 0 { // key == id1
 		return true
 	}
@@ -98,10 +101,10 @@ func GenerateNodeId() string {
 		panic(err)
 	}
 
-	return Sha1hash(u.String())
+	return sha1hash(u.String())
 }
 
-func Sha1hash(str string) string {
+func sha1hash(str string) string {
 	// calculate sha-1 hash
 	hasher := sha1.New()
 	hasher.Write([]byte(str))
