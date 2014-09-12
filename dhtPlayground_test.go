@@ -31,5 +31,6 @@ func TestPlaygGroundRingSetup(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	assert.Equal(t, node4.ring[0].id, node5.id, "05 should follow 04")
 	assert.Equal(t, node7.ring[0].id, node0.id, "last node should go to the beginning")
+	assert.Equal(t, node3.Lookup("02"), node2.id, "node3.lookup(\"02\") should return node2.id")
 
 }
