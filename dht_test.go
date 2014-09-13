@@ -222,6 +222,8 @@ func TestFinger3bits(t *testing.T) {
 	node3.TestCalcFingers(2, 3)
 	fmt.Println("")
 	node3.TestCalcFingers(3, 3)
+
+	node3.PrintNodeInfo()
 }
 
 /*
@@ -324,4 +326,27 @@ func TestFinger160bits(t *testing.T) {
 	fmt.Println("")
 	node3.TestCalcFingers(160, 160)
 	fmt.Println("")
+}
+
+func TestDistanceFunc(t *testing.T) {
+	id0 := "00"
+	id1 := "01"
+	id4 := "04"
+	id7 := "07"
+
+	node0 := MakeDHTNode(&id0, "localhost", "1111")
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
+
+	fmt.Println("------------------------------------------------------------------------------------------------")
+	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node0.id), 8))
+
+	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node1.id), 8))
+
+	fmt.Printf("%v\n", dht.Distance([]byte(node1.id), []byte(node0.id), 8))
+
+	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node4.id), 8))
+
+	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node7.id), 8))
 }
