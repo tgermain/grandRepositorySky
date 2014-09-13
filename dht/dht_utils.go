@@ -9,6 +9,9 @@ import (
 )
 
 func Distance(a, b []byte, bits int) *big.Int {
+	//Be sure that a<b or distance will be infinite
+	//distance 0,1 = 1
+	//distance 1,0 = 255
 	var ring big.Int
 	ring.Exp(big.NewInt(2), big.NewInt(int64(bits)), nil)
 
