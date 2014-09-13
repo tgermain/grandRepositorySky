@@ -84,4 +84,16 @@ func (node *DHTnode) printRingRec(origId string) {
 
 func (node *DHTnode) TestCalcFingers(a, b int) {
 	fmt.Println("Not yet implemented")
+func (node *DHTnode) PrintNodeInfo() {
+	fmt.Println("---------------------------------")
+	fmt.Println("Node info")
+	fmt.Println("---------------------------------")
+	fmt.Printf("  Id		Ip		Port\n")
+	fmt.Printf("  %s		%s 		%s\n", node.id, node.ip, node.port)
+	fmt.Println()
+	fmt.Println("  Finger table :")
+	fmt.Println("  ---------------------------------")
+	for i, v := range node.finger {
+		fmt.Printf("  %d 		%s		%s 		%s\n", i, v.id, v.ip, v.port)
+	}
 }
