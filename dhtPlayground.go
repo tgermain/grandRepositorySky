@@ -8,70 +8,80 @@ import (
 
 type DHTnode struct {
 	id       string
-	ring     []*DHTnode
+	finger   []*DHTnode
 	ip, port string
 }
 
-func MakeDHTNode(id string) DHTnode {
-	daNode := DHTnode{
-		id:   id,
-		ring: make([]*DHTnode, 1),
+func MakeDHTNode(NewId *string, NewIp, NewPort string) DHTnode {
+	if NewId == nil {
+		tempId := dht.GenerateNodeId()
+		NewId = &tempId
 	}
-	daNode.ring[0] = &daNode
+	daNode := DHTnode{
+		id:     *NewId,
+		finger: make([]*DHTnode, 1),
+		ip:     NewIp,
+		port:   NewPort,
+	}
+	daNode.finger[0] = &daNode
 	return daNode
 }
 
 func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
 	//furthers comments assume that he current currentNode is named x
 	switch {
-	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.ring[0].id)) == 0:
+	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.finger[0].id)) == 0:
 		{
 			//init case : currentNode looping on itself
 			// fmt.Println("Init case : 2 node")
-			newNode.ring[0] = currentNode.ring[0]
-			currentNode.ring[0] = &newNode
+			newNode.finger[0] = currentNode.finger[0]
+			currentNode.finger[0] = &newNode
 		}
-	case dht.Between(currentNode.id, currentNode.ring[0].id, newNode.id):
-		// (currentNode.id < newNode.id) && (newNode.id < currentNode.ring[0].id)
+	case dht.Between(currentNode.id, currentNode.finger[0].id, newNode.id):
+		// (currentNode.id < newNode.id) && (newNode.id < currentNode.finger[0].id)
 		{
 			//case of x->(x+2) and we want to add (x+1) node
 			// fmt.Println("add in the middle")
-			newNode.ring[0] = currentNode.ring[0]
-			currentNode.ring[0] = &newNode
+			newNode.finger[0] = currentNode.finger[0]
+			currentNode.finger[0] = &newNode
 		}
-	case dht.Between(currentNode.ring[0].id, newNode.id, currentNode.id):
-		// (currentNode.ring[0].id < currentNode.id) && (currentNode.id < newNode.id)
+	case dht.Between(currentNode.finger[0].id, newNode.id, currentNode.id):
+		// (currentNode.finger[0].id < currentNode.id) && (currentNode.id < newNode.id)
 		{
 			//case of X -> 0 and we want to add (x+1) node
 			// fmt.Println("add at the end")
-			newNode.ring[0] = currentNode.ring[0]
-			currentNode.ring[0] = &newNode
+			newNode.finger[0] = currentNode.finger[0]
+			currentNode.finger[0] = &newNode
 		}
 	default:
 		{
 			// fmt.Println("Go to the next")
-			currentNode.ring[0].AddToRing(newNode)
+			currentNode.finger[0].AddToRing(newNode)
 		}
 	}
 }
 
-func (currentNode *DHTnode) Lookup(idToSearch string) string {
-	if dht.Between(currentNode.id, currentNode.ring[0].id, idToSearch) {
-		return currentNode.id
+func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
+	if dht.Between(currentNode.id, currentNode.finger[0].id, idToSearch) {
+		return currentNode
 	} else {
-		return currentNode.ring[0].Lookup(idToSearch)
+		return currentNode.finger[0].Lookup(idToSearch)
 	}
 }
 
 func (node *DHTnode) PrintRing() {
 	fmt.Printf("%s\n", node.id)
-	node.ring[0].printRingRec(node.id)
+	node.finger[0].printRingRec(node.id)
 }
 
 func (node *DHTnode) printRingRec(origId string) {
 	fmt.Printf("%s\n", node.id)
-	if bytes.Compare([]byte(node.ring[0].id), []byte(origId)) != 0 {
+	if bytes.Compare([]byte(node.finger[0].id), []byte(origId)) != 0 {
 
-		node.ring[0].printRingRec(origId)
+		node.finger[0].printRingRec(origId)
 	}
+}
+
+func (node *DHTnode) TestCalcFingers(a, b int) {
+	fmt.Println("Not yet implemented")
 }

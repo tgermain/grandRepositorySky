@@ -1,12 +1,52 @@
-package dht
+package grandRepositorySky
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"github.com/tgermain/grandRepositorySky/dht"
 	"testing"
 )
 
 // test cases can be run by calling e.g. go test -test.run TestRingSetup
 // go run test will run all tests
+
+func TestRingSetup3bit(t *testing.T) {
+	id0 := "00"
+	id1 := "01"
+	id2 := "02"
+	id3 := "03"
+	id4 := "04"
+	id5 := "05"
+	id6 := "06"
+	id7 := "07"
+
+	node0 := MakeDHTNode(&id0, "localhost", "1111")
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node2 := MakeDHTNode(&id2, "localhost", "1113")
+	node3 := MakeDHTNode(&id3, "localhost", "1114")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node5 := MakeDHTNode(&id5, "localhost", "1116")
+	node6 := MakeDHTNode(&id6, "localhost", "1117")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
+
+	node0.AddToRing(node1)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+
+	fmt.Println("------------------------------------------------------------------------------------------------")
+	fmt.Println("RING STRUCTURE")
+	fmt.Println("------------------------------------------------------------------------------------------------")
+	node1.PrintRing()
+	fmt.Println("------------------------------------------------------------------------------------------------")
+	assert.Equal(t, node4.finger[0].id, node5.id, "05 should follow 04")
+	assert.Equal(t, node7.finger[0].id, node0.id, "last node should go to the beginning")
+	assert.Equal(t, node3.Lookup("02"), &node2, "node3.lookup(\"02\") should return &node2")
+
+}
 
 /*
  * Example of expected output of calling printRing().
@@ -23,29 +63,29 @@ import (
  */
 func TestRingSetup(t *testing.T) {
 	// note nil arg means automatically generate ID, e.g. f38f3b2dcc69a2093f258e31902e40ad33148385
-	node1 := makeDHTNode(nil, "localhost", "1111")
-	node2 := makeDHTNode(nil, "localhost", "1112")
-	node3 := makeDHTNode(nil, "localhost", "1113")
-	node4 := makeDHTNode(nil, "localhost", "1114")
-	node5 := makeDHTNode(nil, "localhost", "1115")
-	node6 := makeDHTNode(nil, "localhost", "1116")
-	node7 := makeDHTNode(nil, "localhost", "1117")
-	node8 := makeDHTNode(nil, "localhost", "1118")
-	node9 := makeDHTNode(nil, "localhost", "1119")
+	node1 := MakeDHTNode(nil, "localhost", "1111")
+	node2 := MakeDHTNode(nil, "localhost", "1112")
+	node3 := MakeDHTNode(nil, "localhost", "1113")
+	node4 := MakeDHTNode(nil, "localhost", "1114")
+	node5 := MakeDHTNode(nil, "localhost", "1115")
+	node6 := MakeDHTNode(nil, "localhost", "1116")
+	node7 := MakeDHTNode(nil, "localhost", "1117")
+	node8 := MakeDHTNode(nil, "localhost", "1118")
+	node9 := MakeDHTNode(nil, "localhost", "1119")
 
-	node1.addToRing(node2)
-	node1.addToRing(node3)
-	node1.addToRing(node4)
-	node4.addToRing(node5)
-	node3.addToRing(node6)
-	node3.addToRing(node7)
-	node3.addToRing(node8)
-	node7.addToRing(node9)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+	node3.AddToRing(node8)
+	node7.AddToRing(node9)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	fmt.Println("RING STRUCTURE")
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	node1.printRing()
+	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
 }
 
@@ -58,38 +98,38 @@ func TestRingSetup(t *testing.T) {
  * c588f83243aeb49288d3fcdeb6cc9e68f9134dce is respoinsible for cba8c6e5f208b9c72ebee924d20f04a081a1b0aa
  */
 func TestLookup(t *testing.T) {
-	node1 := makeDHTNode(nil, "localhost", "1111")
-	node2 := makeDHTNode(nil, "localhost", "1112")
-	node3 := makeDHTNode(nil, "localhost", "1113")
-	node4 := makeDHTNode(nil, "localhost", "1114")
-	node5 := makeDHTNode(nil, "localhost", "1115")
-	node6 := makeDHTNode(nil, "localhost", "1116")
-	node7 := makeDHTNode(nil, "localhost", "1117")
-	node8 := makeDHTNode(nil, "localhost", "1118")
-	node9 := makeDHTNode(nil, "localhost", "1119")
+	node1 := MakeDHTNode(nil, "localhost", "1111")
+	node2 := MakeDHTNode(nil, "localhost", "1112")
+	node3 := MakeDHTNode(nil, "localhost", "1113")
+	node4 := MakeDHTNode(nil, "localhost", "1114")
+	node5 := MakeDHTNode(nil, "localhost", "1115")
+	node6 := MakeDHTNode(nil, "localhost", "1116")
+	node7 := MakeDHTNode(nil, "localhost", "1117")
+	node8 := MakeDHTNode(nil, "localhost", "1118")
+	node9 := MakeDHTNode(nil, "localhost", "1119")
 
-	node1.addToRing(node2)
-	node1.addToRing(node3)
-	node1.addToRing(node4)
-	node4.addToRing(node5)
-	node3.addToRing(node6)
-	node3.addToRing(node7)
-	node3.addToRing(node8)
-	node7.addToRing(node9)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+	node3.AddToRing(node8)
+	node7.AddToRing(node9)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	fmt.Println("RING STRUCTURE")
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	node1.printRing()
+	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
 
 	str := "hello students!"
-	hashKey := sha1hash(str)
+	hashKey := dht.Sha1hash(str)
 	fmt.Println("str=" + str)
 	fmt.Println("hashKey=" + hashKey)
 
-	fmt.Println("node 1: " + node1.lookup(hashKey).nodeId + " is respoinsible for " + hashKey)
-	fmt.Println("node 5: " + node5.lookup(hashKey).nodeId + " is respoinsible for " + hashKey)
+	fmt.Println("node 1: " + node1.Lookup(hashKey).id + " is respoinsible for " + hashKey)
+	fmt.Println("node 5: " + node5.Lookup(hashKey).id + " is respoinsible for " + hashKey)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 
@@ -144,34 +184,34 @@ func TestFinger3bits(t *testing.T) {
 	id6 := "06"
 	id7 := "07"
 
-	node0 := makeDHTNode(&id0, "localhost", "1111")
-	node1 := makeDHTNode(&id1, "localhost", "1112")
-	node2 := makeDHTNode(&id2, "localhost", "1113")
-	node3 := makeDHTNode(&id3, "localhost", "1114")
-	node4 := makeDHTNode(&id4, "localhost", "1115")
-	node5 := makeDHTNode(&id5, "localhost", "1116")
-	node6 := makeDHTNode(&id6, "localhost", "1117")
-	node7 := makeDHTNode(&id7, "localhost", "1118")
+	node0 := MakeDHTNode(&id0, "localhost", "1111")
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node2 := MakeDHTNode(&id2, "localhost", "1113")
+	node3 := MakeDHTNode(&id3, "localhost", "1114")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node5 := MakeDHTNode(&id5, "localhost", "1116")
+	node6 := MakeDHTNode(&id6, "localhost", "1117")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
 
-	node0.addToRing(node1)
-	node1.addToRing(node2)
-	node1.addToRing(node3)
-	node1.addToRing(node4)
-	node4.addToRing(node5)
-	node3.addToRing(node6)
-	node3.addToRing(node7)
+	node0.AddToRing(node1)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	fmt.Println("RING STRUCTURE")
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	node1.printRing()
+	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
 
-	node3.testCalcFingers(1, 3)
+	node3.TestCalcFingers(1, 3)
 	fmt.Println("")
-	node3.testCalcFingers(2, 3)
+	node3.TestCalcFingers(2, 3)
 	fmt.Println("")
-	node3.testCalcFingers(3, 3)
+	node3.TestCalcFingers(3, 3)
 }
 
 /*
@@ -239,39 +279,39 @@ func TestFinger3bits(t *testing.T) {
  */
 func TestFinger160bits(t *testing.T) {
 	// note nil arg means automatically generate ID, e.g. f38f3b2dcc69a2093f258e31902e40ad33148385
-	node1 := makeDHTNode(nil, "localhost", "1111")
-	node2 := makeDHTNode(nil, "localhost", "1112")
-	node3 := makeDHTNode(nil, "localhost", "1113")
-	node4 := makeDHTNode(nil, "localhost", "1114")
-	node5 := makeDHTNode(nil, "localhost", "1115")
-	node6 := makeDHTNode(nil, "localhost", "1116")
-	node7 := makeDHTNode(nil, "localhost", "1117")
-	node8 := makeDHTNode(nil, "localhost", "1118")
-	node9 := makeDHTNode(nil, "localhost", "1119")
+	node1 := MakeDHTNode(nil, "localhost", "1111")
+	node2 := MakeDHTNode(nil, "localhost", "1112")
+	node3 := MakeDHTNode(nil, "localhost", "1113")
+	node4 := MakeDHTNode(nil, "localhost", "1114")
+	node5 := MakeDHTNode(nil, "localhost", "1115")
+	node6 := MakeDHTNode(nil, "localhost", "1116")
+	node7 := MakeDHTNode(nil, "localhost", "1117")
+	node8 := MakeDHTNode(nil, "localhost", "1118")
+	node9 := MakeDHTNode(nil, "localhost", "1119")
 
-	node1.addToRing(node2)
-	node1.addToRing(node3)
-	node1.addToRing(node4)
-	node4.addToRing(node5)
-	node3.addToRing(node6)
-	node3.addToRing(node7)
-	node3.addToRing(node8)
-	node7.addToRing(node9)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+	node3.AddToRing(node8)
+	node7.AddToRing(node9)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	fmt.Println("RING STRUCTURE")
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	node1.printRing()
+	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
 
-	node3.testCalcFingers(0, 160)
+	node3.TestCalcFingers(0, 160)
 	fmt.Println("")
-	node3.testCalcFingers(1, 160)
+	node3.TestCalcFingers(1, 160)
 	fmt.Println("")
-	node3.testCalcFingers(80, 160)
+	node3.TestCalcFingers(80, 160)
 	fmt.Println("")
-	node3.testCalcFingers(120, 90)
+	node3.TestCalcFingers(120, 90)
 	fmt.Println("")
-	node3.testCalcFingers(160, 160)
+	node3.TestCalcFingers(160, 160)
 	fmt.Println("")
 }

@@ -101,10 +101,10 @@ func GenerateNodeId() string {
 		panic(err)
 	}
 
-	return sha1hash(u.String())
+	return Sha1hash(u.String())
 }
 
-func sha1hash(str string) string {
+func Sha1hash(str string) string {
 	// calculate sha-1 hash
 	hasher := sha1.New()
 	hasher.Write([]byte(str))
