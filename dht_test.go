@@ -98,15 +98,25 @@ func TestRingSetup(t *testing.T) {
  * c588f83243aeb49288d3fcdeb6cc9e68f9134dce is respoinsible for cba8c6e5f208b9c72ebee924d20f04a081a1b0aa
  */
 func TestLookup(t *testing.T) {
-	node1 := MakeDHTNode(nil, "localhost", "1111")
-	node2 := MakeDHTNode(nil, "localhost", "1112")
-	node3 := MakeDHTNode(nil, "localhost", "1113")
-	node4 := MakeDHTNode(nil, "localhost", "1114")
-	node5 := MakeDHTNode(nil, "localhost", "1115")
-	node6 := MakeDHTNode(nil, "localhost", "1116")
-	node7 := MakeDHTNode(nil, "localhost", "1117")
-	node8 := MakeDHTNode(nil, "localhost", "1118")
-	node9 := MakeDHTNode(nil, "localhost", "1119")
+	id1 := "01"
+	id2 := "02"
+	id3 := "03"
+	id4 := "04"
+	id5 := "05"
+	id6 := "06"
+	id7 := "07"
+	id8 := "08"
+	id9 := "09"
+
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node2 := MakeDHTNode(&id2, "localhost", "1113")
+	node3 := MakeDHTNode(&id3, "localhost", "1114")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node5 := MakeDHTNode(&id5, "localhost", "1116")
+	node6 := MakeDHTNode(&id6, "localhost", "1117")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
+	node8 := MakeDHTNode(&id8, "localhost", "1119")
+	node9 := MakeDHTNode(&id9, "localhost", "1120")
 
 	node1.AddToRing(node2)
 	node1.AddToRing(node3)
