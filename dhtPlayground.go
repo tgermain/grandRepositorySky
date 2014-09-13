@@ -65,6 +65,7 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 	if dht.Between(currentNode.id, currentNode.finger[0].id, idToSearch) {
 		return currentNode
 	} else {
+		// fmt.Println("go to the next one")
 		return currentNode.finger[0].Lookup(idToSearch)
 	}
 }
