@@ -82,8 +82,11 @@ func (node *DHTnode) printRingRec(origId string) {
 	}
 }
 
-func (node *DHTnode) TestCalcFingers(a, b int) {
-	fmt.Println("Not yet implemented")
+func (node *DHTnode) TestCalcFingers(k, m int) {
+	fingerId, _ := dht.CalcFinger([]byte(node.id), k, m)
+	node.Lookup(fingerId).PrintNodeInfo()
+}
+
 func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println("---------------------------------")
 	fmt.Println("Node info")
