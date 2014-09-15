@@ -8,7 +8,7 @@ import (
 
 type DHTnode struct {
 	id       string
-	finger   []*DHTnode
+	finger   []*DHTnode //Successor is finger[0]
 	ip, port string
 }
 
@@ -63,6 +63,7 @@ func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
 
 func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 	if dht.Between(currentNode.id, currentNode.finger[0].id, idToSearch) {
+		// fmt.Printf("We are seeking for %s\n", idToSearch)
 		return currentNode
 	} else {
 		// fmt.Println("go to the next one")
@@ -84,6 +85,8 @@ func (node *DHTnode) printRingRec(origId string) {
 }
 
 func (node *DHTnode) TestCalcFingers(k, m int) {
+	fmt.Printf("node.id as string = %v\n", node.id)
+	fmt.Printf("node.id to byte = %v\n", []byte(node.id))
 	fingerId, _ := dht.CalcFinger([]byte(node.id), k, m)
 	node.Lookup(fingerId).PrintNodeInfo()
 }
@@ -92,7 +95,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println("---------------------------------")
 	fmt.Println("Node info")
 	fmt.Println("---------------------------------")
-	fmt.Printf("  Id		Ip		Port\n")
+	fmt.Printf("  Id		Ip						Port\n")
 	fmt.Printf("  %s		%s 		%s\n", node.id, node.ip, node.port)
 	fmt.Println()
 	fmt.Println("  Finger table :")
@@ -100,4 +103,6 @@ func (node *DHTnode) PrintNodeInfo() {
 	for i, v := range node.finger {
 		fmt.Printf("  %d 		%s		%s 		%s\n", i, v.id, v.ip, v.port)
 	}
+	fmt.Println("---------------------------------")
+
 }
