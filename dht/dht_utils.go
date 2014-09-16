@@ -37,13 +37,13 @@ func Between(Sid1, Sid2, Skey string) bool {
 	}
 
 	if bytes.Compare(id2, id1) == 1 { // id2 > id1
-		if bytes.Compare(key, id2) == -1 && bytes.Compare(key, id1) == 1 { // key < id2 && key > id1
+		if bytes.Compare(key, id1) == 1 && bytes.Compare(key, id2) == -1 { // id1 < key && key < id2
 			return true
 		} else {
 			return false
 		}
 	} else { // id1 > id2
-		if bytes.Compare(key, id1) == 1 || bytes.Compare(key, id2) == -1 { // key > id1 || key < id2
+		if bytes.Compare(key, id1) == 1 || bytes.Compare(key, id2) == -1 { // id1 > key || key < id2
 			return true
 		} else {
 			return false
