@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/tgermain/grandRepositorySky/dht"
+	"math/big"
 )
 
 //Const parts -----------------------------------------------------------
@@ -63,6 +64,27 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 		//TODO use the fingers table here
 		return currentNode.fingers[0].Lookup(idToSearch)
 	}
+}
+
+func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
+	var minDistance *big.Int
+	var bestFinger *DHTnode
+
+	for _, v := range currentNode.fingers {
+		//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
+		currentDistance := dht.Distance([]byte(v.id), []byte(idToSearch), SPACESIZE)
+
+		// x.cmp(y)
+		// -1 if x <  y
+		//  0 if x == y
+		// +1 if x >  y
+
+		if minDistance.Cmp(currentDistance) == 1 {
+			minDistance = currentDistance
+			bestFinger = v
+		}
+	}
+	return bestFinger
 }
 
 func (node *DHTnode) PrintRing() {
