@@ -20,10 +20,11 @@ type DHTnode struct {
 }
 
 type fingerEntry struct {
-	idKey	string
-	idResp	string
-	tmp *DHTnode
+	idKey  string
+	idResp string
+	tmp    *DHTnode
 }
+
 //Method parts ----------------------------------------------------------
 
 func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
@@ -122,8 +123,9 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println()
 	fmt.Println("  Fingers table :")
 	fmt.Println("  ---------------------------------")
+	fmt.Println("  Index	idkey					idNode ")
 	for i, v := range node.fingers {
-		fmt.Printf("  %d 		%s		%s 		%s\n", i, v.idKey, v.idResp, v.port)
+		fmt.Printf("  %d 		%s					%s\n", i, v.idKey, v.idResp)
 	}
 	fmt.Println("---------------------------------")
 
@@ -143,5 +145,7 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) DHTnode {
 	}
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
+
+	//Initialize the finger table with each finger pointing to the node frehly created itself
 	return daNode
 }
