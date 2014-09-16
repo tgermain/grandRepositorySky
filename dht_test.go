@@ -42,8 +42,9 @@ func TestRingSetup3bit(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	assert.Equal(t, node4.finger[0].id, node5.id, "05 should follow 04")
-	assert.Equal(t, node7.finger[0].id, node0.id, "last node should go to the beginning")
+	node1.Lookup("03").PrintNodeInfo()
+	assert.Equal(t, node4.fingers[0].id, node5.id, "05 should follow 04")
+	assert.Equal(t, node7.fingers[0].id, node0.id, "last node should go to the beginning")
 	assert.Equal(t, node3.Lookup("02"), &node2, "node3.lookup(\"02\") should return &node2")
 
 }
@@ -224,6 +225,7 @@ func TestFinger3bits(t *testing.T) {
 	node3.TestCalcFingers(3, 3)
 
 	node3.PrintNodeInfo()
+
 }
 
 /*
@@ -331,22 +333,17 @@ func TestFinger160bits(t *testing.T) {
 func TestDistanceFunc(t *testing.T) {
 	id0 := "00"
 	id1 := "01"
-	id4 := "04"
-	id7 := "07"
+	// id4 := "04"
+	// id7 := "07"
 
 	node0 := MakeDHTNode(&id0, "localhost", "1111")
 	node1 := MakeDHTNode(&id1, "localhost", "1112")
-	node4 := MakeDHTNode(&id4, "localhost", "1115")
-	node7 := MakeDHTNode(&id7, "localhost", "1118")
+	// node4 := MakeDHTNode(nil, "localhost", "1115")
+	// node7 := MakeDHTNode(nil, "localhost", "1118")
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node0.id), 8))
+	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node0.id), 160))
 
-	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node1.id), 8))
+	fmt.Printf("%v\n", dht.Distance([]byte(node1.id), []byte(node0.id), 160))
 
-	fmt.Printf("%v\n", dht.Distance([]byte(node1.id), []byte(node0.id), 8))
-
-	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node4.id), 8))
-
-	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(node7.id), 8))
 }

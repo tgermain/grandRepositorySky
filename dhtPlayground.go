@@ -62,13 +62,13 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 	} else {
 		// fmt.Println("go to the next one")
 		//TODO use the fingers table here
-		return currentNode.fingers[0].Lookup(idToSearch)
+		return currentNode.findClosestNode(idToSearch).Lookup(idToSearch)
 	}
 }
 
 func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
-	var minDistance *big.Int
-	var bestFinger *DHTnode
+	minDistance := big.NewInt(HUGESTINT)
+	bestFinger := currentNode.fingers[0]
 
 	for _, v := range currentNode.fingers {
 		//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
@@ -84,6 +84,7 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 			bestFinger = v
 		}
 	}
+	fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught node [%s]\n", currentNode.id, idToSearch, bestFinger.id)
 	return bestFinger
 }
 
