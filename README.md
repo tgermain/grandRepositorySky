@@ -41,3 +41,14 @@ TODO :
 - implement the function to create finger table (the primitive are already done)
 - Upgrade the lookup function to take advantage of the fingers table (+test)
 - thinking of when we have to update the fingers tables of nodes (when 2 nodes enter the network : risk of update the table twice) -> search in the litterature and discuss solution
+
+TOCHANGE : 
+- Finger table should be :
+example for node "05" 3bit space
+
+| Index | Key | Successor | 
+| ----- | --- | --------- |
+|     0 |  06 |        07 | 
+|     1 |  08 |        08 | 
+|     2 |  06 |        07 | 
+
