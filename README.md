@@ -40,10 +40,9 @@ to run the playground test :
 TODO : 
 - implement the function to create finger table (the primitive are already done)
 - Upgrade the lookup function to take advantage of the fingers table (+test)
-- thinking of when we have to update the fingers tables of nodes (when 2 nodes enter the network : risk of update the table twice) -> search in the litterature and discuss solution
-
-TOCHANGE : 
-- Finger table should be :
+- Add a predecessor node pointer in DHTNode
+- Extract the next real node from the fingers table (fingers[0] became a new atribut of DHTNode)
+- Finger table is now :
 example for node "05" 3bit space
 
 | Index | Key | Successor | 
@@ -51,4 +50,32 @@ example for node "05" 3bit space
 |     0 |  06 |        07 | 
 |     1 |  08 |        08 | 
 |     2 |  06 |        07 | 
+make sure that all the test and existing code take account of this modification
 
+### Finger table calculation 
+
+2->5
+
+New node 4 !
+
+2->4->5
+
+When a node enter the ring, we initialize its fingers table (to be sure that its succesor is *(5)*) and update the fingers table of its predecessor *(2)*. 
+
+### Ring stabilization
+To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
+**Goroutine** ?
+
+## 2. Network communication
+
+SPRINT : 
+- Do a sample project to understand how to send/receive and parse messages in GO
+- Make a library to send/receive messages
+- Do logs (with timestamps, colors)
+- Make tests
+- Modify the existing code to make stuffs work
+- Handle when a node quit the ring (not gracefuly)
+
+
+TODO : 
+- All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
