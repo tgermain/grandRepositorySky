@@ -8,9 +8,9 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 
 ### 6 objectives : 
 1. Chord DHT playground 
-	- organize nodes in a ring
+	- organize node in ring
 	- lookup function
-	- fingers table
+	- finger table
 2. :wrench:Fully working chord DHT
 	- separate nodes and makes them communicate
 3. Replication
