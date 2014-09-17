@@ -79,17 +79,19 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	bestFinger := currentNode.fingers[0].tmp
 
 	for _, v := range currentNode.fingers {
-		//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
-		currentDistance := dht.Distance([]byte(v.id), []byte(idToSearch), SPACESIZE)
+		if v != nil {
+			//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
+			currentDistance := dht.Distance([]byte(v.idResp), []byte(idToSearch), SPACESIZE)
 
-		// x.cmp(y)
-		// -1 if x <  y
-		//  0 if x == y
-		// +1 if x >  y
+			// x.cmp(y)
+			// -1 if x <  y
+			//  0 if x == y
+			// +1 if x >  y
 
-		if minDistance.Cmp(currentDistance) == 1 {
-			minDistance = currentDistance
-			bestFinger = v
+			if minDistance.Cmp(currentDistance) == 1 {
+				minDistance = currentDistance
+				bestFinger = v.tmp
+			}
 		}
 	}
 	fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught node [%s]\n", currentNode.id, idToSearch, bestFinger.id)
@@ -125,7 +127,9 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println("  ---------------------------------")
 	fmt.Println("  Index	idkey					idNode ")
 	for i, v := range node.fingers {
-		fmt.Printf("  %d 		%s					%s\n", i, v.idKey, v.idResp)
+		if v != nil {
+			fmt.Printf("  %d 		%s					%s\n", i, v.idKey, v.idResp)
+		}
 	}
 	fmt.Println("---------------------------------")
 
