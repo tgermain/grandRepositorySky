@@ -37,11 +37,9 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 to run the playground test : 
 `go test dhtPlayground_test.go dhtPlayground.go -v`
 
-TODO : 
-- implement the function to create finger table (the primitive are already done)
-- Upgrade the lookup function to take advantage of the fingers table (+test)
+###TODO : 
+- Upgrade the lookup function to take advantage of the fingers table (***+test***)
 - Add a predecessor node pointer in DHTNode
-- Extract the next real node from the fingers table (fingers[0] became a new atribut of DHTNode)
 - Finger table is now :
 example for node "05" 3bit space
 
@@ -52,7 +50,11 @@ example for node "05" 3bit space
 |     2 |  06 |        07 | 
 make sure that all the test and existing code take account of this modification
 
-### Finger table calculation 
+###DONE:
+- Extract the next real node from the fingers table (fingers[0] became a new atribut of DHTNode)
+- implement the function to create finger table (the primitive are already done)
+
+### Fingers table calculation 
 
 2->5
 
