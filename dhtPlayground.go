@@ -161,10 +161,13 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *DHTnode {
 	}
 	daNode := DHTnode{
 		id:      *NewId,
-		fingers: make([]*fingerEntry, 1),
+		fingers: make([]*fingerEntry, SPACESIZE),
 		ip:      NewIp,
 		port:    NewPort,
 	}
+	daNode.successor = &fingerEntry{"truc", "bidule", nil}
+	daNode.successor.tmp = &daNode
+	daNode.successor.idResp = daNode.id
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
