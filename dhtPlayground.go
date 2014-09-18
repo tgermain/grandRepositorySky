@@ -35,8 +35,7 @@ func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 			//init case : currentNode looping on itself
 			// fmt.Println("Init case : 2 node")
 
-			newNode.fingers[0].tmp = currentNode.fingers[0].tmp
-			currentNode.fingers[0].tmp = &newNode
+			currentNode.chainingToTheRing(newNode)
 			//TODO : initialize both fingers tables
 		}
 	case dht.Between(currentNode.id, currentNode.successor.tmp.id, newNode.id):
@@ -44,23 +43,42 @@ func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 		{
 			//case of x->(x+2) and we want to add (x+1) node
 			// fmt.Println("add in the middle")
-			newNode.fingers[0].tmp = currentNode.fingers[0].tmp
-			currentNode.fingers[0].tmp = &newNode
+			currentNode.chainingToTheRing(newNode)
 		}
 	case dht.Between(currentNode.successor.tmp.id, newNode.id, currentNode.id):
 		// (currentNode.successor.tmp.id < currentNode.id) && (currentNode.id < newNode.id)
 		{
 			//case of X -> 0 and we want to add (x+1) node
 			// fmt.Println("add at the end")
-			newNode.fingers[0].tmp = currentNode.fingers[0].tmp
-			currentNode.fingers[0].tmp = &newNode
+			currentNode.chainingToTheRing(newNode)
 		}
 	default:
 		{
 			// fmt.Println("Go to the next")
-			currentNode.fingers[0].tmp.AddToRing(newNode)
+			currentNode.successor.tmp.AddToRing(newNode)
 		}
 	}
+}
+
+func (currentNode *DHTnode) chainingToTheRing(newNode *DHTnode) {
+
+	// fmt.Println("old node : ")
+	// currentNode.PrintNodeInfo()
+	// fmt.Println("new node : ")
+	// newNode.PrintNodeInfo()
+
+	newNode.successor.tmp = currentNode.successor.tmp
+
+	currentNode.successor.tmp = newNode
+
+	// fmt.Println("============================================")
+	// fmt.Println("old node : ")
+	// currentNode.PrintNodeInfo()
+	// fmt.Println("new node : ")
+	// newNode.PrintNodeInfo()
+
+	newNode.initFingersTable()
+	// currentNode.initFingersTable()
 }
 
 func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
