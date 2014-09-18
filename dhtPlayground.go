@@ -82,13 +82,24 @@ func (currentNode *DHTnode) chainingToTheRing(newNode *DHTnode) {
 }
 
 func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
-	if dht.Between(currentNode.id, currentNode.fingers[0].tmp.id, idToSearch) {
-		// fmt.Printf("We are seeking for %s\n", idToSearch)
-		return currentNode
-	} else {
-		// fmt.Println("go to the next one")
-		//TODO use the fingers table here
-		return currentNode.findClosestNode(idToSearch).Lookup(idToSearch)
+	fmt.Printf("Node [%s] made a lookup to [%s]\n", currentNode.id, idToSearch)
+	currentNode.PrintNodeInfo()
+	switch {
+	case currentNode.id == currentNode.successor.tmp.id:
+		{
+			return currentNode
+		}
+	case dht.Between(currentNode.id, currentNode.successor.tmp.id, idToSearch):
+		{
+			fmt.Printf("We were seeking for %s, our journey is now finished\n", idToSearch)
+			return currentNode
+		}
+	default:
+		{
+			// fmt.Println("go to the next one")
+			//TODO use the fingers table here
+			return currentNode.findClosestNode(idToSearch).Lookup(idToSearch)
+		}
 	}
 }
 
