@@ -13,9 +13,10 @@ const SPACESIZE = 160
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	id       string
-	fingers  []*fingerEntry //Successor is fingers[0].tmp
-	ip, port string
+	id        string
+	fingers   []*fingerEntry //Successor is fingers[0].tmp
+	successor *fingerEntry
+	ip, port  string
 }
 
 type fingerEntry struct {
@@ -29,7 +30,7 @@ type fingerEntry struct {
 func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
 	//furthers comments assume that he current currentNode is named x
 	switch {
-	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.fingers[0].tmp.id)) == 0:
+	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.successor.tmp.id)) == 0:
 		{
 			//init case : currentNode looping on itself
 			// fmt.Println("Init case : 2 node")
@@ -38,16 +39,16 @@ func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
 			currentNode.fingers[0].tmp = &newNode
 			//TODO : initialize both fingers tables
 		}
-	case dht.Between(currentNode.id, currentNode.fingers[0].tmp.id, newNode.id):
-		// (currentNode.id < newNode.id) && (newNode.id < currentNode.fingers[0].tmp.id)
+	case dht.Between(currentNode.id, currentNode.successor.tmp.id, newNode.id):
+		// (currentNode.id < newNode.id) && (newNode.id < currentNode.successor.tmp.id)
 		{
 			//case of x->(x+2) and we want to add (x+1) node
 			// fmt.Println("add in the middle")
 			newNode.fingers[0].tmp = currentNode.fingers[0].tmp
 			currentNode.fingers[0].tmp = &newNode
 		}
-	case dht.Between(currentNode.fingers[0].tmp.id, newNode.id, currentNode.id):
-		// (currentNode.fingers[0].tmp.id < currentNode.id) && (currentNode.id < newNode.id)
+	case dht.Between(currentNode.successor.tmp.id, newNode.id, currentNode.id):
+		// (currentNode.successor.tmp.id < currentNode.id) && (currentNode.id < newNode.id)
 		{
 			//case of X -> 0 and we want to add (x+1) node
 			// fmt.Println("add at the end")
@@ -74,7 +75,7 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 }
 
 func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
-	bestFinger := currentNode.fingers[0].tmp
+	bestFinger := currentNode.successor.tmp
 
 	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
 	for _, v := range currentNode.fingers {
@@ -99,14 +100,14 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 
 func (node *DHTnode) PrintRing() {
 	fmt.Printf("%s\n", node.id)
-	node.fingers[0].tmp.printRingRec(node.id)
+	node.successor.tmp.printRingRec(node.id)
 }
 
 func (node *DHTnode) printRingRec(origId string) {
 	fmt.Printf("%s\n", node.id)
-	if bytes.Compare([]byte(node.fingers[0].tmp.id), []byte(origId)) != 0 {
+	if bytes.Compare([]byte(node.successor.tmp.id), []byte(origId)) != 0 {
 
-		node.fingers[0].tmp.printRingRec(origId)
+		node.successor.tmp.printRingRec(origId)
 	}
 }
 
