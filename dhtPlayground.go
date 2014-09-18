@@ -116,6 +116,18 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	return bestFinger
 }
 
+func (node *DHTnode) initFingersTable() {
+	fmt.Printf("****************************************************************Node [%s] : init finger table \n", node.id)
+	for i := 0; i < SPACESIZE; i++ {
+		fmt.Printf("Calculatin fingers [%d]\n", i)
+		fingerId, _ := dht.CalcFinger([]byte(node.id), i+1, SPACESIZE)
+		responsibleNode := node.Lookup(fingerId)
+		node.fingers[i] = &fingerEntry{fingerId, responsibleNode.id, responsibleNode}
+
+	}
+	fmt.Println("****************************************************************Fingers table init DONE : ")
+}
+
 func (node *DHTnode) PrintRing() {
 	fmt.Printf("%s\n", node.id)
 	node.successor.tmp.printRingRec(node.id)
