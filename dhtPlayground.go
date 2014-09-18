@@ -107,19 +107,25 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	bestFinger := currentNode.successor.tmp
 
 	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
-	for _, v := range currentNode.fingers {
+	for i, v := range currentNode.fingers {
 		if v != nil {
-			//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
-			currentDistance := dht.Distance([]byte(v.idResp), []byte(idToSearch), SPACESIZE)
+			//If the finger lead the node to itself, it's not an optimization
+			if v.idResp != currentNode.id {
 
-			// x.cmp(y)
-			// -1 if x <  y
-			//  0 if x == y
-			// +1 if x >  y
+				//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
+				currentDistance := dht.Distance([]byte(v.idResp), []byte(idToSearch), SPACESIZE)
 
-			if minDistance.Cmp(currentDistance) == 1 {
-				minDistance = currentDistance
-				bestFinger = v.tmp
+				// x.cmp(y)
+				// -1 if x <  y
+				//  0 if x == y
+				// +1 if x >  y
+
+				if minDistance.Cmp(currentDistance) == 1 {
+					fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.idResp)
+					v.tmp.PrintNodeInfo()
+					minDistance = currentDistance
+					bestFinger = v.tmp
+				}
 			}
 		}
 	}
