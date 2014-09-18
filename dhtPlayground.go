@@ -123,14 +123,14 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Printf("  Id		Ip						Port\n")
 	fmt.Printf("  %s		%s 		%s\n", node.id, node.ip, node.port)
 	fmt.Println()
-	fmt.Println("  Fingers table :")
-	fmt.Println("  ---------------------------------")
-	fmt.Println("  Index	idkey					idNode ")
-	for i, v := range node.fingers {
-		if v != nil {
-			fmt.Printf("  %d 		%s					%s\n", i, v.idKey, v.idResp)
-		}
-	}
+	// fmt.Println("  Fingers table :")
+	// fmt.Println("  ---------------------------------")
+	// fmt.Println("  Index		idkey			idNode ")
+	// for i, v := range node.fingers {
+	// 	if v != nil {
+	// 		fmt.Printf("  %d 		%s					%s\n", i, v.idKey, v.idResp)
+	// 	}
+	// }
 	fmt.Println("---------------------------------")
 
 }
