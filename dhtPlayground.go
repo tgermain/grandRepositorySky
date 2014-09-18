@@ -27,7 +27,7 @@ type fingerEntry struct {
 
 //Method parts ----------------------------------------------------------
 
-func (currentNode *DHTnode) AddToRing(newNode DHTnode) {
+func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 	//furthers comments assume that he current currentNode is named x
 	switch {
 	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.successor.tmp.id)) == 0:
@@ -136,7 +136,7 @@ func (node *DHTnode) PrintNodeInfo() {
 }
 
 //other functions parts --------------------------------------------------------
-func MakeDHTNode(NewId *string, NewIp, NewPort string) DHTnode {
+func MakeDHTNode(NewId *string, NewIp, NewPort string) *DHTnode {
 	if NewId == nil {
 		tempId := dht.GenerateNodeId()
 		NewId = &tempId
@@ -151,5 +151,5 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) DHTnode {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	return daNode
+	return &daNode
 }
