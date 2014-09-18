@@ -5,11 +5,10 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/tgermain/grandRepositorySky/dht"
-	"math/big"
+	// "math/big"
 )
 
 //Const parts -----------------------------------------------------------
-const HUGESTINT = 9223372036854775807
 const SPACESIZE = 160
 
 //Objects parts ---------------------------------------------------------
@@ -75,9 +74,9 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 }
 
 func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
-	minDistance := big.NewInt(HUGESTINT)
 	bestFinger := currentNode.fingers[0].tmp
 
+	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
 	for _, v := range currentNode.fingers {
 		if v != nil {
 			//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
