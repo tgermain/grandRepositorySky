@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/tgermain/grandRepositorySky/dht"
-
+	"io/ioutil"
 	"testing"
 )
 
@@ -35,16 +35,30 @@ func TestRingSetup3bit(t *testing.T) {
 	node3.AddToRing(node6)
 	node3.AddToRing(node7)
 
+	var checking = []struct {
+		in         *DHTnode
+		next, prev string
+	}{
+		{node0, "01", "07"},
+		{node1, "02", "00"},
+		{node2, "03", "01"},
+		{node3, "04", "02"},
+		{node4, "05", "03"},
+		{node5, "06", "04"},
+		{node6, "07", "05"},
+		{node7, "00", "06"},
+	}
+
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	fmt.Println("RING STRUCTURE")
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	node1.PrintRing()
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	node1.PrintNodeInfo()
-	node1.Lookup("03").PrintNodeInfo()
-	assert.Equal(t, node4.successor.tmp.id, node5.id, "05 should follow 04")
-	assert.Equal(t, node7.successor.tmp.id, node0.id, "last node should go to the beginning")
-	assert.Equal(t, node3.Lookup("02"), node2, "node3.lookup(\"02\") should return &node2")
+	for _, v := range checking {
+
+		assert.Equal(t, v.in.successor.tmp.id, v.next, "Error in successor")
+		assert.Equal(t, v.in.predecessor.tmp.id, v.prev, "Error in predecessor")
+	}
 
 }
 
@@ -154,4 +168,62 @@ func TestDistanceFunc(t *testing.T) {
 
 	fmt.Printf("%v\n", dht.Distance([]byte(id2), []byte(truc), 160))
 
+}
+
+func TestLookupWithFingers(t *testing.T) {
+	id0 := "00"
+	id1 := "01"
+	id2 := "02"
+	id3 := "03"
+	id4 := "04"
+	id5 := "05"
+	id6 := "06"
+	id7 := "07"
+
+	node0 := MakeDHTNode(&id0, "localhost", "1111")
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node2 := MakeDHTNode(&id2, "localhost", "1113")
+	node3 := MakeDHTNode(&id3, "localhost", "1114")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node5 := MakeDHTNode(&id5, "localhost", "1116")
+	node6 := MakeDHTNode(&id6, "localhost", "1117")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
+
+	node0.AddToRing(node1)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+}
+
+func TestGraph(t *testing.T) {
+	id0 := "00"
+	id1 := "01"
+	id2 := "02"
+	id3 := "03"
+	id4 := "04"
+	id5 := "05"
+	id6 := "06"
+	id7 := "07"
+
+	node0 := MakeDHTNode(&id0, "localhost", "1111")
+	node1 := MakeDHTNode(&id1, "localhost", "1112")
+	node2 := MakeDHTNode(&id2, "localhost", "1113")
+	node3 := MakeDHTNode(&id3, "localhost", "1114")
+	node4 := MakeDHTNode(&id4, "localhost", "1115")
+	node5 := MakeDHTNode(&id5, "localhost", "1116")
+	node6 := MakeDHTNode(&id6, "localhost", "1117")
+	node7 := MakeDHTNode(&id7, "localhost", "1118")
+
+	node0.AddToRing(node1)
+	node1.AddToRing(node2)
+	node1.AddToRing(node3)
+	node1.AddToRing(node4)
+	node4.AddToRing(node5)
+	node3.AddToRing(node6)
+	node3.AddToRing(node7)
+
+	ioutil.WriteFile("graph.gv", []byte(node0.gimmeGraph(nil, nil)), 0755)
 }
