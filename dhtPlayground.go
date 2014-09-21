@@ -3,6 +3,7 @@ package grandRepositorySky
 //IMPORT parts ----------------------------------------------------------
 import (
 	"bytes"
+	ggv "code.google.com/p/gographviz"
 	"fmt"
 	"github.com/tgermain/grandRepositorySky/dht"
 	// "math/big"
@@ -189,7 +190,45 @@ func (node *DHTnode) PrintNodeInfo() {
 	// 	}
 	// }
 	fmt.Println("---------------------------------")
+}
 
+func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
+	if &node.id == firstNodeId {
+		return g.String()
+	} else {
+		if g == nil {
+			g = ggv.NewGraph()
+			g.SetName("DHTRing")
+			g.SetDir(true)
+		}
+		if firstNodeId == nil {
+			firstNodeId = &node.id
+		}
+		g.AddNode(g.Name, node.id, nil)
+		g.AddNode(g.Name, node.successor.tmp.id, nil)
+		g.AddNode(g.Name, node.predecessor.tmp.id, nil)
+		// g.AddEdge(node.id, node.successor.tmp.id, true, map[string]string{
+		// 	"label": "succ",
+		// })
+		// g.AddEdge(node.id, node.predecessor.tmp.id, true, map[string]string{
+		// 	"label": "pred",
+		// })
+
+		for i, v := range node.fingers {
+			g.AddEdge(node.id, v.idKey, true, map[string]string{
+				"label":         fmt.Sprintf("\"%s.%d\"", node.id, i),
+				"label_scheme":  "3",
+				"decorate":      "true",
+				"labelfontsize": "5.0",
+				"labelfloat":    "true",
+				"color":         "blue",
+			})
+		}
+
+		//recursion !
+		return node.successor.tmp.gimmeGraph(g, firstNodeId)
+
+	}
 }
 
 //other functions parts --------------------------------------------------------
