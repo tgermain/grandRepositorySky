@@ -13,10 +13,11 @@ const SPACESIZE = 160
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	id        string
-	fingers   []*fingerEntry //Successor is fingers[0].tmp
-	successor *fingerEntry
-	ip, port  string
+	id          string
+	fingers     []*fingerEntry //Successor is fingers[0].tmp
+	successor   *fingerEntry
+	predecessor *fingerEntry
+	ip, port    string
 }
 
 type fingerEntry struct {
@@ -67,9 +68,15 @@ func (currentNode *DHTnode) chainingToTheRing(newNode *DHTnode) {
 	// fmt.Println("new node : ")
 	// newNode.PrintNodeInfo()
 
-	newNode.successor.tmp = currentNode.successor.tmp
+	oldSuccesor := currentNode.successor.tmp
 
+	//linking newNode to oldPredecessor
+	oldSuccesor.predecessor.tmp = newNode
+	newNode.successor.tmp = oldSuccesor
+
+	//linking currentNode to newNode
 	currentNode.successor.tmp = newNode
+	newNode.predecessor.tmp = currentNode
 
 	// fmt.Println("============================================")
 	// fmt.Println("old node : ")
@@ -171,6 +178,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Printf("	Ip			%s\n", node.ip)
 	fmt.Printf("	Port		%s\n", node.port)
 	fmt.Printf(" 	Succesor	%s\n", node.successor.tmp.id)
+	fmt.Printf(" 	Predecesor	%s\n", node.predecessor.tmp.id)
 	fmt.Println()
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
@@ -199,6 +207,10 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *DHTnode {
 	daNode.successor = &fingerEntry{"truc", "bidule", nil}
 	daNode.successor.tmp = &daNode
 	daNode.successor.idResp = daNode.id
+
+	daNode.predecessor = &fingerEntry{"truc", "bidule", nil}
+	daNode.predecessor.tmp = &daNode
+	daNode.predecessor.idResp = daNode.id
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
