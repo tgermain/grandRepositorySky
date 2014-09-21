@@ -53,7 +53,7 @@ func Between(Sid1, Sid2, Skey string) bool {
 
 // (n + 2^(k-1)) mod (2^m)
 func CalcFinger(n []byte, k int, m int) (string, []byte) {
-	fmt.Println("calulcating result = (n+2^(k-1)) mod (2^m)")
+	// fmt.Println("calulcating result = (n+2^(k-1)) mod (2^m)")
 
 	// convert the n to a bigint
 	nBigInt := big.Int{}
