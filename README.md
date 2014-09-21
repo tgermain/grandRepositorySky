@@ -39,20 +39,12 @@ to run the playground test :
 
 ###TODO : 
 - Upgrade the lookup function to take advantage of the fingers table (***+test***)
-- Add a predecessor node pointer in DHTNode
-- Finger table is now :
-example for node "05" 3bit space
-
-| Index | Key | Successor | 
-| ----- | --- | --------- |
-|     0 |  06 |        07 | 
-|     1 |  08 |        08 | 
-|     2 |  06 |        07 | 
-make sure that all the test and existing code take account of this modification
 
 ###DONE:
 - Extract the next real node from the fingers table (fingers[0] became a new atribut of DHTNode)
 - implement the function to create finger table (the primitive are already done)
+- Add a predecessor node pointer in DHTNode
+- Add a graphviz visualization (see func ``gimmeGraph`` and test ``TestGraph`` in test3bit_test.go)
 
 ### Fingers table calculation 
 
@@ -67,6 +59,9 @@ When a node enter the ring, we initialize its fingers table (to be sure that its
 ### Ring stabilization
 To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
 **Goroutine** ?
+
+### Ring visualization
+Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for png output
 
 ## 2. Network communication
 
