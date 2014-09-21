@@ -86,12 +86,13 @@ func (currentNode *DHTnode) chainingToTheRing(newNode *DHTnode) {
 	// newNode.PrintNodeInfo()
 
 	newNode.initFingersTable()
-	// currentNode.initFingersTable()
+	currentNode.initFingersTable()
+
 }
 
 func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
-	fmt.Printf("Node [%s] made a lookup to [%s]\n", currentNode.id, idToSearch)
-	currentNode.PrintNodeInfo()
+	// fmt.Printf("Node [%s] made a lookup to [%s]\n", currentNode.id, idToSearch)
+	// currentNode.PrintNodeInfo()
 	switch {
 	case currentNode.id == currentNode.successor.tmp.id:
 		{
@@ -99,7 +100,7 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 		}
 	case dht.Between(currentNode.id, currentNode.successor.tmp.id, idToSearch):
 		{
-			fmt.Printf("We were seeking for %s, our journey is now finished\n", idToSearch)
+			// fmt.Printf("We were seeking for %s, our journey is now finished\n", idToSearch)
 			return currentNode
 		}
 	default:
@@ -115,7 +116,7 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	bestFinger := currentNode.successor.tmp
 
 	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
-	for i, v := range currentNode.fingers {
+	for _, v := range currentNode.fingers {
 		if v != nil {
 			//If the finger lead the node to itself, it's not an optimization
 			if v.idResp != currentNode.id {
@@ -129,28 +130,28 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 				// +1 if x >  y
 
 				if minDistance.Cmp(currentDistance) == 1 {
-					fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.idResp)
-					v.tmp.PrintNodeInfo()
+					// fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.idResp)
+					// v.tmp.PrintNodeInfo()
 					minDistance = currentDistance
 					bestFinger = v.tmp
 				}
 			}
 		}
 	}
-	fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught node [%s]\n", currentNode.id, idToSearch, bestFinger.id)
+	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught node [%s]\n", currentNode.id, idToSearch, bestFinger.id)
 	return bestFinger
 }
 
 func (node *DHTnode) initFingersTable() {
-	fmt.Printf("****************************************************************Node [%s] : init finger table \n", node.id)
+	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", node.id)
 	for i := 0; i < SPACESIZE; i++ {
-		fmt.Printf("Calculatin fingers [%d]\n", i)
+		// fmt.Printf("Calculatin fingers [%d]\n", i)
 		fingerId, _ := dht.CalcFinger([]byte(node.id), i+1, SPACESIZE)
 		responsibleNode := node.Lookup(fingerId)
 		node.fingers[i] = &fingerEntry{fingerId, responsibleNode.id, responsibleNode}
 
 	}
-	fmt.Println("****************************************************************Fingers table init DONE : ")
+	// fmt.Println("****************************************************************Fingers table init DONE : ")
 }
 
 func (node *DHTnode) PrintRing() {
