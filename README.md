@@ -76,3 +76,6 @@ SPRINT :
 
 TODO : 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
+
+## 3. Data & Replication
+facebook duplicate data of one node on 2 other nodes : enough ?
