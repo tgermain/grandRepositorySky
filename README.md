@@ -56,26 +56,69 @@ New node 4 !
 
 When a node enter the ring, we initialize its fingers table (to be sure that its succesor is *(5)*) and update the fingers table of its predecessor *(2)*. 
 
-### Ring stabilization
-To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
-**Goroutine** ?
 
 ### Ring visualization
 Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for png output
 
 ## 2. Network communication
+### Ring stabilization
+To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
+**Goroutine** ?
 
 SPRINT : 
 - Do a sample project to understand how to send/receive and parse messages in GO
 - Make a library to send/receive messages
-- Do logs (with timestamps, colors)
+- Do logs (with timestamps, colors ?)
 - Make tests
 - Modify the existing code to make stuffs work
 - Handle when a node quit the ring (not gracefuly)
+- What lookup can/should/actually return
 
 
 TODO : 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
 
+###launch parameters
+- IP, PORT
+- (IP, PORT of an existing node)
+- (ID)
+- (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
+
+
+###CLI interface
+abilities : 
+- lookup
+- updateFingersTable
+- printInformation (fingerTable)
+- printGraphViz
+- areYouAlive
+
+###message format
+- origin (first emiter of the message)
+	- IP
+	- Port
+- Destination
+	- IP
+	- Port
+- type of operation :
+	- IAmNewHere
+	- update successor/predecessor
+	- updateFingerTable
+	- lookup 
+	- gimmeInfo / IAmTheNSA
+	- AreYouAlive / IAmAlive
+
+
+
+
+
+
 ## 3. Data & Replication
 facebook duplicate data of one node on 2 other nodes : enough ?
+
+###Choice of underlying database
+- Redis
+- mongodb 
+
+### new messages type
+- DataReplication
