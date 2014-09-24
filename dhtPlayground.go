@@ -57,6 +57,7 @@ func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 	default:
 		{
 			// fmt.Println("Go to the next")
+			//TODO use finger table here too
 			currentNode.successor.tmp.AddToRing(newNode)
 		}
 	}
@@ -146,6 +147,7 @@ func (node *DHTnode) initFingersTable() {
 	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", node.id)
 	for i := 0; i < SPACESIZE; i++ {
 		// fmt.Printf("Calculatin fingers [%d]\n", i)
+		//TODO make a condition to void to always calculate the fingerId
 		fingerId, _ := dht.CalcFinger([]byte(node.id), i+1, SPACESIZE)
 		responsibleNode := node.Lookup(fingerId)
 		node.fingers[i] = &fingerEntry{fingerId, responsibleNode.id, responsibleNode}
