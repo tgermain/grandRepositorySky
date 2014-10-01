@@ -67,13 +67,18 @@ To avoid the depreciation of all the fingers table after some new nodes join the
 
 SPRINT : 
 - Do a sample project to understand how to send/receive and parse messages in GO
-- Make a library to send/receive messages
-- Do logs (with timestamps, colors ?)
+- Make a library to send/receive messages 		Tim
+- Do logs (with timestamps, colors ?) 		Tim
 - Make tests
 - Modify the existing code to make stuffs work
 - Handle when a node quit the ring (not gracefuly)
 - What lookup can/should/actually return
 
+Work In progress (Tim):
+- logs : almost done, easy part
+- send/receive message library : 
+	- marshal/unmarshal -> easy with stdlib
+	- use of channel : the idea is to add in the message struct a channel for the anwer
 
 TODO : 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
