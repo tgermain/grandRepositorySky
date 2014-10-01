@@ -58,7 +58,7 @@ When a node enter the ring, we initialize its fingers table (to be sure that its
 
 
 ### Ring visualization
-Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for png output
+Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for svg² output
 
 ## 2. Network communication
 ### Ring stabilization
