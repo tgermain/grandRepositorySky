@@ -195,7 +195,6 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Printf("	Ip			%s\n", node.ip)
 	fmt.Printf("	Port		%s\n", node.port)
 
-	//TODO successor.tmp not accessible anymore later
 	fmt.Printf(" 	Succesor	%s\n", node.successor.idResp)
 	fmt.Printf(" 	Predecesor	%s\n", node.predecessor.idResp)
 	fmt.Println()
@@ -223,7 +222,6 @@ func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
 			firstNodeId = &node.id
 		}
 		g.AddNode(g.Name, node.id, nil)
-		//TODO successor.tmp not accessible anymore later
 		g.AddNode(g.Name, node.successor.idResp, nil)
 		g.AddNode(g.Name, node.predecessor.idResp, nil)
 		// g.AddEdge(node.id, node.successor.idResp, true, map[string]string{
