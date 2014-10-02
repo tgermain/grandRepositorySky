@@ -79,6 +79,11 @@ Work In progress (Tim):
 - send/receive message library : 
 	- marshal/unmarshal -> easy with stdlib
 	- use of channel : the idea is to add in the message struct a channel for the anwer
+	- critical ressource, to be protected:
+		- successor
+		- predecessor
+		- data
+		
 
 TODO : 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
