@@ -149,25 +149,25 @@ func TestFinger3bits(t *testing.T) {
 }
 
 func TestDistanceFunc(t *testing.T) {
-	id0 := "00"
-	id1 := "06"
-	id2 := "01"
-	truc := "cba8c6e5f208b9c72ebee924d20f04a081a1b0aa"
-	// id4 := "04"
-	// id7 := "07"
-
-	node0 := MakeDHTNode(&id0, "localhost", "1111")
-	node1 := MakeDHTNode(&id1, "localhost", "1112")
-	// node4 := MakeDHTNode(nil, "localhost", "1115")
-	// node7 := MakeDHTNode(nil, "localhost", "1118")
+	curr := "02"
+	search := "01003033"
+	next := "03"
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
-	fmt.Printf("%v\n", dht.Distance([]byte(node0.id), []byte(truc), 160))
+	fmt.Printf("%v\n", dht.Distance([]byte(curr), []byte(search), 160))
 
-	fmt.Printf("%v\n", dht.Distance([]byte(node1.id), []byte(truc), 160))
-
-	fmt.Printf("%v\n", dht.Distance([]byte(id2), []byte(truc), 160))
-
+	fmt.Printf("%v\n", dht.Distance([]byte(next), []byte(search), 160))
+	fmt.Printf("%v\n", dht.Distance([]byte("01"), []byte(search), 160))
+	if dht.Between((curr), (next), (search)) {
+		fmt.Println("its between curr and next")
+	} else {
+		fmt.Println("Nop its NOT between at all")
+	}
+	if dht.Between(("01"), (curr), (search)) {
+		fmt.Println("its between next and curr")
+	} else {
+		fmt.Println("Nop its NOT between at all")
+	}
 }
 
 func TestLookupWithFingers(t *testing.T) {
