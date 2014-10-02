@@ -31,7 +31,7 @@ type fingerEntry struct {
 func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 	//furthers comments assume that he current currentNode is named x
 	switch {
-	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.successor.tmp.id)) == 0:
+	case bytes.Compare([]byte(currentNode.id), []byte(currentNode.successor.idResp)) == 0:
 		{
 			//init case : currentNode looping on itself
 			// fmt.Println("Init case : 2 node")
@@ -39,15 +39,15 @@ func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 			currentNode.chainingToTheRing(newNode)
 			//TODO : initialize both fingers tables
 		}
-	case dht.Between(currentNode.id, currentNode.successor.tmp.id, newNode.id):
-		// (currentNode.id < newNode.id) && (newNode.id < currentNode.successor.tmp.id)
+	case dht.Between(currentNode.id, currentNode.successor.idResp, newNode.id):
+		// (currentNode.id < newNode.id) && (newNode.id < currentNode.successor.idResp)
 		{
 			//case of x->(x+2) and we want to add (x+1) node
 			// fmt.Println("add in the middle")
 			currentNode.chainingToTheRing(newNode)
 		}
-	case dht.Between(currentNode.successor.tmp.id, newNode.id, currentNode.id):
-		// (currentNode.successor.tmp.id < currentNode.id) && (currentNode.id < newNode.id)
+	case dht.Between(currentNode.successor.idResp, newNode.id, currentNode.id):
+		// (currentNode.successor.idResp < currentNode.id) && (currentNode.id < newNode.id)
 		{
 			//case of X -> 0 and we want to add (x+1) node
 			// fmt.Println("add at the end")
@@ -56,6 +56,7 @@ func (currentNode *DHTnode) AddToRing(newNode *DHTnode) {
 	default:
 		{
 			// fmt.Println("Go to the next")
+			//TODO successor.tmp not accessible anymore later
 			//TODO use finger table here too
 			currentNode.successor.tmp.AddToRing(newNode)
 		}
@@ -68,15 +69,19 @@ func (currentNode *DHTnode) chainingToTheRing(newNode *DHTnode) {
 	// currentNode.PrintNodeInfo()
 	// fmt.Println("new node : ")
 	// newNode.PrintNodeInfo()
-
+	//TODO replace tmp by id
 	oldSuccesor := currentNode.successor.tmp
 
 	//linking newNode to oldPredecessor
+	oldSuccesor.predecessor.idResp = newNode.id
 	oldSuccesor.predecessor.tmp = newNode
+	newNode.successor.idResp = oldSuccesor.id
 	newNode.successor.tmp = oldSuccesor
 
 	//linking currentNode to newNode
+	currentNode.successor.idResp = newNode.id
 	currentNode.successor.tmp = newNode
+	newNode.predecessor.idResp = newNode.id
 	newNode.predecessor.tmp = currentNode
 
 	// fmt.Println("============================================")
@@ -94,11 +99,11 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 	// fmt.Printf("Node [%s] made a lookup to [%s]\n", currentNode.id, idToSearch)
 	// currentNode.PrintNodeInfo()
 	switch {
-	case currentNode.id == currentNode.successor.tmp.id:
+	case currentNode.id == currentNode.successor.idResp:
 		{
 			return currentNode
 		}
-	case dht.Between(currentNode.id, currentNode.successor.tmp.id, idToSearch):
+	case dht.Between(currentNode.id, currentNode.successor.idResp, idToSearch):
 		{
 			// fmt.Printf("We were seeking for %s, our journey is now finished\n", idToSearch)
 			return currentNode
@@ -115,7 +120,7 @@ func (currentNode *DHTnode) Lookup(idToSearch string) *DHTnode {
 func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	bestFinger := currentNode.successor.tmp
 
-	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
+	minDistance := dht.Distance([]byte(currentNode.successor.idResp), []byte(idToSearch), SPACESIZE)
 	// fmt.Println("distance successor " + minDistance.String())
 	// var bestIndex int
 	for _, v := range currentNode.fingers {
@@ -171,7 +176,7 @@ func (node *DHTnode) PrintRing() {
 
 func (node *DHTnode) printRingRec(origId string) {
 	fmt.Printf("%s\n", node.id)
-	if bytes.Compare([]byte(node.successor.tmp.id), []byte(origId)) != 0 {
+	if bytes.Compare([]byte(node.successor.idResp), []byte(origId)) != 0 {
 
 		node.successor.tmp.printRingRec(origId)
 	}
@@ -189,9 +194,11 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Printf("	Id			%s\n", node.id)
 	fmt.Printf("	Ip			%s\n", node.ip)
 	fmt.Printf("	Port		%s\n", node.port)
-	fmt.Printf(" 	Predecesor	%s\n", node.predecessor.tmp.id)
-	fmt.Printf(" 	Succesor	%s\n", node.successor.tmp.id)
-	// fmt.Println()
+
+	//TODO successor.tmp not accessible anymore later
+	fmt.Printf(" 	Succesor	%s\n", node.successor.idResp)
+	fmt.Printf(" 	Predecesor	%s\n", node.predecessor.idResp)
+	fmt.Println()
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
 	// fmt.Println("  Index		idkey			idNode ")
@@ -216,12 +223,13 @@ func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
 			firstNodeId = &node.id
 		}
 		g.AddNode(g.Name, node.id, nil)
-		g.AddNode(g.Name, node.successor.tmp.id, nil)
-		g.AddNode(g.Name, node.predecessor.tmp.id, nil)
-		// g.AddEdge(node.id, node.successor.tmp.id, true, map[string]string{
+		//TODO successor.tmp not accessible anymore later
+		g.AddNode(g.Name, node.successor.idResp, nil)
+		g.AddNode(g.Name, node.predecessor.idResp, nil)
+		// g.AddEdge(node.id, node.successor.idResp, true, map[string]string{
 		// 	"label": "succ",
 		// })
-		// g.AddEdge(node.id, node.predecessor.tmp.id, true, map[string]string{
+		// g.AddEdge(node.id, node.predecessor.idResp, true, map[string]string{
 		// 	"label": "pred",
 		// })
 
@@ -237,6 +245,7 @@ func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
 		}
 
 		//recursion !
+		//TODO successor.tmp not accessible anymore later
 		return node.successor.tmp.gimmeGraph(g, firstNodeId)
 
 	}
@@ -255,10 +264,12 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *DHTnode {
 		port:    NewPort,
 	}
 	daNode.successor = &fingerEntry{"truc", "bidule", nil}
+	//TODO send info to successor (update predecessor)
 	daNode.successor.tmp = &daNode
 	daNode.successor.idResp = daNode.id
 
 	daNode.predecessor = &fingerEntry{"truc", "bidule", nil}
+	//TODO send info to predecessor (update successor)
 	daNode.predecessor.tmp = &daNode
 	daNode.predecessor.idResp = daNode.id
 	// initialization of fingers table is done while adding the node to the ring
