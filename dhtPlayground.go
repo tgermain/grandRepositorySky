@@ -6,7 +6,6 @@ import (
 	ggv "code.google.com/p/gographviz"
 	"fmt"
 	"github.com/tgermain/grandRepositorySky/dht"
-	// "math/big"
 )
 
 //Const parts -----------------------------------------------------------
@@ -117,29 +116,38 @@ func (currentNode *DHTnode) findClosestNode(idToSearch string) *DHTnode {
 	bestFinger := currentNode.successor.tmp
 
 	minDistance := dht.Distance([]byte(currentNode.successor.tmp.id), []byte(idToSearch), SPACESIZE)
+	// fmt.Println("distance successor " + minDistance.String())
+	// var bestIndex int
 	for _, v := range currentNode.fingers {
 		if v != nil {
-			//If the finger lead the node to itself, it's not an optimization
-			if v.idResp != currentNode.id {
+			if dht.Between(v.idResp, currentNode.id, idToSearch) {
 
-				//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
-				currentDistance := dht.Distance([]byte(v.idResp), []byte(idToSearch), SPACESIZE)
+				//If the finger lead the node to itself, it's not an optimization
+				if v.idResp != currentNode.id {
 
-				// x.cmp(y)
-				// -1 if x <  y
-				//  0 if x == y
-				// +1 if x >  y
+					//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
+					currentDistance := dht.Distance([]byte(v.idResp), []byte(idToSearch), SPACESIZE)
 
-				if minDistance.Cmp(currentDistance) == 1 {
-					// fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.idResp)
-					// v.tmp.PrintNodeInfo()
-					minDistance = currentDistance
-					bestFinger = v.tmp
+					// x.cmp(y)
+					// -1 if x <  y
+					//  0 if x == y
+					// +1 if x >  y
+
+					if minDistance.Cmp(currentDistance) == 1 {
+						// fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.idResp)
+						// fmt.Println("Old best distance " + minDistance.String())
+						// fmt.Println("New best distance " + currentDistance.String())
+						// currentNode.PrintNodeInfo()
+						// bestIndex = i
+						// v.tmp.PrintNodeInfo()
+						minDistance = currentDistance
+						bestFinger = v.tmp
+					}
 				}
 			}
 		}
 	}
-	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught node [%s]\n", currentNode.id, idToSearch, bestFinger.id)
+	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught finger[%d], [%s]\n", currentNode.id, idToSearch, bestIndex, bestFinger.id)
 	return bestFinger
 }
 
@@ -181,9 +189,9 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Printf("	Id			%s\n", node.id)
 	fmt.Printf("	Ip			%s\n", node.ip)
 	fmt.Printf("	Port		%s\n", node.port)
-	fmt.Printf(" 	Succesor	%s\n", node.successor.tmp.id)
 	fmt.Printf(" 	Predecesor	%s\n", node.predecessor.tmp.id)
-	fmt.Println()
+	fmt.Printf(" 	Succesor	%s\n", node.successor.tmp.id)
+	// fmt.Println()
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
 	// fmt.Println("  Index		idkey			idNode ")
