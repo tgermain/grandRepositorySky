@@ -56,8 +56,8 @@ func TestRingSetup3bit(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	for _, v := range checking {
 
-		assert.Equal(t, v.in.successor.tmp.id, v.next, "Error in successor")
-		assert.Equal(t, v.in.predecessor.tmp.id, v.prev, "Error in predecessor")
+		assert.Equal(t, v.in.successor.tmp.Id, v.next, "Error in successor")
+		assert.Equal(t, v.in.predecessor.tmp.Id, v.prev, "Error in predecessor")
 	}
 
 }
