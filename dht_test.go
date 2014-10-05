@@ -75,8 +75,8 @@ func TestRingSetup160bit(t *testing.T) {
 	fmt.Println("------------------------------------------------------------------------------------------------")
 	for _, v := range checking {
 
-		assert.Equal(t, v.in.successor.tmp.id, v.next, "Error in successor")
-		assert.Equal(t, v.in.predecessor.tmp.id, v.prev, "Error in predecessor")
+		assert.Equal(t, v.in.successor.tmp.Id, v.next, "Error in successor")
+		assert.Equal(t, v.in.predecessor.tmp.Id, v.prev, "Error in predecessor")
 	}
 }
 
@@ -129,8 +129,8 @@ func TestLookup(t *testing.T) {
 	fmt.Println("str=" + str)
 	fmt.Println("hashKey=" + hashKey)
 
-	fmt.Println("node 1: " + node1.Lookup(hashKey).id + " is respoinsible for " + hashKey)
-	fmt.Println("node 5: " + node5.Lookup(hashKey).id + " is respoinsible for " + hashKey)
+	fmt.Println("node 1: " + node1.Lookup(hashKey).Id + " is respoinsible for " + hashKey)
+	fmt.Println("node 5: " + node5.Lookup(hashKey).Id + " is respoinsible for " + hashKey)
 
 	fmt.Println("------------------------------------------------------------------------------------------------")
 
