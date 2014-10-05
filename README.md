@@ -3,7 +3,7 @@ GrandRepositorySky
 
 Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DHT) based on _Chord_ protocol (see [This paper ](http://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf))
 
-:construction: Current objective :construction: : **1** :sweat_smile:
+:construction: Current objective :construction: : **2** :suspect:
 ---------------------
 
 ### 6 objectives : 
@@ -96,6 +96,7 @@ TODO :
 
 
 ###CLI interface
+Useful ? **Objective 4** provide a web service, we just have to do more things than just thoses (and make a page to visualize and act on the node)
 abilities : 
 - lookup
 - updateFingersTable
@@ -114,7 +115,7 @@ abilities :
 	- IAmNewHere
 	- update successor/predecessor
 	- updateFingerTable
-	- lookup 
+	- lookup / finded
 	- gimmeInfo / IAmTheNSA
 	- AreYouAlive / IAmAlive
 
