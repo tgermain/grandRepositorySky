@@ -96,6 +96,7 @@ TODO :
 
 
 ###CLI interface
+Useful ? **Objective 4** provide a web service, we just have to do more things than just thoses (and make a page to visualize and act on the node)
 abilities : 
 - lookup
 - updateFingersTable
