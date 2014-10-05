@@ -114,7 +114,7 @@ abilities :
 	- IAmNewHere
 	- update successor/predecessor
 	- updateFingerTable
-	- lookup 
+	- lookup / finded
 	- gimmeInfo / IAmTheNSA
 	- AreYouAlive / IAmAlive
 
