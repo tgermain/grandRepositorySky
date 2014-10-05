@@ -1,8 +1,9 @@
-package comLink
+package communicator
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/tgermain/grandRepositorySky/shared"
 	"net"
 	"reflect"
 	"testing"
@@ -10,14 +11,14 @@ import (
 
 func TestMarshallingUnmarshalling(t *testing.T) {
 	aMessage := message{
-		TypeOfMsg: LOOKUP,
+		TypeOfMsg: shared.LOOKUP,
 		Id:        "monIdQuIlEstBien",
-		Origin: DistantNode{
+		Origin: shared.DistantNode{
 			"IDOrigine",
 			"IPOrigine",
 			"PortOrigine",
 		},
-		Destination: DistantNode{
+		Destination: shared.DistantNode{
 			"IDDestination",
 			"IPDestination",
 			"PortDestination",
@@ -35,14 +36,14 @@ func TestMarshallingUnmarshalling(t *testing.T) {
 func TestEffectifSendingReceving(t *testing.T) {
 
 	aMessage := message{
-		TypeOfMsg: LOOKUP,
-		Id:        "monIdQuIlEstBien",
-		Origin: DistantNode{
+		TypeOfMsg: shared.LOOKUP,
+		Id:        "lautreId",
+		Origin: shared.DistantNode{
 			"IDOrigine",
 			"IPOrigine",
 			"PortOrigine",
 		},
-		Destination: DistantNode{
+		Destination: shared.DistantNode{
 			"IDDestination",
 			"",
 			"2000",

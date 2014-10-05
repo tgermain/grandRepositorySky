@@ -1,4 +1,4 @@
-package main
+package logging
 
 import (
 	"github.com/op/go-logging"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var log = logging.MustGetLogger("example")
+var Log = logging.MustGetLogger("example")
 
 // Example format string. Everything except the message has a custom color
 // which is dependent on the log level. Many fields have a custom output
@@ -45,11 +45,11 @@ func main() {
 	for _, level := range []logging.Level{logging.DEBUG, logging.ERROR} {
 		logging.SetLevel(level, "example")
 
-		log.Debug("debug %s", Password("secret"))
-		log.Info("info")
-		log.Notice("notice")
-		log.Warning("warning")
-		log.Error("err")
-		log.Critical("crit")
+		Log.Debug("debug %s", Password("secret"))
+		Log.Info("info")
+		Log.Notice("notice")
+		Log.Warning("warning")
+		Log.Error("err")
+		Log.Critical("crit")
 	}
 }
