@@ -6,9 +6,24 @@ import (
 	"net"
 )
 
+//Const parts -----------------------------------------------------------
+type messageType int
+
+const (
+	LOOKUP messageType = iota
+)
+
+var messageTypes = []string{
+	"lookup",
+}
+
+func (mt messageType) String() string {
+	return messageTypes[mt]
+}
+
 //Objects parts ---------------------------------------------------------
 type message struct {
-	TypeOfMsg   string
+	TypeOfMsg   messageType
 	Id          string
 	Origin      DistantNode
 	Destination DistantNode

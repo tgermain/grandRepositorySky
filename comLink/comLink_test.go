@@ -10,7 +10,7 @@ import (
 
 func TestMarshallingUnmarshalling(t *testing.T) {
 	aMessage := message{
-		TypeOfMsg: "lookup",
+		TypeOfMsg: LOOKUP,
 		Id:        "monIdQuIlEstBien",
 		Origin: DistantNode{
 			"IDOrigine",
@@ -35,7 +35,7 @@ func TestMarshallingUnmarshalling(t *testing.T) {
 func TestEffectifSendingReceving(t *testing.T) {
 
 	aMessage := message{
-		TypeOfMsg: "lookup",
+		TypeOfMsg: LOOKUP,
 		Id:        "monIdQuIlEstBien",
 		Origin: DistantNode{
 			"IDOrigine",
