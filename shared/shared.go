@@ -24,8 +24,7 @@ func (mt MessageType) String() string {
 }
 
 //Global var -----------------------------------------------------------
-var LocalIp string
-var LocalPort string
+var LocalId, LocalIp, LocalPort string
 
 //Objects parts ---------------------------------------------------------
 type DistantNode struct {

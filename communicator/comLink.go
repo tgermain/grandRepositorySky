@@ -3,7 +3,6 @@ package communicator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared"
 	"net"
 )
@@ -18,8 +17,6 @@ type message struct {
 }
 
 type ComLink struct {
-	Node        *node.DHTnode
-	commChannel <-chan shared.SendingQueueMsg
 }
 
 //Method parts ----------------------------------------------------------
@@ -27,7 +24,6 @@ type ComLink struct {
 //private method -----------------------------------
 func marshallMessage(msg *message) []byte {
 	shared.SetupLogger().Error(msg.Id)
-	shared.SetupLogger().Debug("jte baise !")
 	buffer, err := json.Marshal(msg)
 	if err != nil {
 		fmt.Println("error while marshalling:", err)
@@ -71,37 +67,27 @@ func sendTo(destination shared.DistantNode, payload []byte) {
 }
 
 //exported method -----------------------------------
-func (aComLink *ComLink) SendLookup(destination *shared.DistantNode, idSearched string) *shared.DistantNode {
-	//use of channel and stuff
-
-	return nil
-}
-
-func (aComLink *ComLink) SendUpdateSuccesor() {
-
-}
-
-func (aComLink *ComLink) SendUpdatePredecessor() {
-
-}
 
 func (c *ComLink) SendPrintRing(destination *shared.DistantNode, currentString *string) {
 
 }
 
-func (c *ComLink) ReceivePrintRing(msg *message) {
-	//write your info and if the successor is the origine of the message, send it back to him
+func (c *ComLink) SendUpdateSuccesor(destination *shared.DistantNode, newNode *shared.DistantNode) {
+}
+
+func (c *ComLink) SendUpdatePredecessor(destination *shared.DistantNode, newNode *shared.DistantNode) {
 
 }
 
-//other method
-func MakeComlink(newNode *node.DHTnode, commChannel chan shared.SendingQueueMsg) *ComLink {
-	aComlink := ComLink{
-		newNode,
-		commChannel,
-	}
+func (c *ComLink) SendLookup(destination *shared.DistantNode, idSearched string) *shared.DistantNode {
 
-	return &aComlink
+	//TODO add a return channel to get the result and return it
+	return nil
+}
+
+func (c *ComLink) ReceivePrintRing(msg *message) {
+	//write your info and if the successor is the origine of the message, send it back to him
+
 }
 
 func (c *ComLink) StartAndListen() {
@@ -110,4 +96,8 @@ func (c *ComLink) StartAndListen() {
 	//handle incoming message
 
 	//start the parser/brocker/sender for messages comming from channel
+}
+
+func NewComLink() *ComLink {
+	return new(ComLink)
 }

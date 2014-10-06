@@ -4,6 +4,7 @@ package node
 import (
 	// ggv "code.google.com/p/gographviz"
 	"fmt"
+	comt "github.com/tgermain/grandRepositorySky/communicator"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
 )
@@ -15,11 +16,10 @@ const SPACESIZE = 160
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	Id          string
 	fingers     []*fingerEntry
 	Successor   *shared.DistantNode
 	Predecessor *shared.DistantNode
-	comChannel  chan<- shared.SendingQueueMsg
+	commLib     *comt.ComLink
 }
 
 type fingerEntry struct {
@@ -29,43 +29,6 @@ type fingerEntry struct {
 
 //Method parts ----------------------------------------------------------
 
-func (d *DHTnode) sendUpdateSuccesor(destination *shared.DistantNode, newNode *shared.DistantNode) {
-	d.comChannel <- shared.SendingQueueMsg{
-		shared.UPDATESUCCESSOR,
-		destination,
-		map[string]string{
-			"id":   newNode.Id,
-			"ip":   newNode.Ip,
-			"port": newNode.Port,
-		},
-	}
-}
-
-func (d *DHTnode) sendUpdatePredecessor(destination *shared.DistantNode, newNode *shared.DistantNode) {
-	d.comChannel <- shared.SendingQueueMsg{
-		shared.UPDATEPREDECESSOR,
-		destination,
-		map[string]string{
-			"id":   newNode.Id,
-			"ip":   newNode.Ip,
-			"port": newNode.Port,
-		},
-	}
-}
-
-func (d *DHTnode) sendLookup(destination *shared.DistantNode, idSearched string) *shared.DistantNode {
-	d.comChannel <- shared.SendingQueueMsg{
-		shared.LOOKUP,
-		destination,
-		map[string]string{
-			"searchin": idSearched,
-		},
-	}
-
-	//TODO add a return channel to get the result and return it
-	return nil
-}
-
 func (d *DHTnode) SendPrintRing(destination *shared.DistantNode, currentString *string) {
 
 }
@@ -73,7 +36,7 @@ func (d *DHTnode) SendPrintRing(destination *shared.DistantNode, currentString *
 func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 
 	whereToInsert := currentNode.Lookup(newNode.Id)
-	currentNode.sendUpdateSuccesor(whereToInsert, newNode)
+	currentNode.commLib.SendUpdateSuccesor(whereToInsert, newNode)
 }
 
 //Tell your actual Successor that you are no longer its predecessor
@@ -81,20 +44,20 @@ func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 //tell to your new Successor that you are its predecessor
 func (d *DHTnode) updateSuccessor(newNode *shared.DistantNode) {
 	//possible TODO : condition on the origin of the message for this sending ?
-	d.sendUpdatePredecessor(d.Successor, newNode)
+	d.commLib.SendUpdatePredecessor(d.Successor, newNode)
 	d.Successor = newNode
-	d.sendUpdatePredecessor(newNode, d.ToDistantNode())
+	d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
 }
 
 func (d *DHTnode) updatePredecessor(newNode *shared.DistantNode) {
 	d.Predecessor = newNode
-	d.sendUpdateSuccesor(newNode, d.ToDistantNode())
+	d.commLib.SendUpdateSuccesor(newNode, d.ToDistantNode())
 	d.initFingersTable()
 }
 
 func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
 	return &shared.DistantNode{
-		currentNode.Id,
+		shared.LocalId,
 		shared.LocalIp,
 		shared.LocalPort,
 	}
@@ -102,11 +65,11 @@ func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
 
 func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
 	switch {
-	case currentNode.Id == currentNode.Successor.Id:
+	case shared.LocalId == currentNode.Successor.Id:
 		{
 			return true
 		}
-	case dht.Between(currentNode.Id, currentNode.Successor.Id, IdToSearch):
+	case dht.Between(shared.LocalId, currentNode.Successor.Id, IdToSearch):
 		{
 			return true
 		}
@@ -118,7 +81,7 @@ func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
 }
 
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
-	// fmt.Printf("Node [%s] made a lookup to [%s]\n", currentNode.Id, IdToSearch)
+	// fmt.Printf("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
 	// currentNode.PrintNodeInfo()
 	if currentNode.isResponsible(IdToSearch) {
 		//replace with send
@@ -126,7 +89,7 @@ func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 	} else {
 		// fmt.Println("go to the next one")
 		//TODO use the fingers table here
-		return currentNode.sendLookup(currentNode.findClosestNode(IdToSearch), IdToSearch)
+		return currentNode.commLib.SendLookup(currentNode.findClosestNode(IdToSearch), IdToSearch)
 	}
 
 }
@@ -139,10 +102,10 @@ func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNo
 	// var bestIndex int
 	for _, v := range currentNode.fingers {
 		if v != nil {
-			if dht.Between(v.nodeResp.Id, currentNode.Id, IdToSearch) {
+			if dht.Between(v.nodeResp.Id, shared.LocalId, IdToSearch) {
 
 				//If the finger lead the node to itself, it's not an optimization
-				if v.nodeResp.Id != currentNode.Id {
+				if v.nodeResp.Id != shared.LocalId {
 
 					//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
 					currentDistance := dht.Distance([]byte(v.nodeResp.Id), []byte(IdToSearch), SPACESIZE)
@@ -166,16 +129,16 @@ func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNo
 			}
 		}
 	}
-	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught finger[%d], [%s]\n", currentNode.Id, IdToSearch, bestIndex, bestFinger.Id)
+	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught finger[%d], [%s]\n", shared.LocalId, IdToSearch, bestIndex, bestFinger.Id)
 	return bestFinger
 }
 
 func (node *DHTnode) initFingersTable() {
-	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", node.Id)
+	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", shared.LocalId)
 	for i := 0; i < SPACESIZE; i++ {
 		// fmt.Printf("Calculatin fingers [%d]\n", i)
 		//TODO make a condition to voId to always calculate the fingerId
-		fingerId, _ := dht.CalcFinger([]byte(node.Id), i+1, SPACESIZE)
+		fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
 		responsibleNode := node.Lookup(fingerId)
 		node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
 
@@ -188,7 +151,7 @@ func (node *DHTnode) printRing(currentString *string) {
 		currentString = new(string)
 	}
 	node.PrintNodeName(currentString)
-	node.SendPrintRing(node.Successor, currentString)
+	node.commLib.SendPrintRing(node.Successor, currentString)
 }
 
 func (node *DHTnode) PrintRing() {
@@ -196,14 +159,14 @@ func (node *DHTnode) PrintRing() {
 }
 
 func (node *DHTnode) PrintNodeName(currentString *string) {
-	fmt.Printf("%s\n", node.Id)
+	fmt.Printf("%s\n", shared.LocalId)
 }
 
 func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println("---------------------------------")
 	fmt.Println("Node info")
 	fmt.Println("---------------------------------")
-	fmt.Printf("	Id			%s\n", node.Id)
+	fmt.Printf("	Id			%s\n", shared.LocalId)
 	fmt.Printf("	Ip			%s\n", shared.LocalIp)
 	fmt.Printf("	Port		%s\n", shared.LocalPort)
 
@@ -222,7 +185,7 @@ func (node *DHTnode) PrintNodeInfo() {
 }
 
 // func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
-// 	if &node.Id == firstNodeId {
+// 	if &shared.LocalId == firstNodeId {
 // 		return g.String()
 // 	} else {
 // 		if g == nil {
@@ -231,21 +194,21 @@ func (node *DHTnode) PrintNodeInfo() {
 // 			g.SetDir(true)
 // 		}
 // 		if firstNodeId == nil {
-// 			firstNodeId = &node.Id
+// 			firstNodeId = &shared.LocalId
 // 		}
-// 		g.AddNode(g.Name, node.Id, nil)
+// 		g.AddNode(g.Name, shared.LocalId, nil)
 // 		g.AddNode(g.Name, node.Successor.Id, nil)
 // 		g.AddNode(g.Name, node.predecessor.Id, nil)
-// 		// g.AddEdge(node.Id, node.Successor.Id, true, map[string]string{
+// 		// g.AddEdge(shared.LocalId, node.Successor.Id, true, map[string]string{
 // 		// 	"label": "succ",
 // 		// })
-// 		// g.AddEdge(node.Id, node.predecessor.Id, true, map[string]string{
+// 		// g.AddEdge(shared.LocalId, node.predecessor.Id, true, map[string]string{
 // 		// 	"label": "pred",
 // 		// })
 
 // 		for i, v := range node.fingers {
-// 			g.AddEdge(node.Id, v.IdKey, true, map[string]string{
-// 				"label":         fmt.Sprintf("\"%s.%d\"", node.Id, i),
+// 			g.AddEdge(shared.LocalId, v.IdKey, true, map[string]string{
+// 				"label":         fmt.Sprintf("\"%s.%d\"", shared.LocalId, i),
 // 				"label_scheme":  "3",
 // 				"decorate":      "true",
 // 				"labelfontsize": "5.0",
@@ -262,24 +225,20 @@ func (node *DHTnode) PrintNodeInfo() {
 // }
 
 //other functions parts --------------------------------------------------------
-func MakeNode(NewId *string, commChannel chan shared.SendingQueueMsg) *DHTnode {
-	if NewId == nil {
-		tempId := dht.GenerateNodeId()
-		NewId = &tempId
-	}
-	daNode := DHTnode{
-		Id:         *NewId,
-		fingers:    make([]*fingerEntry, SPACESIZE),
-		comChannel: commChannel,
-	}
-	daNode.Successor = &shared.DistantNode{}
-	daNode.Successor.Id = daNode.Id
 
-	daNode.Predecessor = &shared.DistantNode{}
-	daNode.Predecessor.Id = daNode.Id
+func MakeNode() *DHTnode,*comt.ComLink {
+	daComInterface := comt.NewComLink()
+	daNode := DHTnode{
+		fingers: make([]*fingerEntry, SPACESIZE),
+		commLib: daComInterface,
+	}
+	mySelf := daNode.ToDistantNode()
+	daNode.Successor = mySelf
+
+	daNode.Predecessor = mySelf
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	return &daNode
+	return &daNode,daComInterface
 }
