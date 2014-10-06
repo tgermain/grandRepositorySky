@@ -120,7 +120,15 @@ abilities :
 	- AreYouAlive / IAmAlive
 
 
+Work in progress (Al):
+- Get requests and show brutal infos
+- Web client
+- Web controls
 
+
+TODO :
+- Multiple instances server
+- Graph interface
 
 
 
