@@ -3,6 +3,7 @@ package node
 //IMPORT parts ----------------------------------------------------------
 import (
 	// ggv "code.google.com/p/gographviz"
+	"bytes" // for string manipulation
 	"fmt"
 	comt "github.com/tgermain/grandRepositorySky/communicator"
 	"github.com/tgermain/grandRepositorySky/dht"
@@ -184,6 +185,40 @@ func (node *DHTnode) PrintNodeInfo() {
 	fmt.Println("---------------------------------")
 }
 
+func (node *DHTnode) ToString() string {
+	var buffer bytes.Buffer
+	buffer.WriteString("---------------------------------\n")
+	buffer.WriteString("Node info\n")
+	buffer.WriteString("---------------------------------\n")
+	buffer.WriteString("	Id		")
+	buffer.WriteString(shared.LocalId)
+	buffer.WriteString("\n")
+	buffer.WriteString("	Ip		")
+	buffer.WriteString(shared.LocalIp)
+	buffer.WriteString("\n")
+	buffer.WriteString("	Port	")
+	buffer.WriteString(shared.LocalPort)
+	buffer.WriteString("\n")
+
+	buffer.WriteString(" Succesor	")
+	buffer.WriteString(node.Successor.Id)
+	buffer.WriteString("\n")
+	buffer.WriteString(" Predecesor	")
+	buffer.WriteString(node.Predecessor.Id)
+	buffer.WriteString("\n")
+	// fmt.Println("  Fingers table :")
+	// fmt.Println("  ---------------------------------")
+	// fmt.Println("  Index		Idkey			IdNode ")
+	// for i, v := range node.fingers {
+	// 	if v != nil {
+	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
+	// 	}
+	// }
+	buffer.WriteString("---------------------------------\n")
+	infos := buffer.String()
+	return infos
+}
+
 // func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
 // 	if &shared.LocalId == firstNodeId {
 // 		return g.String()
@@ -226,7 +261,7 @@ func (node *DHTnode) PrintNodeInfo() {
 
 //other functions parts --------------------------------------------------------
 
-func MakeNode() *DHTnode,*comt.ComLink {
+func MakeNode() (*DHTnode, *comt.ComLink) {
 	daComInterface := comt.NewComLink()
 	daNode := DHTnode{
 		fingers: make([]*fingerEntry, SPACESIZE),
@@ -240,5 +275,5 @@ func MakeNode() *DHTnode,*comt.ComLink {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	return &daNode,daComInterface
+	return &daNode, daComInterface
 }
