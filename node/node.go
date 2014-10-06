@@ -36,7 +36,7 @@ func (d *DHTnode) SendPrintRing(destination *shared.DistantNode, currentString *
 func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 
 	whereToInsert := currentNode.Lookup(newNode.Id)
-	currentNode.commLib.SendUpdateSuccesor(whereToInsert, newNode)
+	currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
 }
 
 //Tell your actual Successor that you are no longer its predecessor
@@ -51,7 +51,7 @@ func (d *DHTnode) updateSuccessor(newNode *shared.DistantNode) {
 
 func (d *DHTnode) updatePredecessor(newNode *shared.DistantNode) {
 	d.Predecessor = newNode
-	d.commLib.SendUpdateSuccesor(newNode, d.ToDistantNode())
+	d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
 	d.initFingersTable()
 }
 
@@ -225,7 +225,8 @@ func (node *DHTnode) PrintNodeInfo() {
 // }
 
 //other functions parts --------------------------------------------------------
-
+//Create the node with it's communication interface
+//Does not start to liten for message
 func MakeNode() *DHTnode,*comt.ComLink {
 	daComInterface := comt.NewComLink()
 	daNode := DHTnode{
