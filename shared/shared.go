@@ -35,10 +35,12 @@ type DistantNode struct {
 	Id, Ip, Port string
 }
 
-type SendingQueueMsg struct {
-	DaType      MessageType
+type Message struct {
+	TypeOfMsg   MessageType
+	Id          string
+	Origin      *DistantNode
 	Destination *DistantNode
-	Args        map[string]string
+	Parameters  map[string]string
 }
 
 //example of map init map[string]int{
