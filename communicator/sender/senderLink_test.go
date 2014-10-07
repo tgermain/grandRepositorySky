@@ -1,8 +1,9 @@
-package communicator
+package sender
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/tgermain/grandRepositorySky/communicator"
 	"github.com/tgermain/grandRepositorySky/shared"
 	"net"
 	"reflect"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestMarshallingUnmarshalling(t *testing.T) {
-	aMessage := message{
+	aMessage := shared.Message{
 		TypeOfMsg: shared.LOOKUP,
 		Id:        "monIdQuIlEstBien",
 		Origin: &shared.DistantNode{
@@ -23,19 +24,19 @@ func TestMarshallingUnmarshalling(t *testing.T) {
 			"IPDestination",
 			"PortDestination",
 		},
-		Parameters: make(map[string][]byte),
+		Parameters: make(map[string]string),
 	}
 
-	marshalledMsg := marshallMessage(&aMessage)
+	marshalledMsg := communicator.MarshallMessage(&aMessage)
 
-	transformedMsg := unmarshallMessage(marshalledMsg)
+	transformedMsg := communicator.UnmarshallMessage(marshalledMsg)
 
-	assert.True(t, reflect.DeepEqual(aMessage, transformedMsg), "marshalling-unmarshalling should not change the message")
+	assert.True(t, reflect.DeepEqual(aMessage, transformedMsg), "marshalling-unmarshalling should not change the shared.Message")
 }
 
 func TestEffectifSendingReceving(t *testing.T) {
 
-	aMessage := message{
+	aMessage := shared.Message{
 		TypeOfMsg: shared.LOOKUP,
 		Id:        "lautreId",
 		Origin: &shared.DistantNode{
@@ -48,10 +49,10 @@ func TestEffectifSendingReceving(t *testing.T) {
 			"",
 			"2000",
 		},
-		Parameters: make(map[string][]byte),
+		Parameters: make(map[string]string),
 	}
 
-	marshalledMsg := marshallMessage(&aMessage)
+	marshalledMsg := communicator.MarshallMessage(&aMessage)
 
 	//seting up a test serveur ready t listen
 	addr, err := net.ResolveUDPAddr("udp", ":2000")
@@ -74,7 +75,7 @@ func TestEffectifSendingReceving(t *testing.T) {
 	}(sock)
 
 	sendTo(aMessage.Destination, marshalledMsg)
-	fmt.Println("Message sended")
+	fmt.Println("shared.Message sended")
 }
 
 func TestSendPrintRing(t *testing.T) {
@@ -90,7 +91,7 @@ func TestSendPrintRing(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := message{
+	aMessage := shared.Message{
 		TypeOfMsg: shared.PRINTRING,
 		Id:        "",
 		Origin: &shared.DistantNode{
@@ -99,11 +100,11 @@ func TestSendPrintRing(t *testing.T) {
 			"monPortLocal",
 		},
 		Destination: destination,
-		Parameters: map[string][]byte{
-			"currentString": []byte(currentString)},
+		Parameters: map[string]string{
+			"currentString": (currentString)},
 	}
 
-	marshalledMsg := marshallMessage(&aMessage)
+	marshalledMsg := communicator.MarshallMessage(&aMessage)
 
 	//seting up a test serveur ready t listen
 	addr, err := net.ResolveUDPAddr("udp", ":2000")
@@ -124,8 +125,8 @@ func TestSendPrintRing(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(marshalledMsg, buf[0:n]), "server should read what we send")
 		defer sock.Close()
 	}(sock)
-	aComLink := NewComLink()
-	aComLink.SendPrintRing(destination, &currentString)
+	aSenderLink := NewSenderLink()
+	aSenderLink.SendPrintRing(destination, &currentString)
 }
 
 func TestSendUpdateSuccessor(t *testing.T) {
@@ -145,7 +146,7 @@ func TestSendUpdateSuccessor(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := message{
+	aMessage := shared.Message{
 		TypeOfMsg: shared.UPDATESUCCESSOR,
 		Id:        "",
 		Origin: &shared.DistantNode{
@@ -154,14 +155,14 @@ func TestSendUpdateSuccessor(t *testing.T) {
 			"monPortLocal",
 		},
 		Destination: destination,
-		Parameters: map[string][]byte{
-			"newNodeID":   []byte(newNode.Id),
-			"newNodeIp":   []byte(newNode.Ip),
-			"newNodePort": []byte(newNode.Port),
+		Parameters: map[string]string{
+			"newNodeID":   newNode.Id,
+			"newNodeIp":   newNode.Ip,
+			"newNodePort": newNode.Port,
 		},
 	}
 
-	marshalledMsg := marshallMessage(&aMessage)
+	marshalledMsg := communicator.MarshallMessage(&aMessage)
 
 	//seting up a test serveur ready t listen
 	addr, err := net.ResolveUDPAddr("udp", ":2000")
@@ -182,8 +183,8 @@ func TestSendUpdateSuccessor(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(marshalledMsg, buf[0:n]), "server should read what we send")
 		defer sock.Close()
 	}(sock)
-	aComLink := NewComLink()
-	aComLink.SendUpdateSuccesor(destination, newNode)
+	aSenderLink := NewSenderLink()
+	aSenderLink.SendUpdateSuccessor(destination, newNode)
 }
 
 func TestSendUpdatePredecessor(t *testing.T) {
@@ -203,7 +204,7 @@ func TestSendUpdatePredecessor(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := message{
+	aMessage := shared.Message{
 		TypeOfMsg: shared.UPDATEPREDECESSOR,
 		Id:        "",
 		Origin: &shared.DistantNode{
@@ -212,14 +213,14 @@ func TestSendUpdatePredecessor(t *testing.T) {
 			"monPortLocal",
 		},
 		Destination: destination,
-		Parameters: map[string][]byte{
-			"newNodeID":   []byte(newNode.Id),
-			"newNodeIp":   []byte(newNode.Ip),
-			"newNodePort": []byte(newNode.Port),
+		Parameters: map[string]string{
+			"newNodeID":   newNode.Id,
+			"newNodeIp":   newNode.Ip,
+			"newNodePort": newNode.Port,
 		},
 	}
 
-	marshalledMsg := marshallMessage(&aMessage)
+	marshalledMsg := communicator.MarshallMessage(&aMessage)
 
 	//seting up a test serveur ready t listen
 	addr, err := net.ResolveUDPAddr("udp", ":2000")
@@ -240,6 +241,6 @@ func TestSendUpdatePredecessor(t *testing.T) {
 		assert.True(t, reflect.DeepEqual(marshalledMsg, buf[0:n]), "server should read what we send")
 		defer sock.Close()
 	}(sock)
-	aComLink := NewComLink()
-	aComLink.SendUpdateSuccesor(destination, newNode)
+	aSenderLink := NewSenderLink()
+	aSenderLink.SendUpdatePredecessor(destination, newNode)
 }
