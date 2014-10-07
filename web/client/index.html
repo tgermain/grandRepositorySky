@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div ng-app="" ng-controller="nodeController"> 
+ 
+	{{ nodes.id + ', ' + nodes.port }}
+	</br>
+	test : {{nodes}}
+	
+
+</div>
+
+<script>
+function nodeController($scope,$http) {
+	$http({
+		method: 'GET', 
+		url: 'http://127.0.0.1:3000/nodes',
+		respondType: 'json',
+        headers: {
+             'Accept': 'application/json',
+             'Content-Type': 'application/json',
+             'Access-Control-Allow-Origin' : '*',
+             'Access-Control-Allow-Credentials': true
+        }}).
+  success(function(data, status, headers, config) {
+  	console.log(data);
+    $scope.nodes = data;
+    $scope.status = status;
+    $scope.headers = headers;
+    $scope.config = config;
+    $scope.state = "good";
+  }).
+  error(function(data, status, headers, config) {
+  	console.log(data);
+    $scope.nodes = data;
+    $scope.status = status;
+    $scope.headers = headers;
+    $scope.config = config;
+    $scope.state = "error";
+  });
+  /*
+  $http.get("http://127.0.0.1:3000/nodes")
+  //$http.get("http://www.w3schools.com//website/Customers_JSON.php")
+  .success(function(response) {$scope.nodes = response;}
+  	);
+*/
+}
+</script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+
+</body>
+</html>
