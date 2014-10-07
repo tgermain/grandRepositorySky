@@ -4,7 +4,7 @@ package node
 import (
 	// ggv "code.google.com/p/gographviz"
 	"fmt"
-	comt "github.com/tgermain/grandRepositorySky/communicator"
+	sender "github.com/tgermain/grandRepositorySky/communicator/sender"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
 )
@@ -19,7 +19,7 @@ type DHTnode struct {
 	fingers     []*fingerEntry
 	Successor   *shared.DistantNode
 	Predecessor *shared.DistantNode
-	commLib     *comt.ComLink
+	commLib     *sender.SenderLink
 }
 
 type fingerEntry struct {
@@ -227,8 +227,8 @@ func (node *DHTnode) PrintNodeInfo() {
 //other functions parts --------------------------------------------------------
 //Create the node with it's communication interface
 //Does not start to liten for message
-func MakeNode() *DHTnode,*comt.ComLink {
-	daComInterface := comt.NewComLink()
+func MakeNode() (*DHTnode, *sender.SenderLink) {
+	daComInterface := sender.NewSenderLink()
 	daNode := DHTnode{
 		fingers: make([]*fingerEntry, SPACESIZE),
 		commLib: daComInterface,
@@ -241,5 +241,5 @@ func MakeNode() *DHTnode,*comt.ComLink {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	return &daNode,daComInterface
+	return &daNode, daComInterface
 }
