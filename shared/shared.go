@@ -3,7 +3,6 @@ package shared
 import (
 	"github.com/op/go-logging"
 	"os"
-	"time"
 )
 
 //Const parts -----------------------------------------------------------
@@ -65,7 +64,7 @@ func SetupLogger() *logging.Logger {
 	logBackend := logging.NewLogBackend(os.Stderr, "", 0)
 
 	//file creation and opening
-	logFileBaseName := "sampleLog-" + time.Now().Format(time.RFC3339) + ".log"
+	logFileBaseName := "mainLog.log"
 	logFileName := "./" + logFileBaseName
 	logFile, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)
 	if err != nil {
@@ -76,7 +75,9 @@ func SetupLogger() *logging.Logger {
 
 	logging.SetBackend(logBackend, logFileBackend)
 	logging.SetFormatter(logging.MustStringFormatter(format))
-	logging.SetLevel(logging.ERROR, "main")
+	logging.SetLevel(logging.DEBUG, "main")
 
 	return logging.MustGetLogger("main")
 }
+
+var Logger = SetupLogger()
