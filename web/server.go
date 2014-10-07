@@ -1,15 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	//"github.com/tgermain/grandRepositorySky"
 	"github.com/tgermain/grandRepositorySky/dht" // for makeDHTnode
 	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared" // for makeDHTnode
 	"net/http"
-	"time" // to set a timer
+	//"time" // to set a timer
 )
+
+type NodeJson struct {
+	Id         string `json:"id"`
+	Ip         string `json:"ip"`
+	Port       string `json:"port"`
+	Succesor   string `json:"succesor"`
+	Predecesor string `json:"predecesor"`
+}
 
 //TODO remove this function and replace it by a working one in the lib
 func MakeDHTNode(NewId *string, NewIp, NewPort string) *node.DHTnode {
@@ -34,33 +42,35 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *node.DHTnode {
 var id1 string = "01"
 var node1 *node.DHTnode = MakeDHTNode(&id1, "localhost", "1111")
 
-func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", HelloHandler)
-	r.HandleFunc("/nodes", NodesHandler)
-	r.HandleFunc("/node/{idNoeud}", NodeHandler)
-	http.Handle("/", r)
-
-	go http.ListenAndServe(":3000", r)
-
-	time.Sleep(300 * time.Second)
-}
-
 // Hello Handler
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("GET /")
 	fmt.Fprintf(w, "Hello World too")
 }
 
 //TODO graph vizualisation => get all nodes ?
 //TODO client all nodes loop request
 func NodesHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, node1.ToString())
+	fmt.Println("GET /noeuds")
+	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, node1.Predecessor.Id, node1.Successor.Id}
+	js, err := json.Marshal(node1Json)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+	w.Write(js)
 }
 
 //TODO printInfo (fingerTable of a node) request => getNode ?
 func NodeHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	idNoeud := vars["idNoeud"]
+	fmt.Println("GET /noeuds/" + idNoeud)
 	if idNoeud == "01" {
 		fmt.Fprintf(w, node1.ToString())
 	} else {
@@ -77,3 +87,15 @@ func NodeHandler(w http.ResponseWriter, req *http.Request) {
 //TODO launch updateFingerTable request
 
 //TODO launch areYouAlive request
+
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/", HelloHandler)
+	r.HandleFunc("/nodes", NodesHandler)
+	r.HandleFunc("/nodes/{idNoeud}", NodeHandler)
+	http.Handle("/", r)
+
+	http.ListenAndServe(":3000", r) // adding go before with timer gives a timeout
+
+	//time.Sleep(300 * time.Second)
+}
