@@ -54,9 +54,12 @@ func main() {
 				time.Sleep(time.Second * 5)
 				node1.PrintRing()
 			}
+			// go func() {
 			for {
+				time.Sleep(time.Second)
 				runtime.Gosched()
 			}
+			// }()
 		},
 	}
 	rootCmd.Flags().StringVarP(&Id, "Id of the node", "n", "2222", "Id you want for your node")
