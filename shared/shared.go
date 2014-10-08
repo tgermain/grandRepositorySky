@@ -54,7 +54,7 @@ type Message struct {
 // Example format string. Everything except the message has a custom color
 // which is dependent on the log level. Many fields have a custom output
 // formatting too, eg. the time returns the hour down to the milli second.
-var format = "%{color}%{time:15:04:05.000000} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}"
+var format = "%{color}%{time:15:04:05.000000} ▶ %{level:.4s} %{id:03x} %{message} %{color:reset} "
 
 func SetupLogger() *logging.Logger {
 	// Setup one stderr and one file backend and combine them both into one
@@ -77,7 +77,8 @@ func SetupLogger() *logging.Logger {
 	logging.SetFormatter(logging.MustStringFormatter(format))
 	logging.SetLevel(logging.DEBUG, "main")
 
-	return logging.MustGetLogger("main")
+	Logger = logging.MustGetLogger("main")
+	return Logger
 }
 
-var Logger = SetupLogger()
+var Logger *logging.Logger
