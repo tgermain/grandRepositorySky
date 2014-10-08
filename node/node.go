@@ -42,17 +42,33 @@ func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 //Tell your actual Successor that you are no longer its predecessor
 //set your succesor to the new value
 //tell to your new Successor that you are its predecessor
-func (d *DHTnode) updateSuccessor(newNode *shared.DistantNode) {
+func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 	//possible TODO : condition on the origin of the message for this sending ?
-	d.commLib.SendUpdatePredecessor(d.Successor, newNode)
-	d.Successor = newNode
-	d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
+	if d.Successor.Id != newNode.Id {
+		// if d.Successor.Id != newNode.Id {
+		d.commLib.SendUpdatePredecessor(d.Successor, newNode)
+		// }
+
+		d.Successor = newNode
+		d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
+
+	} else {
+		shared.Logger.Info("Succesor stable !!")
+		d.PrintNodeInfo()
+	}
 }
 
-func (d *DHTnode) updatePredecessor(newNode *shared.DistantNode) {
-	d.Predecessor = newNode
-	d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
-	d.initFingersTable()
+func (d *DHTnode) UpdatePredecessor(newNode *shared.DistantNode) {
+	if d.Predecessor.Id != newNode.Id {
+
+		d.Predecessor = newNode
+		d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
+		// d.initFingersTable()
+
+	} else {
+		shared.Logger.Info("Predecessor stable !!")
+		d.PrintNodeInfo()
+	}
 }
 
 func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
