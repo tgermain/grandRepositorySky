@@ -10,35 +10,10 @@ import (
 	"testing"
 )
 
-func TestMarshallingUnmarshalling(t *testing.T) {
-	aMessage := shared.Message{
-		TypeOfMsg: shared.LOOKUP,
-		Id:        "monIdQuIlEstBien",
-		Origin: &shared.DistantNode{
-			"IDOrigine",
-			"IPOrigine",
-			"PortOrigine",
-		},
-		Destination: &shared.DistantNode{
-			"IDDestination",
-			"IPDestination",
-			"PortDestination",
-		},
-		Parameters: make(map[string]string),
-	}
-
-	marshalledMsg := communicator.MarshallMessage(&aMessage)
-
-	transformedMsg := communicator.UnmarshallMessage(marshalledMsg)
-
-	assert.True(t, reflect.DeepEqual(aMessage, transformedMsg), "marshalling-unmarshalling should not change the shared.Message")
-}
-
 func TestEffectifSendingReceving(t *testing.T) {
 
-	aMessage := shared.Message{
-		TypeOfMsg: shared.LOOKUP,
-		Id:        "lautreId",
+	aMessage := communicator.Message{
+		TypeOfMsg: communicator.LOOKUP,
 		Origin: &shared.DistantNode{
 			"IDOrigine",
 			"IPOrigine",
@@ -74,8 +49,8 @@ func TestEffectifSendingReceving(t *testing.T) {
 		defer sock.Close()
 	}(sock)
 
-	sendTo(aMessage.Destination, marshalledMsg)
-	fmt.Println("shared.Message sended")
+	sendTo(aMessage.Destination, &aMessage)
+	fmt.Println("communicator.Message sended")
 }
 
 func TestSendPrintRing(t *testing.T) {
@@ -91,9 +66,8 @@ func TestSendPrintRing(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := shared.Message{
-		TypeOfMsg: shared.PRINTRING,
-		Id:        "",
+	aMessage := communicator.Message{
+		TypeOfMsg: communicator.PRINTRING,
 		Origin: &shared.DistantNode{
 			"monIdLocal",
 			"monIpLocal",
@@ -146,9 +120,8 @@ func TestSendUpdateSuccessor(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := shared.Message{
-		TypeOfMsg: shared.UPDATESUCCESSOR,
-		Id:        "",
+	aMessage := communicator.Message{
+		TypeOfMsg: communicator.UPDATESUCCESSOR,
 		Origin: &shared.DistantNode{
 			"monIdLocal",
 			"monIpLocal",
@@ -204,9 +177,8 @@ func TestSendUpdatePredecessor(t *testing.T) {
 		"2000",
 	}
 
-	aMessage := shared.Message{
-		TypeOfMsg: shared.UPDATEPREDECESSOR,
-		Id:        "",
+	aMessage := communicator.Message{
+		TypeOfMsg: communicator.UPDATEPREDECESSOR,
 		Origin: &shared.DistantNode{
 			"monIdLocal",
 			"monIpLocal",
