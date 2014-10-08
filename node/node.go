@@ -81,7 +81,7 @@ func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
 }
 
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
-	// fmt.Printf("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
+	shared.Logger.Info("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
 	// currentNode.PrintNodeInfo()
 	if currentNode.isResponsible(IdToSearch) {
 		//replace with send
@@ -163,16 +163,14 @@ func (node *DHTnode) PrintNodeName(currentString *string) {
 }
 
 func (node *DHTnode) PrintNodeInfo() {
-	fmt.Println("---------------------------------")
-	fmt.Println("Node info")
-	fmt.Println("---------------------------------")
-	fmt.Printf("	Id			%s\n", shared.LocalId)
-	fmt.Printf("	Ip			%s\n", shared.LocalIp)
-	fmt.Printf("	Port		%s\n", shared.LocalPort)
-
-	fmt.Printf(" 	Succesor	%s\n", node.Successor.Id)
-	fmt.Printf(" 	Predecesor	%s\n", node.Predecessor.Id)
-	fmt.Println()
+	shared.Logger.Info("---------------------------------")
+	shared.Logger.Info("Node info")
+	shared.Logger.Info("---------------------------------")
+	shared.Logger.Info("	Id			%s", shared.LocalId)
+	shared.Logger.Info("	Ip			%s", shared.LocalIp)
+	shared.Logger.Info("	Port		%s", shared.LocalPort)
+	shared.Logger.Info(" 	Succesor	%s", node.Successor.Id)
+	shared.Logger.Info(" 	Predecesor	%s", node.Predecessor.Id)
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
 	// fmt.Println("  Index		Idkey			IdNode ")
@@ -181,7 +179,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
 	// 	}
 	// }
-	fmt.Println("---------------------------------")
+	shared.Logger.Info("---------------------------------")
 }
 
 // func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
@@ -241,5 +239,6 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
+	shared.Logger.Info("New node [%.5s] created with its sender Interface", shared.LocalId)
 	return &daNode, daComInterface
 }
