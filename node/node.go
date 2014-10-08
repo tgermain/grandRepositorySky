@@ -162,20 +162,14 @@ func (node *DHTnode) initFingersTable() {
 	// fmt.Println("****************************************************************Fingers table init DONE : ")
 }
 
-func (node *DHTnode) printRing(currentString *string) {
-	if currentString == nil {
-		currentString = new(string)
-	}
-	node.PrintNodeName(currentString)
-	node.commLib.SendPrintRing(node.Successor, currentString)
-}
-
 func (node *DHTnode) PrintRing() {
-	node.printRing(nil)
+	daString := ""
+	node.PrintNodeName(&daString)
+	node.commLib.SendPrintRing(node.Successor, &daString)
 }
 
 func (node *DHTnode) PrintNodeName(currentString *string) {
-	fmt.Printf("%s\n", shared.LocalId)
+	*currentString += fmt.Sprintf("%s\n", shared.LocalId)
 }
 
 func (node *DHTnode) PrintNodeInfo() {
