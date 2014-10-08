@@ -63,7 +63,7 @@ func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
 	}
 }
 
-func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
+func (currentNode *DHTnode) IsResponsible(IdToSearch string) bool {
 	switch {
 	case shared.LocalId == currentNode.Successor.Id:
 		{
@@ -83,7 +83,7 @@ func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 	shared.Logger.Info("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
 	// currentNode.PrintNodeInfo()
-	if currentNode.isResponsible(IdToSearch) {
+	if currentNode.IsResponsible(IdToSearch) {
 		//replace with send
 		return currentNode.ToDistantNode()
 	} else {
@@ -94,7 +94,7 @@ func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 
 }
 
-func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNode {
+func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNode {
 	bestFinger := currentNode.Successor
 
 	minDistance := dht.Distance([]byte(currentNode.Successor.Id), []byte(IdToSearch), SPACESIZE)
