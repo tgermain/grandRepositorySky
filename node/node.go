@@ -7,6 +7,7 @@ import (
 	sender "github.com/tgermain/grandRepositorySky/communicator/sender"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
+	"time"
 )
 
 //Const parts -----------------------------------------------------------
@@ -105,7 +106,15 @@ func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 	} else {
 		// fmt.Println("go to the next one")
 		//TODO use the fingers table here
-		return currentNode.commLib.SendLookup(currentNode.findClosestNode(IdToSearch), IdToSearch)
+		responseChan := currentNode.commLib.SendLookup(currentNode.FindClosestNode(IdToSearch), IdToSearch)
+		select {
+		case res := <-responseChan:
+			return &res
+		//case of timeout ?
+		case <-time.After(time.Second * 2):
+			shared.Logger.Error("Lookup for %s timeout", IdToSearch)
+			return nil
+		}
 	}
 
 }
