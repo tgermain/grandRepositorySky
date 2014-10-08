@@ -1,8 +1,8 @@
-package grandRepositorySky
+package main
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/tgermain/grandRepositorySky/communicator"
+	"github.com/tgermain/grandRepositorySky/communicator/receiver"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared"
