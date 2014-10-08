@@ -30,12 +30,11 @@ type fingerEntry struct {
 
 //Method parts ----------------------------------------------------------
 
-func (d *DHTnode) SendPrintRing(destination *shared.DistantNode, currentString *string) {
-
+func (currentNode *DHTnode) JoinRing(newNode *shared.DistantNode) {
+	currentNode.commLib.SendJoinRing(newNode)
 }
 
 func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
-
 	whereToInsert := currentNode.Lookup(newNode.Id)
 	currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
 }
