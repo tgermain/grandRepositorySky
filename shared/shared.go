@@ -5,27 +5,6 @@ import (
 	"os"
 )
 
-//Const parts -----------------------------------------------------------
-type MessageType int
-
-const (
-	LOOKUP MessageType = iota
-	UPDATESUCCESSOR
-	UPDATEPREDECESSOR
-	PRINTRING
-)
-
-var messageTypes = []string{
-	"lookup",
-	"update successor",
-	"update predecessor",
-	"print ring",
-}
-
-func (mt MessageType) String() string {
-	return messageTypes[mt]
-}
-
 //Global var -----------------------------------------------------------
 var LocalId, LocalIp, LocalPort string
 
@@ -33,21 +12,6 @@ var LocalId, LocalIp, LocalPort string
 type DistantNode struct {
 	Id, Ip, Port string
 }
-
-type Message struct {
-	TypeOfMsg   MessageType
-	Id          string
-	Origin      *DistantNode
-	Destination *DistantNode
-	Parameters  map[string]string
-}
-
-//example of map init map[string]int{
-//     "rsc": 3711,
-//     "r":   2138,
-//     "gri": 1908,
-//     "adg": 912,
-// }
 
 //Log part -------------------------------------------------------------
 
