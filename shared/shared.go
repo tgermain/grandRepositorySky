@@ -13,10 +13,14 @@ const (
 	LOOKUP MessageType = iota
 	UPDATESUCCESSOR
 	UPDATEPREDECESSOR
+	PRINTRING
 )
 
 var messageTypes = []string{
 	"lookup",
+	"update successor",
+	"update predecessor",
+	"print ring",
 }
 
 func (mt MessageType) String() string {

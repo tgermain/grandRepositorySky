@@ -12,12 +12,15 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *node.DHTnode {
 		tempId := dht.GenerateNodeId()
 		NewId = &tempId
 	}
+	//Set the globally shared information
 	shared.localId = NewId
 	shared.LocalIp = NewIp
 	shared.LocalPort = NewPort
 
+	// create node with its commInterface
 	newNode, newComLink := node.MakeNode()
-	newComLink := communicator.MakeComlink(newNode, commChannel)
+
+	//Make the commInterface listen to incomming messages on globalIp, globalPort
 	newComLink.StartAndListen()
 
 	return newNode
