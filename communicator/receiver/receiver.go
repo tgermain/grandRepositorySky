@@ -120,7 +120,7 @@ func (r *ReceiverLink) receivePrintRing(msg *communicator.Message) {
 			//pass the request around
 			r.node.PrintNodeName(&currentString)
 			msg.Parameters["currentString"] = currentString
-			r.sender.RelayPrintRing(r.node.Successor, msg)
+			r.sender.RelayPrintRing(r.node.GetSuccesor(), msg)
 		}
 	}
 }
