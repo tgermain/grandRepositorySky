@@ -1,54 +1,184 @@
 <!DOCTYPE html>
 <html>
+<head>
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+</head>
 <body>
 
-<div ng-app="" ng-controller="nodeController"> 
- 
-	{{ nodes.id + ', ' + nodes.port }}
-	</br>
-	test : {{nodes}}
-	
+<div ng-app="" ng-controller="nodeController"> 			
+	<div class="row">
+		<div class="col-xs-6 col-md-5 panel panel-default">
+			<div class="panel-heading">External node</div>
+			<div class="panel-body">
+				</br>
+				<button class="btn btn-default" ng-click=""> 
+				test alive
+				</button>
+				</br>
+				{{selectedNode.id}}
+				</br>
+				{{selectedNode.ip}}
+				</br>
+				{{selectedNode.port}}
+				</br>
+				{{selectedNode.succesor}}
+				</br>
+				{{selectedNode.predecesor}}
+				</br>
+			</div>
+		</div>
 
+		<div class="col-xs-6 col-md-5 panel panel-default">
+			<div class="panel-heading">Personnal node</div>
+			<div class="panel-body">
+				</br>
+				<button class="btn btn-default" ng-if="!nodeIsSelected" ng-click=""> 
+					insert node
+				</button>
+				</br>
+				<button class="btn btn-default" ng-if="nodeIsSelected" ng-click=""> 
+					remove node
+				</button>
+				</br>
+				{{localNode.id}}
+				</br>
+				{{localNode.ip}}
+				</br>
+				{{localNode.port}}
+				</br>
+				{{localNode.succesor}}
+				</br>
+				{{localNode.predecesor}}
+				</br>
+			</div>
+		</div>
+
+		<div class="col-xs-12 col-md-8 panel panel-default">
+			<div class="panel-body">
+			future graph visualisation
+			</br>
+			nodes : {{nodes}}
+			</br>
+			local : {{localNode}}
+			</br>
+			<button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()"> 
+				maj general data
+			</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script>
 function nodeController($scope,$http) {
-	$http({
-		method: 'GET', 
-		url: 'http://127.0.0.1:3000/nodes',
-		respondType: 'json',
-        headers: {
-             'Accept': 'application/json',
-             'Content-Type': 'application/json',
-             'Access-Control-Allow-Origin' : '*',
-             'Access-Control-Allow-Credentials': true
-        }}).
-  success(function(data, status, headers, config) {
-  	console.log(data);
-    $scope.nodes = data;
-    $scope.status = status;
-    $scope.headers = headers;
-    $scope.config = config;
-    $scope.state = "good";
-  }).
-  error(function(data, status, headers, config) {
-  	console.log(data);
-    $scope.nodes = data;
-    $scope.status = status;
-    $scope.headers = headers;
-    $scope.config = config;
-    $scope.state = "error";
-  });
-  /*
-  $http.get("http://127.0.0.1:3000/nodes")
-  //$http.get("http://www.w3schools.com//website/Customers_JSON.php")
-  .success(function(response) {$scope.nodes = response;}
-  	);
-*/
+	$scope.init = function () {           
+        $scope.nodeIsSelected = false;
+
+        var urlReq = 'http://' + '127.0.0.1' + ':' + '3000' + '/nodes';
+		$http({
+			method: 'GET', 
+			url: urlReq,
+			respondType: 'json',
+			headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin' : '*',
+			'Access-Control-Allow-Credentials': true
+		}}).
+		success(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.localNode = $scope.nodes;
+			$scope.status = status;
+		}).
+		error(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.localNode = $scope.nodes;
+			$scope.status = status;
+		});
+
+        console.log($scope.localNode);        
+    }
+
+    $scope.getAllNodes = function (){
+    	var urlReq = 'http://' + '127.0.0.1' + ':' + '3000' + '/nodes';
+		$http({
+			method: 'GET', 
+			url: urlReq,
+			respondType: 'json',
+	        headers: {
+	             'Accept': 'application/json',
+	             'Content-Type': 'application/json',
+	             'Access-Control-Allow-Origin' : '*',
+	             'Access-Control-Allow-Credentials': true
+	        }}).
+		success(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.status = status;
+		}).
+		error(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.status = status;
+	  });
+	}
+
+	$scope.getNode = function (ident, ip, port, local){
+		if (local){
+            var urlReq = 'http://' + '127.0.0.1' + ':' + '3000' + '/nodes/' + ident;
+			$http({
+				method: 'GET', 
+				url: urlReq ,
+				respondType: 'json',
+		        headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin' : '*',
+					'Access-Control-Allow-Credentials': true
+	        }}).
+			success(function(data, status, headers, config) {		
+				$scope.localNode = data;
+				$scope.selectedNode = data;
+				$scope.nodeIsSelected = true;					
+				$scope.status = status;
+			}).
+			error(function(data, status, headers, config) {
+				$scope.status = status;
+			});
+		}
+		else{
+            var urlReq ='http://' + '127.0.0.1' + ':' + '3000' + '/nodes/' + ident;
+			$http({
+				method: 'GET', 
+				url: urlReq ,
+				respondType: 'json',
+		        headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin' : '*',
+					'Access-Control-Allow-Credentials': true
+	        }}).
+			success(function(data, status, headers, config) {		
+				$scope.selectedNode = data;
+				$scope.nodeIsSelected = true;					
+				$scope.status = status;
+			}).
+			error(function(data, status, headers, config) {
+				$scope.status = status;
+			});
+		}
+	}
 }
 </script>
-
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
 
 </body>
 </html>
