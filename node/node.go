@@ -143,7 +143,7 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						// fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.nodeResp.Id)
+						fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]\n", IdToSearch, v.nodeResp.Id, bestFinger.Id)
 						// fmt.Println("Old best distance " + minDistance.String())
 						// fmt.Println("New best distance " + currentDistance.String())
 						// currentNode.PrintNodeInfo()
