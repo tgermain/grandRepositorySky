@@ -66,21 +66,19 @@ To avoid the depreciation of all the fingers table after some new nodes join the
 **Goroutine** ?
 
 SPRINT : 
-- Do a sample project to understand how to send/receive and parse messages in GO
 - Make tests
-- Handle when a node quit the ring (not gracefuly)
-- Ring stabilization
-- heartBeat
 
 TODO (tim) :
--semaphore for critical part (predecessor, successor maybe others ...)
--
+- Handle when a node quit the ring (not gracefuly)
 
 Done : 
-- Make a library to send/receive messages 		*done*
-- Do logs (with timestamps, colors ?) 		*done*
-- Modify the existing code to make stuffs work *done*
-- What lookup can/should/actually return *done*
+-semaphore for critical part (predecessor, successor maybe others ...)
+- Make a library to send/receive messages 		
+- Do logs (with timestamps, colors ?) 		
+- Modify the existing code to make stuffs work 
+- What lookup can/should/actually return 
+- Ring stabilization 
+- heartBeat 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
 
 ###launch parameters DONE
@@ -110,10 +108,10 @@ abilities :
 - type of operation :
 	- IAmNewHere *done*
 	- update successor/predecessor *done*
-	- updateFingerTable
+	- updateFingerTable  *done*
 	- lookup / lookupResponse *done*
-	- gimmeInfo / IAmTheNSA
-	- AreYouAlive / IAmAlive
+	- gimmeInfo / IAmTheNSA **TODO**
+	- AreYouAlive / IAmAlive *done*
 
 
 Work in progress (Al):
@@ -136,7 +134,7 @@ facebook duplicate data of one node on 2 other nodes : enough ?
 
 ###Choice of underlying database
 - Redis
-- mongodb 
+- mongodb, too heavy
 
 ### new messages type
 - DataReplication
