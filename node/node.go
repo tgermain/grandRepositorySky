@@ -292,7 +292,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	shared.Logger.Info("New node [%.5s] created with its sender Interface", shared.LocalId)
+	shared.Logger.Info("New node [%.5s] createde", shared.LocalId)
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 

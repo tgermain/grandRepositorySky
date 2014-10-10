@@ -208,5 +208,6 @@ func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAn
 }
 
 func NewSenderLink() *SenderLink {
+	shared.Logger.Info("New sender Link")
 	return new(SenderLink)
 }

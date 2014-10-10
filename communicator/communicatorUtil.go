@@ -28,7 +28,7 @@ var messageTypes = []string{
 	"update successor",
 	"update predecessor",
 	"print ring",
-	"Join ring",
+	"join ring",
 	"update finger table",
 	"are you alive ?",
 	"i am alive",
