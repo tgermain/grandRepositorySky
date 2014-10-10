@@ -160,6 +160,17 @@ func (s *SenderLink) SendLookupResponse(destination *shared.DistantNode, idAnswe
 	sendTo(destination, newMessage)
 }
 
+func (s *SenderLink) SendUpdateFingerTable(destination *shared.DistantNode) {
+	shared.Logger.Info("Send update finger table to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.UPDATEFINGERTABLE,
+		getOrigin(),
+		*destination,
+		map[string]string{},
+	}
+	sendTo(destination, newMessage)
+}
+
 func NewSenderLink() *SenderLink {
 	return new(SenderLink)
 }

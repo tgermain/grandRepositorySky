@@ -47,6 +47,10 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 	case msg.TypeOfMsg == communicator.PRINTRING:
 		{
 			go r.receivePrintRing(&msg)
+	case msg.TypeOfMsg == communicator.UPDATEFINGERTABLE:
+		{
+			r.receiveUpdateFingerTable(&msg)
+		}
 		}
 	}
 	// multiple launch a go routine
@@ -152,6 +156,10 @@ func (r *ReceiverLink) receiveLookupResponse(msg *communicator.Message) {
 	}
 }
 
+func (r *ReceiverLink) receiveUpdateFingerTable(msg *communicator.Message) {
+	shared.Logger.Info("Receiving update finger table from %s", msg.Origin.Id)
+	r.node.UpdateFingerTable()
+}
 //TODO a test !
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {

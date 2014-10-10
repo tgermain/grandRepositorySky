@@ -17,6 +17,7 @@ const (
 	UPDATEPREDECESSOR                    //3
 	PRINTRING                            //4
 	JOINRING                             //5
+	UPDATEFINGERTABLE                    //6
 )
 
 var messageTypes = []string{
@@ -26,6 +27,7 @@ var messageTypes = []string{
 	"update predecessor",
 	"print ring",
 	"Join ring",
+	"update finger table",
 }
 
 func (mt MessageType) String() string {

@@ -12,6 +12,7 @@ import (
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
+const UPDATEPERIOD = time.Minute
 
 //Gloabl var part -------------------------------------------------------
 
@@ -63,7 +64,7 @@ func (d *DHTnode) UpdatePredecessor(newNode *shared.DistantNode) {
 
 		d.Predecessor = newNode
 		d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
-		// d.initFingersTable()
+		// d.UpdateFingerTable()
 
 	} else {
 		shared.Logger.Info("Predecessor stable !!")
@@ -157,7 +158,7 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 	return bestFinger
 }
 
-func (node *DHTnode) initFingersTable() {
+func (node *DHTnode) UpdateFingerTable() {
 	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", shared.LocalId)
 	for i := 0; i < SPACESIZE; i++ {
 		// fmt.Printf("Calculatin fingers [%d]\n", i)
@@ -240,6 +241,15 @@ func (node *DHTnode) PrintNodeInfo() {
 // 	}
 // }
 
+func (d *DHTnode) updateFingersRoutine() {
+	shared.Logger.Info("Starting update fingers table routing")
+	for {
+		time.Sleep(UPDATEPERIOD)
+		shared.Logger.Info("Auto updating finger table of node %s", shared.LocalId)
+		d.UpdateFingerTable()
+	}
+}
+
 //other functions parts --------------------------------------------------------
 //Create the node with it's communication interface
 //Does not start to liten for message
@@ -258,5 +268,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
 	shared.Logger.Info("New node [%.5s] created with its sender Interface", shared.LocalId)
+	go daNode.updateFingersRoutine()
+
 	return &daNode, daComInterface
 }
