@@ -13,6 +13,8 @@ import (
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
 const UPDATEPERIOD = time.Minute
+const HEARTBEATPERIOD = time.Second * 10
+const HEARBEATTIMEOUT = time.Second * 2
 
 //Gloabl var part -------------------------------------------------------
 
@@ -250,6 +252,29 @@ func (d *DHTnode) updateFingersRoutine() {
 	}
 }
 
+func (d *DHTnode) heartBeatRoutine() {
+	shared.Logger.Info("Starting heartBeat routing")
+	for {
+		time.Sleep(HEARTBEATPERIOD)
+		d.sendHeartBeat(d.Successor)
+	}
+}
+
+func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) {
+
+	responseChan := d.commLib.SendHeartBeat(d.Successor)
+	select {
+	case <-responseChan:
+		{
+			//Everything this node is alive. Do nothing more
+		}
+	//case of timeout ?
+	case <-time.After(HEARBEATTIMEOUT):
+		shared.Logger.Error("heartBeat to %s timeout", destination.Id)
+		//DANGER
+	}
+}
+
 //other functions parts --------------------------------------------------------
 //Create the node with it's communication interface
 //Does not start to liten for message
@@ -268,6 +293,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
 	shared.Logger.Info("New node [%.5s] created with its sender Interface", shared.LocalId)
+	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 
 	return &daNode, daComInterface

@@ -171,6 +171,42 @@ func (s *SenderLink) SendUpdateFingerTable(destination *shared.DistantNode) {
 	sendTo(destination, newMessage)
 }
 
+func (s *SenderLink) SendHeartBeat(destination *shared.DistantNode) chan shared.DistantNode {
+	shared.Logger.Info("Send heartBeat to %s ", destination.Id)
+	//generate id for pending heartBeat
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.AREYOUALIVE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+		},
+	}
+
+	//create an entry in the pendingLookup table
+	responseChan := make(chan shared.DistantNode)
+	communicator.PendingHearBeat[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAnswer string) {
+	shared.Logger.Info("Send heartBeat response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.IAMALIVE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
 func NewSenderLink() *SenderLink {
 	return new(SenderLink)
 }

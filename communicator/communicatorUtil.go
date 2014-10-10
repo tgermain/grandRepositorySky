@@ -18,6 +18,8 @@ const (
 	PRINTRING                            //4
 	JOINRING                             //5
 	UPDATEFINGERTABLE                    //6
+	AREYOUALIVE                          //7
+	IAMALIVE                             //8
 )
 
 var messageTypes = []string{
@@ -28,6 +30,8 @@ var messageTypes = []string{
 	"print ring",
 	"Join ring",
 	"update finger table",
+	"are you alive ?",
+	"i am alive",
 }
 
 func (mt MessageType) String() string {
@@ -45,6 +49,7 @@ type Message struct {
 
 //Global variable -------------------------------------------------------
 var PendingLookups = make(map[string]chan shared.DistantNode)
+var PendingHearBeat = make(map[string]chan shared.DistantNode)
 
 //Exported methods ------------------------------------------------------
 func MarshallMessage(msg *Message) []byte {

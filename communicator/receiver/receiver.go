@@ -51,6 +51,13 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveUpdateFingerTable(&msg)
 		}
+	case msg.TypeOfMsg == communicator.AREYOUALIVE:
+		{
+			r.receiveHeartBeat(&msg)
+		}
+	case msg.TypeOfMsg == communicator.IAMALIVE:
+		{
+			r.receiveHeartBeatResponse(&msg)
 		}
 	}
 	// multiple launch a go routine
@@ -160,6 +167,32 @@ func (r *ReceiverLink) receiveUpdateFingerTable(msg *communicator.Message) {
 	shared.Logger.Info("Receiving update finger table from %s", msg.Origin.Id)
 	r.node.UpdateFingerTable()
 }
+
+func (r *ReceiverLink) receiveHeartBeat(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer") {
+		shared.Logger.Info("Receiving a heartBeat from %s", msg.Origin.Id)
+		idAnswer, _ := msg.Parameters["idAnswer"]
+
+		r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
+	} else {
+		//error missing parameter, do nothing ?
+	}
+}
+
+func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		shared.Logger.Info("Receiving a heartBeat response from %s for %s", msg.Origin.Id, idAnswer)
+
+		chanResp, ok2 := communicator.PendingHearBeat[idAnswer]
+		if ok2 {
+			chanResp <- msg.Origin
+		}
+	} else {
+		//error missing parameter, do nothing ?
+	}
+}
+
 //TODO a test !
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {
