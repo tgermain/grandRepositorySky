@@ -15,6 +15,7 @@ const SPACESIZE = 160
 const UPDATEPERIOD = time.Minute
 const HEARTBEATPERIOD = time.Second * 10
 const HEARBEATTIMEOUT = time.Second * 2
+const LOOKUPTIMEOUT = time.Second * 2
 
 //Gloabl var part -------------------------------------------------------
 
@@ -113,7 +114,7 @@ func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 		case res := <-responseChan:
 			return &res
 		//case of timeout ?
-		case <-time.After(time.Second * 2):
+		case <-time.After(LOOKUPTIMEOUT):
 			shared.Logger.Error("Lookup for %s timeout", IdToSearch)
 			return nil
 		}
