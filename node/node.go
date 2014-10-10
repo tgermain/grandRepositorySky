@@ -43,7 +43,11 @@ func (currentNode *DHTnode) JoinRing(newNode *shared.DistantNode) {
 
 func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 	whereToInsert := currentNode.Lookup(newNode.Id)
-	currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
+	if whereToInsert != nil {
+		currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
+	} else {
+		shared.Logger.Error("Add to ring of %s fail due to a lookup timeout", newNode.Id)
+	}
 }
 
 //Tell your actual successor that you are no longer its predecessor
@@ -175,7 +179,12 @@ func (node *DHTnode) UpdateFingerTable() {
 		//TODO make a condition to voId to always calculate the fingerId
 		fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
 		responsibleNode := node.Lookup(fingerId)
-		node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
+		if responsibleNode != nil {
+
+			node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
+		} else {
+			shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
+		}
 
 	}
 	// fmt.Println("****************************************************************Fingers table init DONE : ")
