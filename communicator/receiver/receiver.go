@@ -60,6 +60,11 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveHeartBeatResponse(&msg)
 		}
+	default:
+		{
+			//rejected mesage
+			shared.Logger.Error("Message rejected")
+		}
 	}
 	// multiple launch a go routine
 }
