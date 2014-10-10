@@ -26,27 +26,28 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 	switch {
 	case msg.TypeOfMsg == communicator.LOOKUP:
 		{
-			go r.receiveLookup(&msg)
+			r.receiveLookup(&msg)
 		}
 	case msg.TypeOfMsg == communicator.LOOKUPRESPONSE:
 		{
-			go r.receiveLookupResponse(&msg)
+			r.receiveLookupResponse(&msg)
 		}
 	case msg.TypeOfMsg == communicator.JOINRING:
 		{
-			go r.receiveJoinRing(&msg)
+			r.receiveJoinRing(&msg)
 		}
 	case msg.TypeOfMsg == communicator.UPDATESUCCESSOR:
 		{
-			go r.receiveUpdateSuccessor(&msg)
+			r.receiveUpdateSuccessor(&msg)
 		}
 	case msg.TypeOfMsg == communicator.UPDATEPREDECESSOR:
 		{
-			go r.receiveUpdatePredecessor(&msg)
+			r.receiveUpdatePredecessor(&msg)
 		}
 	case msg.TypeOfMsg == communicator.PRINTRING:
 		{
-			go r.receivePrintRing(&msg)
+			r.receivePrintRing(&msg)
+		}
 	case msg.TypeOfMsg == communicator.UPDATEFINGERTABLE:
 		{
 			r.receiveUpdateFingerTable(&msg)
@@ -234,7 +235,7 @@ func (r *ReceiverLink) StartAndListen() {
 				panic(err)
 			}
 			payload := buffer[0:bytesReads]
-			r.handleRequest(payload)
+			go r.handleRequest(payload)
 			time.Sleep(time.Millisecond * 500)
 			runtime.Gosched()
 		}
