@@ -8,9 +8,20 @@ import (
 	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared" // for makeDHTnode
 	"net/http"
+	"os"
 	//"time" // to set a timer
 )
 
+type FingerJSON struct {
+	IdKey    string          `json:"idkey"`
+	NodeResp DistantNodeJSON `json:"nodeResp"`
+}
+
+type DistantNodeJSON struct {
+	Id   string `json:"id"`
+	Ip   string `json:"ip"`
+	Port string `json:"port"`
+}
 type NodeJson struct {
 	Id         string `json:"id"`
 	Ip         string `json:"ip"`
@@ -89,13 +100,38 @@ func NodeHandler(w http.ResponseWriter, req *http.Request) {
 //TODO launch areYouAlive request
 
 func main() {
+	args := os.Args
+	var port string
+	var ip string
+	if len(args) > 1 {
+		if len(args) > 2 {
+			fmt.Printf("%s\n", args[1])
+			port = args[2]
+			fmt.Printf("%s\n", args[2])
+			ip = args[1]
+		} else {
+			fmt.Printf("%s\n", args[1])
+			port = args[1]
+			// default ip : all
+			ip = ""
+		}
+
+	} else {
+		// default port
+		port = "3000"
+	}
+
+	receive := ip + ":" + port
+	fmt.Printf("%s\n", receive)
+
 	r := mux.NewRouter()
 	r.HandleFunc("/", HelloHandler)
 	r.HandleFunc("/nodes", NodesHandler)
 	r.HandleFunc("/nodes/{idNoeud}", NodeHandler)
 	http.Handle("/", r)
 
-	http.ListenAndServe(":3000", r) // adding go before with timer gives a timeout
+	http.ListenAndServe(receive, r) // adding go before with timer gives a timeout
 
 	//time.Sleep(300 * time.Second)
+
 }
