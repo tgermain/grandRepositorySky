@@ -131,3 +131,11 @@ facebook duplicate data of one node on 2 other nodes : enough !
 
 ### new messages type
 - DataReplication
+- 
+TODO : 
+- methods in node.go to add, retreive, modify and delete a (key-value) data
+- new messages : 
+	-POSTDATA
+	-GETDATA
+	-MODIFYDATA
+	-DELETEDATA
