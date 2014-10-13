@@ -7,7 +7,7 @@ import (
 	"github.com/tgermain/grandRepositorySky/shared"
 	"net"
 	"runtime"
-	"time"
+	// "time"
 )
 
 //Objects parts ---------------------------------------------------------
@@ -286,7 +286,7 @@ func (r *ReceiverLink) StartAndListen() {
 			}
 			payload := buffer[0:bytesReads]
 			go r.handleRequest(payload)
-			time.Sleep(time.Millisecond * 10)
+			// time.Sleep(time.Millisecond * 10)
 			runtime.Gosched()
 		}
 	}()
