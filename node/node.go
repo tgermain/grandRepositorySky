@@ -13,13 +13,13 @@ import (
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
-const UPDATEPERIOD = time.Minute
-const HEARTBEATPERIOD = time.Second * 10
+const UPDATEFINGERSPERIOD = time.Minute
 const UPDATESUCCSUCCERIOD = time.Second * 10
+const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
-const LOOKUPTIMEOUT = time.Second * 2
+const LOOKUPTIMEOUT = time.Second * 3
 
-//Mutex part -------------------------------------------------------
+//Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
 var mutexPred = &sync.Mutex{}
 
@@ -303,10 +303,11 @@ func (d *DHTnode) GetFingerTable() []*fingerEntry {
 	temp := d.fingers
 	return temp
 }
+
 func (d *DHTnode) updateFingersRoutine() {
 	shared.Logger.Notice("Starting update fingers table routing")
 	for {
-		time.Sleep(UPDATEPERIOD)
+		time.Sleep(UPDATEFINGERSPERIOD)
 		shared.Logger.Notice("Auto updating finger table of node %s", shared.LocalId)
 		d.UpdateFingerTable()
 	}
