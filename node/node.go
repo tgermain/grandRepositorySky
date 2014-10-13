@@ -144,7 +144,14 @@ func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 }
 
 func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNode {
-	bestFinger := currentNode.GetSuccesor()
+	//if successor didn't respond, go to the next one
+	var bestFinger *shared.DistantNode
+	if currentNode.sendHeartBeat(currentNode.GetSuccesor()) {
+
+		bestFinger = currentNode.GetSuccesor()
+	} else {
+		bestFinger = currentNode.GetSuccSucc()
+	}
 
 	minDistance := dht.Distance([]byte(currentNode.GetSuccesor().Id), []byte(IdToSearch), SPACESIZE)
 	// fmt.Println("distance successor " + minDistance.String())
@@ -165,14 +172,18 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
-						// fmt.Println("Old best distance " + minDistance.String())
-						// fmt.Println("New best distance " + currentDistance.String())
-						// currentNode.PrintNodeInfo()
-						// bestIndex = i
-						// v.tmp.PrintNodeInfo()
-						minDistance = currentDistance
-						bestFinger = v.nodeResp
+						//check if this finger is still alive
+						if currentNode.sendHeartBeat(v.nodeResp) {
+
+							shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
+							// fmt.Println("Old best distance " + minDistance.String())
+							// fmt.Println("New best distance " + currentDistance.String())
+							// currentNode.PrintNodeInfo()
+							// bestIndex = i
+							// v.tmp.PrintNodeInfo()
+							minDistance = currentDistance
+							bestFinger = v.nodeResp
+						}
 					}
 				}
 			}
