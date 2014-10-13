@@ -3,7 +3,7 @@ GrandRepositorySky
 
 Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DHT) based on _Chord_ protocol (see [This paper ](http://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf))
 
-:construction: Current objective :construction: : **3** :god:
+:construction: Current objective :construction: : **3** :godmode:
 ---------------------
 
 ### 6 objectives : 
@@ -135,7 +135,7 @@ facebook duplicate data of one node on 2 other nodes : enough !
 TODO : 
 - methods in node.go to add, retreive, modify and delete a (key-value) data
 - new messages : 
-	-POSTDATA
-	-GETDATA
-	-MODIFYDATA
-	-DELETEDATA
+	- POSTDATA
+	- GETDATA
+	- MODIFYDATA
+	- DELETEDATA
