@@ -39,7 +39,8 @@ func SetupLogger() *logging.Logger {
 
 	logging.SetBackend(logBackend, logFileBackend)
 	logging.SetFormatter(logging.MustStringFormatter(format))
-	logging.SetLevel(logging.DEBUG, "main")
+
+	logging.SetLevel(logging.NOTICE, "main")
 
 	Logger = logging.MustGetLogger("main")
 	return Logger

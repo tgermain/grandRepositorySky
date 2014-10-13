@@ -62,6 +62,7 @@ func (d *DHTnode) LeaveRing() {
 func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 	mutexSucc.Lock()
 	defer mutexSucc.Unlock()
+	shared.Logger.Notice("update successor with %s", newNode.Id)
 	//possible TODO : condition on the origin of the message for this sending ?
 	if d.successor.Id != newNode.Id {
 		// if d.successor.Id != newNode.Id {
@@ -80,6 +81,7 @@ func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 func (d *DHTnode) UpdatePredecessor(newNode *shared.DistantNode) {
 	mutexPred.Lock()
 	defer mutexPred.Unlock()
+	shared.Logger.Notice("update predecessor with %s", newNode.Id)
 	if d.predecessor.Id != newNode.Id {
 
 		d.predecessor = newNode
@@ -118,7 +120,7 @@ func (currentNode *DHTnode) IsResponsible(IdToSearch string) bool {
 }
 
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
-	shared.Logger.Info("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
+	shared.Logger.Info("Node [%s] made a lookup to [%s]", shared.LocalId, IdToSearch)
 	// currentNode.PrintNodeInfo()
 	if currentNode.IsResponsible(IdToSearch) {
 		//replace with send
@@ -161,7 +163,7 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]\n", IdToSearch, v.nodeResp.Id, bestFinger.Id)
+						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
 						// fmt.Println("Old best distance " + minDistance.String())
 						// fmt.Println("New best distance " + currentDistance.String())
 						// currentNode.PrintNodeInfo()
@@ -179,6 +181,7 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 }
 
 func (node *DHTnode) UpdateFingerTable() {
+	shared.Logger.Notice("Update finger table")
 	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", shared.LocalId)
 	for i := 0; i < SPACESIZE; i++ {
 		// fmt.Printf("Calculatin fingers [%d]\n", i)
@@ -187,6 +190,7 @@ func (node *DHTnode) UpdateFingerTable() {
 		responsibleNode := node.Lookup(fingerId)
 		if responsibleNode != nil {
 
+					shared.Logger.Info("Update of finger %d with value %s", i, responsibleNode.Id)
 			node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
 		} else {
 			shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
@@ -285,10 +289,10 @@ func (d *DHTnode) GetFingerTable() []*fingerEntry {
 	return temp
 }
 func (d *DHTnode) updateFingersRoutine() {
-	shared.Logger.Info("Starting update fingers table routing")
+	shared.Logger.Notice("Starting update fingers table routing")
 	for {
 		time.Sleep(UPDATEPERIOD)
-		shared.Logger.Info("Auto updating finger table of node %s", shared.LocalId)
+		shared.Logger.Notice("Auto updating finger table of node %s", shared.LocalId)
 		d.UpdateFingerTable()
 	}
 }
@@ -308,6 +312,7 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) {
 	case <-responseChan:
 		{
 			//Everything this node is alive. Do nothing more
+			shared.Logger.Notice("%s still alive", destination.Id)
 		}
 	//case of timeout ?
 	case <-time.After(HEARBEATTIMEOUT):
