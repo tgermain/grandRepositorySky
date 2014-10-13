@@ -192,22 +192,35 @@ func (node *DHTnode) UpdateFingerTable() {
 	for i := 0; i < SPACESIZE; i++ {
 		i := i
 		go func() {
+			if node.fingers[i] != nil {
 
-			// fmt.Printf("Calculatin fingers [%d]\n", i)
-			//TODO make a condition to voId to always calculate the fingerId
-			fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
-			responsibleNode := node.Lookup(fingerId)
-			if responsibleNode != nil {
-
-				if node.fingers[i] != nil {
+				// fmt.Printf("Calculatin fingers [%d]\n", i)
+				//avoid to always calculate the fingerId again
+				responsibleNode := node.Lookup(node.fingers[i].IdKey)
+				if responsibleNode != nil {
 
 					if node.fingers[i].nodeResp.Id != responsibleNode.Id {
 						shared.Logger.Info("Update of finger %d with value %s", i, responsibleNode.Id)
+						node.fingers[i].nodeResp = responsibleNode
 					}
+
+				} else {
+					shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
 				}
-				node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
 			} else {
-				shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
+				fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
+				responsibleNode := node.Lookup(fingerId)
+				if responsibleNode != nil {
+					node.fingers[i] = &fingerEntry{
+						fingerId,
+						&shared.DistantNode{
+							responsibleNode.Id,
+							responsibleNode.Ip,
+							responsibleNode.Port},
+					}
+				} else {
+					shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
+				}
 			}
 		}()
 
