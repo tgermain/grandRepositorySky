@@ -136,7 +136,7 @@ func (s *SenderLink) SendLookup(destination *shared.DistantNode, idSearched stri
 }
 
 func (s *SenderLink) RelayLookup(destination *shared.DistantNode, msg *communicator.Message) {
-	shared.Logger.Info("Relay lookup from %s to %s", msg.Origin.Id, destination.Id)
+	shared.Logger.Info("Relay lookup for %s from %s to %s", msg.Parameters["idSearched"], msg.Origin.Id, destination.Id)
 
 	sendTo(destination, msg)
 }
