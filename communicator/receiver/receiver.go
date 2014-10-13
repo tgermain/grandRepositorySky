@@ -60,6 +60,14 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveHeartBeatResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.GETSUCCESORE:
+		{
+			r.receiveGetSuccesor(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETSUCCESORERESPONSE:
+		{
+			r.receiveGetSuccesorResponse(&msg)
+		}
 	default:
 		{
 			//rejected mesage
@@ -193,6 +201,43 @@ func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
 		chanResp, ok2 := communicator.PendingHearBeat[idAnswer]
 		if ok2 {
 			chanResp <- msg.Origin
+		}
+	} else {
+		//error missing parameter, do nothing ?
+	}
+}
+
+func (r *ReceiverLink) receiveGetSuccesor(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer") {
+		shared.Logger.Warning("Receiving a get successor from %s", msg.Origin.Id)
+		idAnswer, _ := msg.Parameters["idAnswer"]
+
+		go r.sender.SendGetSuccResponse(&msg.Origin, idAnswer, r.node.GetSuccesor())
+	} else {
+		//error missing parameter, do nothing ?
+	}
+}
+
+func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "succSuccID",
+		"succSuccIp",
+		"succSuccPort") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		succSuccID, _ := msg.Parameters["succSuccID"]
+		succSuccIp, _ := msg.Parameters["succSuccIp"]
+		succSuccPort, _ := msg.Parameters["succSuccPort"]
+
+		shared.Logger.Warning("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
+
+		succSucc := shared.DistantNode{
+			succSuccID,
+			succSuccIp,
+			succSuccPort,
+		}
+
+		chanResp, ok2 := communicator.PendingGetSucc[idAnswer]
+		if ok2 {
+			chanResp <- succSucc
 		}
 	} else {
 		//error missing parameter, do nothing ?

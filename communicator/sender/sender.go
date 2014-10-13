@@ -207,6 +207,45 @@ func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAn
 	sendTo(destination, newMessage)
 }
 
+func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.DistantNode {
+	shared.Logger.Warning("Send get succ to %s ", destination.Id)
+	//generate id for pending heartBeat
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.GETSUCCESORE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+		},
+	}
+
+	//create an entry in the pendingLookup table
+	responseChan := make(chan shared.DistantNode)
+	communicator.PendingGetSucc[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnswer string, daSucc *shared.DistantNode) {
+	shared.Logger.Warning("Send get successor response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.GETSUCCESORERESPONSE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer":     idAnswer,
+			"succSuccID":   string(daSucc.Id),
+			"succSuccIp":   string(daSucc.Ip),
+			"succSuccPort": string(daSucc.Port),
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
 func NewSenderLink() *SenderLink {
 	shared.Logger.Info("New sender Link")
 	return new(SenderLink)

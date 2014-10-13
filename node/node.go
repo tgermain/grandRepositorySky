@@ -15,6 +15,7 @@ import (
 const SPACESIZE = 160
 const UPDATEPERIOD = time.Minute
 const HEARTBEATPERIOD = time.Second * 10
+const UPDATESUCCSUCCERIOD = time.Second * 10
 const HEARBEATTIMEOUT = time.Second * 2
 const LOOKUPTIMEOUT = time.Second * 2
 
@@ -292,6 +293,11 @@ func (d *DHTnode) GetPredecessor() *shared.DistantNode {
 	return &temp
 }
 
+func (d *DHTnode) GetSuccSucc() *shared.DistantNode {
+	temp := *d.succSucc
+	return &temp
+}
+
 func (d *DHTnode) GetFingerTable() []*fingerEntry {
 	temp := d.fingers
 	return temp
@@ -309,11 +315,38 @@ func (d *DHTnode) heartBeatRoutine() {
 	shared.Logger.Info("Starting heartBeat routing")
 	for {
 		time.Sleep(HEARTBEATPERIOD)
-		d.sendHeartBeat(d.GetSuccesor())
+		if !d.sendHeartBeat(d.GetSuccesor()) {
+			d.commLib.SendUpdatePredecessor(d.GetSuccSucc(), d.ToDistantNode())
+			mutexSucc.Lock()
+			d.successor = d.succSucc
+			mutexSucc.Unlock()
+		}
+		d.PrintNodeInfo()
 	}
 }
 
-func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) {
+func (d *DHTnode) updateSuccSuccRoutine() {
+	shared.Logger.Notice("Starting update succ succ routing")
+	for {
+		time.Sleep(UPDATESUCCSUCCERIOD)
+
+		responseChan := d.commLib.SendGetSucc(d.successor)
+		select {
+		case res := <-responseChan:
+			{
+				if res != *d.GetSuccSucc() {
+					shared.Logger.Info("updating succ succ with %s", res.Id)
+					d.succSucc = &res
+				}
+			}
+		//case of timeout ?
+		case <-time.After(HEARBEATTIMEOUT):
+			shared.Logger.Error("Update succ succ timeout")
+		}
+	}
+}
+
+func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 
 	responseChan := d.commLib.SendHeartBeat(d.GetSuccesor())
 	select {
@@ -349,6 +382,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	shared.Logger.Info("New node [%.5s] createde", shared.LocalId)
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
+	go daNode.updateSuccSuccRoutine()
 
 	return &daNode, daComInterface
 }
