@@ -61,35 +61,29 @@ When a node enter the ring, we initialize its fingers table (to be sure that its
 Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for svg² output
 
 ## 2. Network communication
-### Ring stabilization
+### Ring stabilization TODO
 To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
 **Goroutine** ?
 
 SPRINT : 
-- Do a sample project to understand how to send/receive and parse messages in GO
-- Make a library to send/receive messages 		Tim
-- Do logs (with timestamps, colors ?) 		Tim
 - Make tests
-- Modify the existing code to make stuffs work
+
+TODO (tim) :
 - Handle when a node quit the ring (not gracefuly)
-- What lookup can/should/actually return
 
-Work In progress (Tim):
-- logs : almost done, easy part
-- send/receive message library : 
-	- marshal/unmarshal -> easy with stdlib
-	- use of channel : the idea is to add in the message struct a channel for the anwer
-	- critical ressource, to be protected:
-		- successor
-		- predecessor
-		- data
-		
-
-TODO : 
+Done : 
+-semaphore for critical part (predecessor, successor maybe others ...)
+- Make a library to send/receive messages 		
+- Do logs (with timestamps, colors ?) 		
+- Modify the existing code to make stuffs work 
+- What lookup can/should/actually return 
+- Ring stabilization 
+- heartBeat 
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
 
-###launch parameters
-- IP, PORT
+###launch parameters DONE
+*done* except for data
+- IP, PORT 
 - (IP, PORT of an existing node)
 - (ID)
 - (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
@@ -112,16 +106,16 @@ abilities :
 	- IP
 	- Port
 - type of operation :
-	- IAmNewHere
-	- update successor/predecessor
-	- updateFingerTable
-	- lookup / finded
-	- gimmeInfo / IAmTheNSA
-	- AreYouAlive / IAmAlive
+	- IAmNewHere *done*
+	- update successor/predecessor *done*
+	- updateFingerTable  *done*
+	- lookup / lookupResponse *done*
+	- gimmeInfo / IAmTheNSA **TODO**
+	- AreYouAlive / IAmAlive *done*
 
 
 Work in progress (Al):
-- Get requests and show brutal infos
+- Get requests and show brutal infos :neckbeard: :rage4: :boar: yeah BRUTAL ! :)
 - Web client
 - Web controls
 
@@ -135,9 +129,12 @@ TODO :
 ## 3. Data & Replication
 facebook duplicate data of one node on 2 other nodes : enough ?
 
+###launch parameters 
+- (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
+
 ###Choice of underlying database
 - Redis
-- mongodb 
+- mongodb, too heavy
 
 ### new messages type
 - DataReplication

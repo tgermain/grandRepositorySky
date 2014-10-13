@@ -5,22 +5,30 @@ import (
 	// ggv "code.google.com/p/gographviz"
 	"bytes" // for string manipulation
 	"fmt"
-	comt "github.com/tgermain/grandRepositorySky/communicator"
+	sender "github.com/tgermain/grandRepositorySky/communicator/sender"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
+	"sync"
+	"time"
 )
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
+const UPDATEPERIOD = time.Minute
+const HEARTBEATPERIOD = time.Second * 10
+const HEARBEATTIMEOUT = time.Second * 2
+const LOOKUPTIMEOUT = time.Second * 2
 
-//Gloabl var part -------------------------------------------------------
+//Mutex part -------------------------------------------------------
+var mutexSucc = &sync.Mutex{}
+var mutexPred = &sync.Mutex{}
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
 	fingers     []*fingerEntry
-	Successor   *shared.DistantNode
-	Predecessor *shared.DistantNode
-	commLib     *comt.ComLink
+	successor   *shared.DistantNode
+	predecessor *shared.DistantNode
+	commLib     *sender.SenderLink
 }
 
 type fingerEntry struct {
@@ -30,30 +38,61 @@ type fingerEntry struct {
 
 //Method parts ----------------------------------------------------------
 
-func (d *DHTnode) SendPrintRing(destination *shared.DistantNode, currentString *string) {
-
+func (currentNode *DHTnode) JoinRing(newNode *shared.DistantNode) {
+	currentNode.commLib.SendJoinRing(newNode)
 }
 
 func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
-
 	whereToInsert := currentNode.Lookup(newNode.Id)
-	currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
+	if whereToInsert != nil {
+		currentNode.commLib.SendUpdateSuccessor(whereToInsert, newNode)
+	} else {
+		shared.Logger.Error("Add to ring of %s fail due to a lookup timeout", newNode.Id)
+	}
 }
 
-//Tell your actual Successor that you are no longer its predecessor
+func (d *DHTnode) LeaveRing() {
+	shared.Logger.Notice("Node %s leaving gracefully the ring.", shared.LocalId)
+	d.commLib.SendUpdateSuccessor(d.predecessor, d.successor)
+	d.commLib.SendUpdatePredecessor(d.successor, d.predecessor)
+}
+
+//Tell your actual successor that you are no longer its predecessor
 //set your succesor to the new value
-//tell to your new Successor that you are its predecessor
-func (d *DHTnode) updateSuccessor(newNode *shared.DistantNode) {
+//tell to your new successor that you are its predecessor
+func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
+	mutexSucc.Lock()
+	defer mutexSucc.Unlock()
+	shared.Logger.Notice("update successor with %s", newNode.Id)
 	//possible TODO : condition on the origin of the message for this sending ?
-	d.commLib.SendUpdatePredecessor(d.Successor, newNode)
-	d.Successor = newNode
-	d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
+	if d.successor.Id != newNode.Id {
+		// if d.successor.Id != newNode.Id {
+		d.commLib.SendUpdatePredecessor(d.successor, newNode)
+		// }
+
+		d.successor = newNode
+		d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
+
+		go d.UpdateFingerTable()
+	} else {
+		shared.Logger.Info("Succesor stable !!")
+	}
 }
 
-func (d *DHTnode) updatePredecessor(newNode *shared.DistantNode) {
-	d.Predecessor = newNode
-	d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
-	d.initFingersTable()
+func (d *DHTnode) UpdatePredecessor(newNode *shared.DistantNode) {
+	mutexPred.Lock()
+	defer mutexPred.Unlock()
+	shared.Logger.Notice("update predecessor with %s", newNode.Id)
+	if d.predecessor.Id != newNode.Id {
+
+		d.predecessor = newNode
+		d.commLib.SendUpdateSuccessor(newNode, d.ToDistantNode())
+		// d.UpdateFingerTable()
+
+	} else {
+		shared.Logger.Info("predecessor stable !!")
+		d.PrintNodeInfo()
+	}
 }
 
 func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
@@ -64,13 +103,13 @@ func (currentNode *DHTnode) ToDistantNode() *shared.DistantNode {
 	}
 }
 
-func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
+func (currentNode *DHTnode) IsResponsible(IdToSearch string) bool {
 	switch {
-	case shared.LocalId == currentNode.Successor.Id:
+	case shared.LocalId == currentNode.GetSuccesor().Id:
 		{
 			return true
 		}
-	case dht.Between(shared.LocalId, currentNode.Successor.Id, IdToSearch):
+	case dht.Between(shared.LocalId, currentNode.GetSuccesor().Id, IdToSearch):
 		{
 			return true
 		}
@@ -82,24 +121,32 @@ func (currentNode *DHTnode) isResponsible(IdToSearch string) bool {
 }
 
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
-	// fmt.Printf("Node [%s] made a lookup to [%s]\n", shared.LocalId, IdToSearch)
+	shared.Logger.Info("Node [%s] made a lookup to [%s]", shared.LocalId, IdToSearch)
 	// currentNode.PrintNodeInfo()
-	if currentNode.isResponsible(IdToSearch) {
+	if currentNode.IsResponsible(IdToSearch) {
 		//replace with send
 		return currentNode.ToDistantNode()
 	} else {
 		// fmt.Println("go to the next one")
 		//TODO use the fingers table here
-		return currentNode.commLib.SendLookup(currentNode.findClosestNode(IdToSearch), IdToSearch)
+		responseChan := currentNode.commLib.SendLookup(currentNode.FindClosestNode(IdToSearch), IdToSearch)
+		select {
+		case res := <-responseChan:
+			return &res
+		//case of timeout ?
+		case <-time.After(LOOKUPTIMEOUT):
+			shared.Logger.Error("Lookup for %s timeout", IdToSearch)
+			return nil
+		}
 	}
 
 }
 
-func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNode {
-	bestFinger := currentNode.Successor
+func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNode {
+	bestFinger := currentNode.GetSuccesor()
 
-	minDistance := dht.Distance([]byte(currentNode.Successor.Id), []byte(IdToSearch), SPACESIZE)
-	// fmt.Println("distance Successor " + minDistance.String())
+	minDistance := dht.Distance([]byte(currentNode.GetSuccesor().Id), []byte(IdToSearch), SPACESIZE)
+	// fmt.Println("distance successor " + minDistance.String())
 	// var bestIndex int
 	for _, v := range currentNode.fingers {
 		if v != nil {
@@ -117,7 +164,7 @@ func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						// fmt.Printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Better finger ellected ! number [%d] ->[%s]\n", i, v.nodeResp.Id)
+						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
 						// fmt.Println("Old best distance " + minDistance.String())
 						// fmt.Println("New best distance " + currentDistance.String())
 						// currentNode.PrintNodeInfo()
@@ -134,46 +181,53 @@ func (currentNode *DHTnode) findClosestNode(IdToSearch string) *shared.DistantNo
 	return bestFinger
 }
 
-func (node *DHTnode) initFingersTable() {
+func (node *DHTnode) UpdateFingerTable() {
+	shared.Logger.Notice("Update finger table")
 	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", shared.LocalId)
 	for i := 0; i < SPACESIZE; i++ {
+		// go func() {
+
 		// fmt.Printf("Calculatin fingers [%d]\n", i)
 		//TODO make a condition to voId to always calculate the fingerId
 		fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
 		responsibleNode := node.Lookup(fingerId)
-		node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
+		if responsibleNode != nil {
+
+			if node.fingers[i] != nil {
+
+				if node.fingers[i].nodeResp.Id != responsibleNode.Id {
+					shared.Logger.Info("Update of finger %d with value %s", i, responsibleNode.Id)
+				}
+			}
+			node.fingers[i] = &fingerEntry{fingerId, &shared.DistantNode{responsibleNode.Id, responsibleNode.Ip, responsibleNode.Port}}
+		} else {
+			shared.Logger.Error("Update of finger %d fail due to a lookup timeout", i)
+		}
+		// }()
 
 	}
 	// fmt.Println("****************************************************************Fingers table init DONE : ")
 }
 
-func (node *DHTnode) printRing(currentString *string) {
-	if currentString == nil {
-		currentString = new(string)
-	}
-	node.PrintNodeName(currentString)
-	node.commLib.SendPrintRing(node.Successor, currentString)
-}
-
 func (node *DHTnode) PrintRing() {
-	node.printRing(nil)
+	daString := ""
+	node.PrintNodeName(&daString)
+	node.commLib.SendPrintRing(node.GetSuccesor(), &daString)
 }
 
 func (node *DHTnode) PrintNodeName(currentString *string) {
-	fmt.Printf("%s\n", shared.LocalId)
+	*currentString += fmt.Sprintf("%s\n", shared.LocalId)
 }
 
 func (node *DHTnode) PrintNodeInfo() {
-	fmt.Println("---------------------------------")
-	fmt.Println("Node info")
-	fmt.Println("---------------------------------")
-	fmt.Printf("	Id			%s\n", shared.LocalId)
-	fmt.Printf("	Ip			%s\n", shared.LocalIp)
-	fmt.Printf("	Port		%s\n", shared.LocalPort)
-
-	fmt.Printf(" 	Succesor	%s\n", node.Successor.Id)
-	fmt.Printf(" 	Predecesor	%s\n", node.Predecessor.Id)
-	fmt.Println()
+	shared.Logger.Info("---------------------------------")
+	shared.Logger.Info("Node info")
+	shared.Logger.Info("---------------------------------")
+	shared.Logger.Info("	Id			%s", shared.LocalId)
+	shared.Logger.Info("	Ip			%s", shared.LocalIp)
+	shared.Logger.Info("	Port		%s", shared.LocalPort)
+	shared.Logger.Info(" 	Succesor	%s", node.successor.Id)
+	shared.Logger.Info(" 	Predecesor	%s", node.predecessor.Id)
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
 	// fmt.Println("  Index		Idkey			IdNode ")
@@ -182,7 +236,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
 	// 	}
 	// }
-	fmt.Println("---------------------------------")
+	shared.Logger.Info("---------------------------------")
 }
 
 func (node *DHTnode) ToString() string {
@@ -232,9 +286,9 @@ func (node *DHTnode) ToString() string {
 // 			firstNodeId = &shared.LocalId
 // 		}
 // 		g.AddNode(g.Name, shared.LocalId, nil)
-// 		g.AddNode(g.Name, node.Successor.Id, nil)
+// 		g.AddNode(g.Name, node.successor.Id, nil)
 // 		g.AddNode(g.Name, node.predecessor.Id, nil)
-// 		// g.AddEdge(shared.LocalId, node.Successor.Id, true, map[string]string{
+// 		// g.AddEdge(shared.LocalId, node.successor.Id, true, map[string]string{
 // 		// 	"label": "succ",
 // 		// })
 // 		// g.AddEdge(shared.LocalId, node.predecessor.Id, true, map[string]string{
@@ -253,29 +307,92 @@ func (node *DHTnode) ToString() string {
 // 		}
 
 // 		//recursion !
-// 		//TODO Successor.tmp not accessible anymore later
-// 		return node.Successor.tmp.gimmeGraph(g, firstNodeId)
+// 		//TODO successor.tmp not accessible anymore later
+// 		return node.successor.tmp.gimmeGraph(g, firstNodeId)
 
 // 	}
 // }
+
+func (d *DHTnode) GetSuccesor() *shared.DistantNode {
+	mutexSucc.Lock()
+	defer mutexSucc.Unlock()
+	temp := *d.successor
+	return &temp
+}
+
+func (d *DHTnode) GetPredecessor() *shared.DistantNode {
+	mutexPred.Lock()
+	defer mutexPred.Unlock()
+	temp := *d.predecessor
+	return &temp
+}
+
+func (d *DHTnode) GetFingerTable() []*fingerEntry {
+	temp := d.fingers
+	return temp
+}
+func (d *DHTnode) updateFingersRoutine() {
+	shared.Logger.Notice("Starting update fingers table routing")
+	for {
+		time.Sleep(UPDATEPERIOD)
+		shared.Logger.Notice("Auto updating finger table of node %s", shared.LocalId)
+		d.UpdateFingerTable()
+	}
+}
+
+func (d *DHTnode) heartBeatRoutine() {
+	shared.Logger.Info("Starting heartBeat routing")
+	for {
+		time.Sleep(HEARTBEATPERIOD)
+		d.sendHeartBeat(d.GetSuccesor())
+	}
+}
+
+func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) {
+
+	responseChan := d.commLib.SendHeartBeat(d.GetSuccesor())
+	select {
+	case <-responseChan:
+		{
+			//Everything this node is alive. Do nothing more
+			shared.Logger.Notice("%s still alive", destination.Id)
+		}
+	//case of timeout ?
+	case <-time.After(HEARBEATTIMEOUT):
+		shared.Logger.Error("heartBeat to %s timeout", destination.Id)
+		//DANGER
+	}
+}
 
 //other functions parts --------------------------------------------------------
 
 //Create the node with it's communication interface
 //Does not start to liten for message
+<<<<<<< HEAD
 func MakeNode() (*DHTnode, *comt.ComLink) {
 	daComInterface := comt.NewComLink()
+=======
+func MakeNode() (*DHTnode, *sender.SenderLink) {
+	daComInterface := sender.NewSenderLink()
+>>>>>>> comLink
 	daNode := DHTnode{
 		fingers: make([]*fingerEntry, SPACESIZE),
 		commLib: daComInterface,
 	}
 	mySelf := daNode.ToDistantNode()
-	daNode.Successor = mySelf
+	daNode.successor = mySelf
 
-	daNode.Predecessor = mySelf
+	daNode.predecessor = mySelf
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
+<<<<<<< HEAD
+=======
+	shared.Logger.Info("New node [%.5s] createde", shared.LocalId)
+	go daNode.heartBeatRoutine()
+	go daNode.updateFingersRoutine()
+
+>>>>>>> comLink
 	return &daNode, daComInterface
 }
