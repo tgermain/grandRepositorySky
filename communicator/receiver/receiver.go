@@ -241,7 +241,7 @@ func (r *ReceiverLink) StartAndListen() {
 			}
 			payload := buffer[0:bytesReads]
 			go r.handleRequest(payload)
-			time.Sleep(time.Millisecond * 500)
+			time.Sleep(time.Millisecond * 10)
 			runtime.Gosched()
 		}
 	}()
