@@ -3,7 +3,7 @@ GrandRepositorySky
 
 Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DHT) based on _Chord_ protocol (see [This paper ](http://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf))
 
-:construction: Current objective :construction: : **2** :suspect:
+:construction: Current objective :construction: : **3** :god:
 ---------------------
 
 ### 6 objectives : 
