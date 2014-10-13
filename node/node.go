@@ -13,11 +13,11 @@ import (
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
-const UPDATEFINGERSPERIOD = time.Minute
+const UPDATEFINGERSPERIOD = time.Second * 30
 const UPDATESUCCSUCCERIOD = time.Second * 10
 const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
-const LOOKUPTIMEOUT = time.Second * 3
+const LOOKUPTIMEOUT = time.Second * 4
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -374,7 +374,7 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 	case <-responseChan:
 		{
 			//Everything this node is alive. Do nothing more
-			shared.Logger.Notice("%s still alive", destination.Id)
+
 			return true
 		}
 	//case of timeout ?
