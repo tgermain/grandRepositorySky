@@ -11,18 +11,19 @@ import (
 type MessageType int
 
 const (
-	LOOKUP            MessageType = iota //0
-	LOOKUPRESPONSE                       //1
-	UPDATESUCCESSOR                      //2
-	UPDATEPREDECESSOR                    //3
-	PRINTRING                            //4
-	JOINRING                             //5
-	UPDATEFINGERTABLE                    //6
-	AREYOUALIVE                          //7
-	IAMALIVE                             //8
+	LOOKUP            MessageType = iota + 1 //1
+	LOOKUPRESPONSE                           //2
+	UPDATESUCCESSOR                          //3
+	UPDATEPREDECESSOR                        //4
+	PRINTRING                                //5
+	JOINRING                                 //6
+	UPDATEFINGERTABLE                        //7
+	AREYOUALIVE                              //8
+	IAMALIVE                                 //9
 )
 
 var messageTypes = []string{
+	"unknown",
 	"lookup",
 	"lookup response",
 	"update successor",
