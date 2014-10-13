@@ -50,6 +50,12 @@ func (currentNode *DHTnode) AddToRing(newNode *shared.DistantNode) {
 	}
 }
 
+func (d *DHTnode) LeaveRing() {
+	shared.Logger.Notice("Node %s leaving gracefully the ring.", shared.LocalId)
+	d.commLib.SendUpdateSuccessor(d.predecessor, d.successor)
+	d.commLib.SendUpdatePredecessor(d.successor, d.predecessor)
+}
+
 //Tell your actual successor that you are no longer its predecessor
 //set your succesor to the new value
 //tell to your new successor that you are its predecessor
