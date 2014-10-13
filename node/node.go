@@ -72,9 +72,9 @@ func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 		d.successor = newNode
 		d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
 
+		go d.UpdateFingerTable()
 	} else {
 		shared.Logger.Info("Succesor stable !!")
-		d.PrintNodeInfo()
 	}
 }
 
