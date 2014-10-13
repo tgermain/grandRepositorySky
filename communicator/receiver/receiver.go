@@ -128,7 +128,7 @@ func (r *ReceiverLink) receivePrintRing(msg *communicator.Message) {
 			//pass the request around
 			r.node.PrintNodeName(&currentString)
 			msg.Parameters["currentString"] = currentString
-			r.sender.RelayPrintRing(r.node.GetSuccesor(), msg)
+			go r.sender.RelayPrintRing(r.node.GetSuccesor(), msg)
 		}
 	}
 }
@@ -148,11 +148,11 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 		//Am I responsible for the key requested  ?
 		if r.node.IsResponsible(idSearched) {
 			shared.Logger.Info("I'm responsible !")
-			r.sender.SendLookupResponse(&msg.Origin, idAnswer)
+			go r.sender.SendLookupResponse(&msg.Origin, idAnswer)
 		} else {
 			//no -> sending the request to the closest node
 			shared.Logger.Info("relay the lookup")
-			r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
+			go r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
 		}
 
 	} else {
@@ -187,7 +187,7 @@ func (r *ReceiverLink) receiveHeartBeat(msg *communicator.Message) {
 		shared.Logger.Info("Receiving a heartBeat from %s", msg.Origin.Id)
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
-		r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
+		go r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
 	} else {
 		//error missing parameter, do nothing ?
 	}
