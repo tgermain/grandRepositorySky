@@ -32,10 +32,12 @@ func settingUpUdpConnection(destination *shared.DistantNode) *net.UDPConn {
 func sendTo(destination *shared.DistantNode, msg *communicator.Message) {
 	conn := settingUpUdpConnection(destination)
 	// defer conn.Close()
+	go func() {
 
-	payload := communicator.MarshallMessage(msg)
-	conn.Write(payload)
-	shared.Logger.Debug("Sending %#v", msg)
+		payload := communicator.MarshallMessage(msg)
+		conn.Write(payload)
+		shared.Logger.Debug("Sending %#v", msg)
+	}()
 }
 
 //Convenient method to obtain a bare communicator.Message with only the origin set to global IP/port
