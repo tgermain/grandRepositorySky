@@ -232,14 +232,15 @@ func (node *DHTnode) PrintNodeName(currentString *string) {
 }
 
 func (node *DHTnode) PrintNodeInfo() {
-	shared.Logger.Info("---------------------------------")
-	shared.Logger.Info("Node info")
-	shared.Logger.Info("---------------------------------")
-	shared.Logger.Info("	Id			%s", shared.LocalId)
-	shared.Logger.Info("	Ip			%s", shared.LocalIp)
-	shared.Logger.Info("	Port		%s", shared.LocalPort)
-	shared.Logger.Info(" 	Succesor	%s", node.successor.Id)
-	shared.Logger.Info(" 	Predecesor	%s", node.predecessor.Id)
+	shared.Logger.Notice("---------------------------------")
+	shared.Logger.Notice("Node info")
+	shared.Logger.Notice("---------------------------------")
+	shared.Logger.Notice("	Id			%s", shared.LocalId)
+	shared.Logger.Notice("	Ip			%s", shared.LocalIp)
+	shared.Logger.Notice("	Port		%s", shared.LocalPort)
+	shared.Logger.Notice(" 	Succesor	%s", node.successor.Id)
+	shared.Logger.Notice(" 	Predecesor	%s", node.predecessor.Id)
+	shared.Logger.Notice(" 	succSucc	%s", node.succSucc.Id)
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
 	// fmt.Println("  Index		Idkey			IdNode ")
@@ -248,7 +249,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
 	// 	}
 	// }
-	shared.Logger.Info("---------------------------------")
+	shared.Logger.Notice("---------------------------------")
 }
 
 // func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
@@ -325,7 +326,7 @@ func (d *DHTnode) updateFingersRoutine() {
 }
 
 func (d *DHTnode) heartBeatRoutine() {
-	shared.Logger.Info("Starting heartBeat routing")
+	shared.Logger.Notice("Starting heartBeat routing")
 	for {
 		time.Sleep(HEARTBEATPERIOD)
 		if !d.sendHeartBeat(d.GetSuccesor()) {
@@ -367,11 +368,14 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 		{
 			//Everything this node is alive. Do nothing more
 			shared.Logger.Notice("%s still alive", destination.Id)
+			return true
 		}
 	//case of timeout ?
 	case <-time.After(HEARBEATTIMEOUT):
-		shared.Logger.Error("heartBeat to %s timeout", destination.Id)
+		shared.Logger.Error("%s is dead", destination.Id)
 		//DANGER
+		//make the succ.succ must update pred and d must update succ
+		return false
 	}
 }
 
@@ -392,7 +396,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-	shared.Logger.Info("New node [%.5s] createde", shared.LocalId)
+	shared.Logger.Notice("New node [%.5s] created", shared.LocalId)
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 	go daNode.updateSuccSuccRoutine()

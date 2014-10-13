@@ -16,7 +16,7 @@ func MakeDHTNode(NewId *string, NewIp, NewPort string) *node.DHTnode {
 		tempId := dht.GenerateNodeId()
 		NewId = &tempId
 	}
-	shared.Logger.Info("Creating node : \nId %.10v \nIP %s Port %.10s \n", *NewId, NewIp, NewPort)
+	shared.Logger.Notice("Creating node : \nId %v \nIP %s Port %.10s \n", *NewId, NewIp, NewPort)
 	//Set the globally shared information
 	shared.LocalId = *NewId
 	shared.LocalIp = NewIp
