@@ -148,7 +148,7 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 		//Am I responsible for the key requested  ?
 		if r.node.IsResponsible(idSearched) {
 			shared.Logger.Info("I'm responsible !")
-			go r.sender.SendLookupResponse(&msg.Origin, idAnswer)
+			go r.sender.SendLookupResponse(&msg.Origin, idAnswer, idSearched)
 		} else {
 			//no -> sending the request to the closest node
 			shared.Logger.Info("relay the lookup")
@@ -163,10 +163,11 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 
 func (r *ReceiverLink) receiveLookupResponse(msg *communicator.Message) {
 	//heck if everything required is here
-	if checkRequiredParams(msg.Parameters, "idAnswer") {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched") {
+		idSearched, _ := msg.Parameters["idSearched"]
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
-		shared.Logger.Info("Receive a lookup response for : %s", idAnswer)
+		shared.Logger.Info("Receive a lookup response for : %s", idSearched)
 
 		chanResp, ok2 := communicator.PendingLookups[idAnswer]
 		if ok2 {

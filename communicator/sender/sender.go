@@ -147,14 +147,15 @@ func (s *SenderLink) RelayPrintRing(destination *shared.DistantNode, msg *commun
 	sendTo(destination, msg)
 }
 
-func (s *SenderLink) SendLookupResponse(destination *shared.DistantNode, idAnswer string) {
+func (s *SenderLink) SendLookupResponse(destination *shared.DistantNode, idAnswer string, idSearched string) {
 	shared.Logger.Info("Send lookup response to %s ", destination.Id)
 	newMessage := &communicator.Message{
 		communicator.LOOKUPRESPONSE,
 		getOrigin(),
 		*destination,
 		map[string]string{
-			"idAnswer": idAnswer,
+			"idAnswer":   idAnswer,
+			"idSearched": idSearched,
 		},
 	}
 	sendTo(destination, newMessage)
