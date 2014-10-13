@@ -27,6 +27,7 @@ var mutexPred = &sync.Mutex{}
 type DHTnode struct {
 	fingers     []*fingerEntry
 	successor   *shared.DistantNode
+	succSucc    *shared.DistantNode
 	predecessor *shared.DistantNode
 	commLib     *sender.SenderLink
 }
@@ -69,7 +70,7 @@ func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 		// if d.successor.Id != newNode.Id {
 		d.commLib.SendUpdatePredecessor(d.successor, newNode)
 		// }
-
+		d.succSucc = d.successor
 		d.successor = newNode
 		d.commLib.SendUpdatePredecessor(newNode, d.ToDistantNode())
 
@@ -373,7 +374,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	}
 	mySelf := daNode.ToDistantNode()
 	daNode.successor = mySelf
-
+	daNode.succSucc = mySelf
 	daNode.predecessor = mySelf
 	// initialization of fingers table is done while adding the node to the ring
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
