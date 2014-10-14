@@ -8,6 +8,7 @@ import (
 	"github.com/tgermain/grandRepositorySky/dataSet"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
+	"math"
 	"sync"
 	"time"
 )
@@ -407,8 +408,31 @@ func (d *DHTnode) getReplicas() {
 	//case of successor or predecessor=itself
 }
 
-func (d *DHTnode) theMajority() {
+func (d *DHTnode) theMajority(replicas []string) string {
 	//take a set of datas and return the data which appear most of the time
+	countMap := make(map[string]int)
+
+	//compute frequency
+	for _, v := range replicas {
+		_, exist := countMap[v]
+		if exist {
+
+			countMap[v]++
+		} else {
+			countMap[v] = 0
+		}
+	}
+	//easy case : only on value
+	if len(countMap) == 1 {
+		return replicas[0]
+	}
+	//tough case, multiple values
+	for k, v := range countMap {
+		if v >= math.Trunc(len(replicas)/2+1) {
+			return k
+		}
+	}
+	shared.Logger.Error("Can't find a majority")
 }
 
 func (d *DHTnode) ModifyData() {
