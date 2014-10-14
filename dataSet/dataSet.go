@@ -5,8 +5,8 @@ type DataSet struct {
 }
 
 type PieceOfData struct {
-	tag   string //to which node the data is from
-	value string //the data
+	Tag   string //to which node the data is from
+	Value string //the data
 }
 
 func (d *DataSet) SetData(key string, value PieceOfData) bool {
@@ -26,7 +26,7 @@ func (d *DataSet) GetData(key string) PieceOfData {
 }
 
 func (d *DataSet) DelData(key string) {
-	d.set[key] = nil
+	delete(d.set, key)
 }
 
 func (d *DataSet) GetSet() map[string]PieceOfData {

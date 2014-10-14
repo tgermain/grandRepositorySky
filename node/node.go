@@ -509,10 +509,10 @@ func (d *DHTnode) cleanReplicas() {
 	shared.Logger.Notice("Auto cleaning old replicated datas")
 	//check if data are tagged with current, predecessor or successor node, if not destroy them
 	for key, dataPiece := range shared.Datas.GetSet() {
-		if dataPiece.tag == shared.LocalId || dataPiece.tag == d.GetSuccesor().Id || dataPiece.tag == d.GetPredecessor().Id {
+		if dataPiece.Tag == shared.LocalId || dataPiece.Tag == d.GetSuccesor().Id || dataPiece.Tag == d.GetPredecessor().Id {
 			//ok
 		} else {
-			shared.Logger.Info("tag %s, key %s, dataPiece %s removed", dataPiece.tag, key, dataPiece.value)
+			shared.Logger.Info("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
 			shared.Datas.DelData(key)
 		}
 	}
