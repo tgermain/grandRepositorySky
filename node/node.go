@@ -13,10 +13,14 @@ import (
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
+
 const UPDATEFINGERSPERIOD = time.Second * 30
+
 const UPDATESUCCSUCCERIOD = time.Second * 10
+
 const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
+
 const LOOKUPTIMEOUT = time.Second * 4
 
 const GETDATATIMEOUT = time.Second * 5
@@ -71,7 +75,6 @@ func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 	mutexSucc.Lock()
 	defer mutexSucc.Unlock()
 	shared.Logger.Notice("update successor with %s", newNode.Id)
-	//possible TODO : condition on the origin of the message for this sending ?
 	if d.successor.Id != newNode.Id {
 		// if d.successor.Id != newNode.Id {
 		d.commLib.SendUpdatePredecessor(d.successor, newNode)
@@ -83,6 +86,7 @@ func (d *DHTnode) UpdateSuccessor(newNode *shared.DistantNode) {
 		go d.UpdateFingerTable()
 	} else {
 		shared.Logger.Info("Succesor stable !!")
+
 	}
 }
 
@@ -99,6 +103,7 @@ func (d *DHTnode) UpdatePredecessor(newNode *shared.DistantNode) {
 	} else {
 		shared.Logger.Info("predecessor stable !!")
 		d.PrintNodeInfo()
+
 	}
 }
 
@@ -129,18 +134,17 @@ func (currentNode *DHTnode) IsResponsible(IdToSearch string) bool {
 
 func (currentNode *DHTnode) Lookup(IdToSearch string) *shared.DistantNode {
 	shared.Logger.Info("Node [%s] made a lookup to [%s]", shared.LocalId, IdToSearch)
-	// currentNode.PrintNodeInfo()
+
 	if currentNode.IsResponsible(IdToSearch) {
-		//replace with send
+
 		return currentNode.ToDistantNode()
 	} else {
-		// fmt.Println("go to the next one")
-		//TODO use the fingers table here
+
 		responseChan := currentNode.commLib.SendLookup(currentNode.FindClosestNode(IdToSearch), IdToSearch)
 		select {
 		case res := <-responseChan:
 			return &res
-		//case of timeout ?
+
 		case <-time.After(LOOKUPTIMEOUT):
 			shared.Logger.Error("Lookup for %s timeout", IdToSearch)
 			return nil
@@ -153,8 +157,7 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 	bestFinger := currentNode.GetSuccesor()
 
 	minDistance := dht.Distance([]byte(currentNode.GetSuccesor().Id), []byte(IdToSearch), SPACESIZE)
-	// fmt.Println("distance successor " + minDistance.String())
-	// var bestIndex int
+
 	for _, v := range currentNode.fingers {
 		if v != nil {
 			if dht.Between(v.nodeResp.Id, shared.LocalId, IdToSearch) {
@@ -171,36 +174,29 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						//check if this finger is still alive
-						// if currentNode.sendHeartBeat(v.nodeResp) {
 
 						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
-						// fmt.Println("Old best distance " + minDistance.String())
-						// fmt.Println("New best distance " + currentDistance.String())
-						// currentNode.PrintNodeInfo()
-						// bestIndex = i
-						// v.tmp.PrintNodeInfo()
+
 						minDistance = currentDistance
 						bestFinger = v.nodeResp
-						// }
+
 					}
 				}
 			}
 		}
 	}
-	// fmt.Printf("From [%s] We have found the bes way to go to [%s] : we go throught finger[%d], [%s]\n", shared.LocalId, IdToSearch, bestIndex, bestFinger.Id)
+
 	return bestFinger
 }
 
 func (node *DHTnode) UpdateFingerTable() {
 	shared.Logger.Notice("Update finger table")
-	// fmt.Printf("****************************************************************Node [%s] : init finger table \n", shared.LocalId)
+
 	for i := 0; i < SPACESIZE; i++ {
 		i := i
 		go func() {
 			if node.fingers[i] != nil {
 
-				// fmt.Printf("Calculatin fingers [%d]\n", i)
 				//avoid to always calculate the fingerId again
 				responsibleNode := node.Lookup(node.fingers[i].IdKey)
 				if responsibleNode != nil {
@@ -231,7 +227,7 @@ func (node *DHTnode) UpdateFingerTable() {
 		}()
 
 	}
-	// fmt.Println("****************************************************************Fingers table init DONE : ")
+
 }
 
 func (node *DHTnode) PrintRing() {
@@ -254,56 +250,9 @@ func (node *DHTnode) PrintNodeInfo() {
 	shared.Logger.Notice(" 	Succesor	%s", node.successor.Id)
 	shared.Logger.Notice(" 	Predecesor	%s", node.predecessor.Id)
 	shared.Logger.Notice(" 	succSucc	%s", node.succSucc.Id)
-	// fmt.Println("  Fingers table :")
-	// fmt.Println("  ---------------------------------")
-	// fmt.Println("  Index		Idkey			IdNode ")
-	// for i, v := range node.fingers {
-	// 	if v != nil {
-	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
-	// 	}
-	// }
+
 	shared.Logger.Notice("---------------------------------")
 }
-
-// func (node *DHTnode) gimmeGraph(g *ggv.Graph, firstNodeId *string) string {
-// 	if &shared.LocalId == firstNodeId {
-// 		return g.String()
-// 	} else {
-// 		if g == nil {
-// 			g = ggv.NewGraph()
-// 			g.SetName("DHTRing")
-// 			g.SetDir(true)
-// 		}
-// 		if firstNodeId == nil {
-// 			firstNodeId = &shared.LocalId
-// 		}
-// 		g.AddNode(g.Name, shared.LocalId, nil)
-// 		g.AddNode(g.Name, node.successor.Id, nil)
-// 		g.AddNode(g.Name, node.predecessor.Id, nil)
-// 		// g.AddEdge(shared.LocalId, node.successor.Id, true, map[string]string{
-// 		// 	"label": "succ",
-// 		// })
-// 		// g.AddEdge(shared.LocalId, node.predecessor.Id, true, map[string]string{
-// 		// 	"label": "pred",
-// 		// })
-
-// 		for i, v := range node.fingers {
-// 			g.AddEdge(shared.LocalId, v.IdKey, true, map[string]string{
-// 				"label":         fmt.Sprintf("\"%s.%d\"", shared.LocalId, i),
-// 				"label_scheme":  "3",
-// 				"decorate":      "true",
-// 				"labelfontsize": "5.0",
-// 				"labelfloat":    "true",
-// 				"color":         "blue",
-// 			})
-// 		}
-
-// 		//recursion !
-// 		//TODO successor.tmp not accessible anymore later
-// 		return node.successor.tmp.gimmeGraph(g, firstNodeId)
-
-// 	}
-// }
 
 func (d *DHTnode) GetSuccesor() *shared.DistantNode {
 	mutexSucc.Lock()
@@ -343,6 +292,8 @@ func (d *DHTnode) heartBeatRoutine() {
 	for {
 		time.Sleep(HEARTBEATPERIOD)
 		if !d.sendHeartBeat(d.GetSuccesor()) {
+			//DANGER
+			//make the succ.succ must update pred and d must update succ
 			d.commLib.SendUpdatePredecessor(d.GetSuccSucc(), d.ToDistantNode())
 			mutexSucc.Lock()
 			d.successor = d.succSucc
@@ -366,7 +317,6 @@ func (d *DHTnode) updateSuccSuccRoutine() {
 					d.succSucc = &res
 				}
 			}
-		//case of timeout ?
 		case <-time.After(HEARBEATTIMEOUT):
 			shared.Logger.Error("Update succ succ timeout")
 		}
@@ -379,15 +329,13 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 	select {
 	case <-responseChan:
 		{
-			//Everything this node is alive. Do nothing more
+			//This node is alive. Do nothing more
 
 			return true
 		}
-	//case of timeout ?
 	case <-time.After(HEARBEATTIMEOUT):
 		shared.Logger.Error("%s is dead", destination.Id)
-		//DANGER
-		//make the succ.succ must update pred and d must update succ
+
 		return false
 	}
 }
@@ -411,7 +359,6 @@ func (d *DHTnode) GetData(key string) string {
 			}
 		case <-time.After(GETDATATIMEOUT):
 			shared.Logger.Error("Get data for %s timeout", hashedKey)
-			//make the succ.succ must update pred and d must update succ
 			return NOTFOUNDMSG
 		}
 	}
@@ -423,6 +370,8 @@ func (d *DHTnode) GetDataDemocratic(hashedKey string) string {
 	//return the most frequent one
 	return d.theMajority(allDatas)
 }
+
+//used in receiver
 func (d *DHTnode) GetLocalData(hashedKey string) string {
 	return shared.Datas.GetData(hashedKey).Value
 }
@@ -508,7 +457,11 @@ func (d *DHTnode) cleanReplicas() {
 	//check if data are tagged with current, predecessor or successor node, if not destroy them
 	for key, dataPiece := range shared.Datas.GetSet() {
 		if dataPiece.Tag == shared.LocalId || dataPiece.Tag == d.GetSuccesor().Id || dataPiece.Tag == d.GetPredecessor().Id {
-			//ok
+			//check if isResponsible of data
+			//if yes -> take the ownership of the data
+			if d.IsResponsible(key) {
+				dataPiece.Tag = shared.LocalId
+			}
 		} else {
 			shared.Logger.Info("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
 			shared.Datas.DelData(key)

@@ -268,7 +268,6 @@ func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
 	}
 }
 
-//TODO a test !
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {
 		_, ok := params[v]
