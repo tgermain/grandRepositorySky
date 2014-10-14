@@ -99,8 +99,6 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -117,8 +115,6 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -163,8 +159,6 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 			go r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
 		}
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 
 }
@@ -181,8 +175,6 @@ func (r *ReceiverLink) receiveLookupResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -197,8 +189,6 @@ func (r *ReceiverLink) receiveHeartBeat(msg *communicator.Message) {
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
 		go r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -211,8 +201,6 @@ func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -222,8 +210,6 @@ func (r *ReceiverLink) receiveGetSuccesor(msg *communicator.Message) {
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
 		go r.sender.SendGetSuccResponse(&msg.Origin, idAnswer, r.node.GetSuccesor())
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -279,8 +265,6 @@ func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- value
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
