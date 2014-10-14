@@ -5,10 +5,8 @@ import (
 	// ggv "code.google.com/p/gographviz"
 	"fmt"
 	sender "github.com/tgermain/grandRepositorySky/communicator/sender"
-	"github.com/tgermain/grandRepositorySky/dataSet"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
-	"math"
 	"sync"
 	"time"
 )
