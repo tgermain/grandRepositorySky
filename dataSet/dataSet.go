@@ -25,6 +25,14 @@ func (d *DataSet) GetData(key string) PieceOfData {
 	return val
 }
 
+func (d *DataSet) DelData(key string) {
+	d.set[key] = nil
+}
+
+func (d *DataSet) GetSet() map[string]PieceOfData {
+	return d.set
+}
+
 func MakeDataSet() DataSet {
 	return DataSet{
 		make(map[string]PieceOfData),
