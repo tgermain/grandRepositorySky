@@ -122,6 +122,8 @@ TODO :
 ## 3. Data & Replication
 facebook duplicate data of one node on 2 other nodes : enough !
 
+- Data place on node A is replicated to A.successor and A.predecessor
+
 ###launch parameters 
 - (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
 
@@ -131,11 +133,11 @@ facebook duplicate data of one node on 2 other nodes : enough !
 
 ### new messages type
 - DataReplication
-- 
+
 TODO : 
 - methods in node.go to add, retreive, modify and delete a (key-value) data
 - new messages : 
 	- POSTDATA
-	- GETDATA
+	- GETDATA / GETDATARESPONSE
 	- MODIFYDATA
 	- DELETEDATA
