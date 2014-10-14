@@ -249,6 +249,48 @@ func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnsw
 	sendTo(destination, newMessage)
 }
 
+func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched string, forced bool) chan string {
+	shared.Logger.Warning("Send get data to %s ", destination.Id)
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.GETDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer":   idAnswer,
+			"idSearched": idSearched,
+		},
+	}
+	//forced force the node to get data, even if is not responsible
+	//force true -> get replica
+	//force false -> get data
+	if forced {
+		newMessage.Parameters["forced"] = ""
+	}
+	//create an entry in the pendingLookup table
+	responseChan := make(chan string)
+	communicator.PendingGetData[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendGetDataResponse(destination *shared.DistantNode, idAnswer string, valueRequested string) {
+	shared.Logger.Info("Send get data response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.GETDATARESPONSE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+			"value":    valueRequested,
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
 func NewSenderLink() *SenderLink {
 	shared.Logger.Info("New sender Link")
 	return new(SenderLink)

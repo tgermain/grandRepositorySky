@@ -22,6 +22,8 @@ const (
 	IAMALIVE                                    //9
 	GETSUCCESORE                                //10
 	GETSUCCESORERESPONSE                        //11
+	GETDATA                                     //12
+	GETDATARESPONSE                             //13
 )
 
 var messageTypes = []string{
@@ -37,6 +39,8 @@ var messageTypes = []string{
 	"i am alive",
 	"get successor",
 	"get successor response",
+	"get data",
+	"get data response",
 }
 
 func (mt MessageType) String() string {
@@ -56,6 +60,7 @@ type Message struct {
 var PendingLookups = make(map[string]chan shared.DistantNode)
 var PendingHearBeat = make(map[string]chan shared.DistantNode)
 var PendingGetSucc = make(map[string]chan shared.DistantNode)
+var PendingGetData = make(map[string]chan string)
 
 //Exported methods ------------------------------------------------------
 func MarshallMessage(msg *Message) []byte {

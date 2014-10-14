@@ -21,7 +21,11 @@ const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
 const LOOKUPTIMEOUT = time.Second * 4
 
+const GETDATATIMEOUT = time.Second * 5
+
 const CLEANREPLICASPERIOD = time.Second * 30
+
+const NOTFOUNDMSG = "Data not found"
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -390,49 +394,109 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 	}
 }
 
-func (d *DHTnode) GetData() {
+func (d *DHTnode) GetData(key string) string {
+
+	hashedKey := dht.Sha1hash(key)
 	//if data are local
-	//get replica
-	//get majority of replicas
-	//else find where is data -> lookup, relay request and prepare to response
+	if d.IsResponsible(hashedKey) {
+		return d.GetDataDemocratic(key)
+	} else {
+		//else find where is data -> lookup, relay request and prepare to response
+		dest := d.Lookup(hashedKey)
+		//send message
+		responseChan := d.commLib.SendGetData(dest, hashedKey, false)
+		select {
+		case value := <-responseChan:
+			{
+
+				return value
+			}
+		case <-time.After(GETDATATIMEOUT):
+			shared.Logger.Error("Get data for %s timeout", hashedKey)
+			//make the succ.succ must update pred and d must update succ
+			return NOTFOUNDMSG
+		}
+	}
 }
 
-func (d *DHTnode) SetData() {
+func (d *DHTnode) GetDataDemocratic(hashedKey string) string {
+	//get replicas
+	allDatas := d.getReplicas(hashedKey)
+	//return the most frequent one
+	return d.theMajority(allDatas)
+}
+func (d *DHTnode) GetLocalData(hashedKey string) string {
+	return shared.Datas.GetData(hashedKey).Value
+}
+
 	//if data are local
 	//send setData to replicas
 	//else find where is data -> lookup, relay request and prepare to response
 }
 
-func (d *DHTnode) getReplicas() {
+func (d *DHTnode) getReplicas(hashedKey string) []string {
 	//get the datas from both replica aka pred and succ
-	//case of successor or predecessor=itself
+	//case of successor AND predecessor=itself -> no replica
+	//case successor= predecessor -> replica on predecessor
+	results := []string{d.GetLocalData(hashedKey)}
+	for _, v := range d.getReplicasPlaces() {
+		go func() {
+			responseChan := d.commLib.SendGetData(v, hashedKey, true)
+			select {
+			case value := <-responseChan:
+				{
+					results = append(results, value)
+				}
+			case <-time.After(GETDATATIMEOUT):
+				shared.Logger.Error("Get replica for %s timeout", hashedKey)
+				//make the succ.succ must update pred and d must update succ
+			}
+		}()
+	}
+	return results
+}
+
+func (d *DHTnode) getReplicasPlaces() []*shared.DistantNode {
+	//get the direction of replicas.
+	if d.successor.Id == shared.LocalId && d.predecessor.Id == shared.LocalId {
+		//case of successor AND predecessor=itself -> no replica
+		return []*shared.DistantNode{}
+	}
+	if d.successor.Id == d.predecessor.Id {
+		//case successor= predecessor -> replica on predecessor
+		return []*shared.DistantNode{d.predecessor}
+	}
+
+	//normal case : replication on succ and pred
+	return []*shared.DistantNode{d.predecessor, d.successor}
 }
 
 func (d *DHTnode) theMajority(replicas []string) string {
 	//take a set of datas and return the data which appear most of the time
-	countMap := make(map[string]int)
+
+	frequMap := make(map[string]int)
 
 	//compute frequency
 	for _, v := range replicas {
-		_, exist := countMap[v]
+		_, exist := frequMap[v]
 		if exist {
-
-			countMap[v]++
+			frequMap[v]++
 		} else {
-			countMap[v] = 0
+			frequMap[v] = 1
 		}
 	}
 	//easy case : only on value
-	if len(countMap) == 1 {
+	if len(frequMap) == 1 {
 		return replicas[0]
 	}
 	//tough case, multiple values
-	for k, v := range countMap {
-		if v >= math.Trunc(len(replicas)/2+1) {
+	for k, v := range frequMap {
+		if v >= (len(replicas)/2 + 1) {
 			return k
 		}
 	}
-	shared.Logger.Error("Can't find a majority")
+	shared.Logger.Critical("Can't find a majority return unprediclable data ")
+	return replicas[0]
 }
 
 func (d *DHTnode) ModifyData() {

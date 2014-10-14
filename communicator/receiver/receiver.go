@@ -68,6 +68,14 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveGetSuccesorResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.GETDATA:
+		{
+			r.receiveGetData(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETDATARESPONSE:
+		{
+			r.receiveGetDataResponse(&msg)
+		}
 	default:
 		{
 			//rejected mesage
@@ -239,6 +247,37 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 		chanResp, ok2 := communicator.PendingGetSucc[idAnswer]
 		if ok2 {
 			chanResp <- succSucc
+		}
+	}
+}
+
+func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched", "forced") {
+		shared.Logger.Warning("Receiving a get data from %s", msg.Origin.Id)
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		idSearched, _ := msg.Parameters["idSearched"]
+		_, forced := msg.Parameters["forced"]
+
+		var result string
+		if forced {
+			result = r.node.GetLocalData(idSearched)
+		} else {
+			result = r.node.GetData(idSearched)
+		}
+		r.sender.SendGetDataResponse(&msg.Origin, idAnswer, result)
+	}
+}
+
+func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "value") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		value, _ := msg.Parameters["value"]
+
+		shared.Logger.Warning("Receiving a get data response from %s for %s", msg.Origin.Id, idAnswer)
+
+		chanResp, ok2 := communicator.PendingGetData[idAnswer]
+		if ok2 {
+			chanResp <- value
 		}
 	} else {
 		//error missing parameter, do nothing ?
