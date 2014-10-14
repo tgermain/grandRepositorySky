@@ -33,7 +33,7 @@ type DHTnode struct {
 
 type fingerEntry struct {
 	IdKey    string
-	nodeResp *shared.DistantNode
+	NodeResp *shared.DistantNode
 }
 
 //Method parts ----------------------------------------------------------
@@ -150,13 +150,13 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 	// var bestIndex int
 	for _, v := range currentNode.fingers {
 		if v != nil {
-			if dht.Between(v.nodeResp.Id, shared.LocalId, IdToSearch) {
+			if dht.Between(v.NodeResp.Id, shared.LocalId, IdToSearch) {
 
 				//If the finger lead the node to itself, it's not an optimization
-				if v.nodeResp.Id != shared.LocalId {
+				if v.NodeResp.Id != shared.LocalId {
 
 					//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
-					currentDistance := dht.Distance([]byte(v.nodeResp.Id), []byte(IdToSearch), SPACESIZE)
+					currentDistance := dht.Distance([]byte(v.NodeResp.Id), []byte(IdToSearch), SPACESIZE)
 
 					// x.cmp(y)
 					// -1 if x <  y
@@ -164,14 +164,14 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 					// +1 if x >  y
 
 					if minDistance.Cmp(currentDistance) == 1 {
-						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
+						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.NodeResp.Id, bestFinger.Id)
 						// fmt.Println("Old best distance " + minDistance.String())
 						// fmt.Println("New best distance " + currentDistance.String())
 						// currentNode.PrintNodeInfo()
 						// bestIndex = i
 						// v.tmp.PrintNodeInfo()
 						minDistance = currentDistance
-						bestFinger = v.nodeResp
+						bestFinger = v.NodeResp
 					}
 				}
 			}
@@ -195,7 +195,7 @@ func (node *DHTnode) UpdateFingerTable() {
 
 			if node.fingers[i] != nil {
 
-				if node.fingers[i].nodeResp.Id != responsibleNode.Id {
+				if node.fingers[i].NodeResp.Id != responsibleNode.Id {
 					shared.Logger.Info("Update of finger %d with value %s", i, responsibleNode.Id)
 				}
 			}
@@ -255,10 +255,10 @@ func (node *DHTnode) ToString() string {
 	buffer.WriteString("\n")
 
 	buffer.WriteString(" Succesor	")
-	buffer.WriteString(node.Successor.Id)
+	buffer.WriteString(node.successor.Id)
 	buffer.WriteString("\n")
 	buffer.WriteString(" Predecesor	")
-	buffer.WriteString(node.Predecessor.Id)
+	buffer.WriteString(node.predecessor.Id)
 	buffer.WriteString("\n")
 	// fmt.Println("  Fingers table :")
 	// fmt.Println("  ---------------------------------")
@@ -368,13 +368,9 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) {
 
 //Create the node with it's communication interface
 //Does not start to liten for message
-<<<<<<< HEAD
-func MakeNode() (*DHTnode, *comt.ComLink) {
-	daComInterface := comt.NewComLink()
-=======
+
 func MakeNode() (*DHTnode, *sender.SenderLink) {
 	daComInterface := sender.NewSenderLink()
->>>>>>> comLink
 	daNode := DHTnode{
 		fingers: make([]*fingerEntry, SPACESIZE),
 		commLib: daComInterface,
@@ -387,12 +383,10 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	// The fingers table of the first node of a ring is initialized when a second node is added to the ring
 
 	//Initialize the finger table with each finger pointing to the node frehly created itself
-<<<<<<< HEAD
-=======
+
 	shared.Logger.Info("New node [%.5s] createde", shared.LocalId)
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 
->>>>>>> comLink
 	return &daNode, daComInterface
 }
