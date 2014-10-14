@@ -2,11 +2,13 @@ package shared
 
 import (
 	"github.com/op/go-logging"
+	"github.com/tgermain/grandRepositorySky/dataSet"
 	"os"
 )
 
 //Global var -----------------------------------------------------------
 var LocalId, LocalIp, LocalPort string
+var datas = dataSet.MakeDataSet()
 
 //Objects parts ---------------------------------------------------------
 type DistantNode struct {
@@ -40,7 +42,7 @@ func SetupLogger() *logging.Logger {
 	logging.SetBackend(logBackend, logFileBackend)
 	logging.SetFormatter(logging.MustStringFormatter(format))
 
-	logging.SetLevel(logging.INFO, "main")
+	logging.SetLevel(logging.DEBUG, "main")
 
 	Logger = logging.MustGetLogger("main")
 	return Logger
