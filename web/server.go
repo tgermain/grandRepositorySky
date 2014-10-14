@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"encoding/json"
@@ -14,22 +14,22 @@ import (
 )
 
 type FingerJSON struct {
-	IdKey    string          `json:"idkey"`
-	NodeResp DistantNodeJSON `json:"nodeResp"`
+	IdKey    string
+	NodeResp DistantNodeJSON
 }
 
 type DistantNodeJSON struct {
-	Id   string `json:"id"`
-	Ip   string `json:"ip"`
-	Port string `json:"port"`
+	Id   string
+	Ip   string
+	Port string
 }
 type NodeJson struct {
-	Id          string          `json:"id"`
-	Ip          string          `json:"ip"`
-	Port        string          `json:"port"`
-	Successor   DistantNodeJSON `json:"successor"`
-	Predecessor DistantNodeJSON `json:"predecessor"`
-	Fingers     []FingerJSON    `json:"fingers"`
+	Id          string
+	Ip          string
+	Port        string
+	Successor   DistantNodeJSON
+	Predecessor DistantNodeJSON
+	Fingers     []FingerJSON
 }
 
 //TODO remove this function and replace it by a working one in the lib
@@ -171,7 +171,5 @@ func main() {
 	http.Handle("/", r)
 
 	http.ListenAndServe(receive, r) // adding go before with timer gives a timeout
-
 	//time.Sleep(300 * time.Second)
-
 }
