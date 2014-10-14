@@ -386,6 +386,38 @@ func (d *DHTnode) sendHeartBeat(destination *shared.DistantNode) bool {
 	}
 }
 
+func (d *DHTnode) GetData() {
+	//if data are local
+	//get replica
+	//get majority of replicas
+	//else find where is data -> lookup, relay request and prepare to response
+}
+
+func (d *DHTnode) SetData() {
+	//if data are local
+	//send setData to replicas
+	//else find where is data -> lookup, relay request and prepare to response
+}
+
+func (d *DHTnode) getReplicas() {
+	//get the datas from both replica aka pred and succ
+	//case of successor or predecessor=itself
+}
+
+func (d *DHTnode) theMajority() {
+	//take a set of datas and return the data which appear most of the time
+}
+
+func (d *DHTnode) ModifyData() {
+	//tuple space style !
+	//remove the old data
+	//create a new one
+}
+
+func (d *DHTnode) routineLazyDataCleans() {
+	//check if data are tagged with current, predecessor or successor node, if not destroy them
+}
+
 //other functions parts --------------------------------------------------------
 //Create the node with it's communication interface
 //Does not start to liten for message
