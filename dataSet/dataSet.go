@@ -1,15 +1,15 @@
 package dataSet
 
 type DataSet struct {
-	set map[string]pieceOfData
+	set map[string]PieceOfData
 }
 
-type pieceOfData struct {
+type PieceOfData struct {
 	tag   string //to which node the data is from
 	value string //the data
 }
 
-func (d *DataSet) SetData(key string, value pieceOfData) bool {
+func (d *DataSet) SetData(key string, value PieceOfData) bool {
 	_, exist := d.set[key]
 	if exist {
 		return false
@@ -19,7 +19,7 @@ func (d *DataSet) SetData(key string, value pieceOfData) bool {
 	}
 }
 
-func (d *DataSet) GetData(key string) pieceOfData {
+func (d *DataSet) GetData(key string) PieceOfData {
 	//can return nul
 	val, _ := d.set[key]
 	return val
@@ -27,6 +27,6 @@ func (d *DataSet) GetData(key string) pieceOfData {
 
 func MakeDataSet() DataSet {
 	return DataSet{
-		make(map[string]pieceOfData),
+		make(map[string]PieceOfData),
 	}
 }

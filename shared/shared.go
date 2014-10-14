@@ -8,7 +8,7 @@ import (
 
 //Global var -----------------------------------------------------------
 var LocalId, LocalIp, LocalPort string
-var datas = dataSet.MakeDataSet()
+var Datas = dataSet.MakeDataSet()
 
 //Objects parts ---------------------------------------------------------
 type DistantNode struct {
