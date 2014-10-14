@@ -5,6 +5,7 @@ import (
 	// ggv "code.google.com/p/gographviz"
 	"fmt"
 	sender "github.com/tgermain/grandRepositorySky/communicator/sender"
+	"github.com/tgermain/grandRepositorySky/dataSet"
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/shared"
 	"sync"
@@ -18,6 +19,8 @@ const UPDATESUCCSUCCERIOD = time.Second * 10
 const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
 const LOOKUPTIMEOUT = time.Second * 4
+
+const CLEANREPLICASPERIOD = time.Second * 30
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -414,8 +417,27 @@ func (d *DHTnode) ModifyData() {
 	//create a new one
 }
 
-func (d *DHTnode) routineLazyDataCleans() {
+func (d *DHTnode) cleanReplicas() {
+	shared.Logger.Notice("Auto cleaning old replicated datas")
 	//check if data are tagged with current, predecessor or successor node, if not destroy them
+	for key, dataPiece := range shared.Datas.GetSet() {
+		if dataPiece.tag == shared.LocalId || dataPiece.tag == d.GetSuccesor().Id || dataPiece.tag == d.GetPredecessor().Id {
+			//ok
+		} else {
+			shared.Logger.Info("tag %s, key %s, dataPiece %s removed", dataPiece.tag, key, dataPiece.value)
+			shared.Datas.DelData(key)
+		}
+	}
+
+}
+
+func (d *DHTnode) cleanReplicaRoutine() {
+	//sleep not to execute updateFinger and cleanReplicas at the same time
+	time.Sleep(time.Second * 15)
+	for {
+		time.Sleep(CLEANREPLICASPERIOD)
+		d.cleanReplicas()
+	}
 }
 
 //other functions parts --------------------------------------------------------
