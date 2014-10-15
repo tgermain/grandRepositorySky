@@ -19,7 +19,7 @@
 <div ng-app="" ng-controller="nodeController"> 			
 	<div class="row">
 		<div ng-class="{'panel-primary': nodeIsSelected, 'panel-info': !nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
-			<div  class="panel-heading">External node</div>
+			<div  class="panel-heading">External node (by default successor of local)</div>
 			<div class="panel-body">
 				</br>
 				<button class="btn btn-default" ng-click="nodeIsSelected=true; selectedNode=distNode" ng-disabled="nodeIsSelected"> 
@@ -54,11 +54,11 @@
 				<input class="form-control" id="inputLocId" placeholder={{localNode.Id}} ng-model="localNode.Id">		
 				</br>
 				<label for="inputTest" class="col-sm-2 control-label">ip</label>	
-				<input class="form-control" id="inputLocIp" placeholder={{localNode.Ip}} ng-model="localNode.Ip">
+				<input class="form-control" id="inputLocIp" placeholder={{localIp}} ng-model="localIp">
 				
 				</br>
 				<label for="inputTest" class="col-sm-2 control-label">port</label>	
-				<input class="form-control" id="inputLocPort" placeholder={{localNode.Port}} ng-model="localNode.Port">
+				<input class="form-control" id="inputLocPort" placeholder={{localPort}} ng-model="localPort">
 				
 				</br>
 				<label for="inputTest" class="col-sm-2 control-label">successor</label>	
@@ -75,8 +75,11 @@
 			<div class="panel-body">
 			future graph visualisation
 			</br>
-			<button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()"> 
-				maj general data
+			<button class="btn btn-default" ng-click="getAllNodes(false)" ng-init="init()"> 
+				maj data of selected node
+			</button>
+			<button class="btn btn-default" ng-click="getAllNodes(true)"> 
+				reinit datas from selected node
 			</button>
 			</br>
 			nodes : {{nodes}}
@@ -93,40 +96,21 @@
 function nodeController($scope,$http) {
 	$scope.init = function () {           
         $scope.nodeIsSelected = false;
+        $scope.localIp = "127.0.0.1";
+        $scope.localPort = "3000";
 
-        var urlReq = 'http://' + "127.0.0.1" + ':' + "3000" + '/nodes';
-		$http({
-			method: 'GET', 
-			url: urlReq,
-			respondType: 'json',
-			headers: {
-			'Accept': 'application/json',
-			'Content-Type': 'application/json',
-			'Access-Control-Allow-Origin' : '*',
-			'Access-Control-Allow-Credentials': true
-		}}).
-		success(function(data, status, headers, config) {
-			$scope.nodes = data;
-			$scope.localNode = $scope.nodes;
-			$scope.distNode = $scope.localNode.Successor;
-			$scope.selectedNode = $scope.localNode;
-			$scope.status = status;
-		}).
-		error(function(data, status, headers, config) {
-			console.log("error status : "+ status);
-			$scope.nodes = data;
-			$scope.localNode = $scope.nodes;
-			$scope.status = status;
-		});
-
-
-        console.log($scope.localNode);        
+        $scope.getAllNodes(true);      
     }
 
-    $scope.getAllNodes = function (){
-    	console.log("port " + $scope.selectedNode.Port);
+    $scope.getAllNodes = function (isInit){
 
-    	var urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/nodes';
+    	var urlReq;
+    	if ($scope.nodeIsSelected){
+    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/nodes';
+    	} else{
+    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/nodes';
+    	}
+    	
 		$http({
 			method: 'GET', 
 			url: urlReq,
@@ -140,6 +124,23 @@ function nodeController($scope,$http) {
 		success(function(data, status, headers, config) {
 			$scope.nodes = data;
 			$scope.status = status;
+			
+			if (isInit){
+				$scope.nodeIsSelected = false;
+				$scope.localNode = $scope.nodes;
+				$scope.selectedNode = $scope.localNode;
+				$scope.distNode = $scope.localNode.Successor
+			} else {
+				if (!$scope.nodeIsSelected){
+					$scope.localNode = $scope.nodes;				
+				} else{
+					$scope.distNode = $scope.nodes;		
+				}
+			}
+			if($scope.localNode){
+				$scope.localIp = $scope.localNode.Ip;
+				$scope.localPort = $scope.localNode.Port;
+			}
 		}).
 		error(function(data, status, headers, config) {
 			console.log("error status : "+ status);
