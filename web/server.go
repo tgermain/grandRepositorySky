@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/tgermain/grandRepositorySky/communicator/receiver" //for makeDHTnode
-	"github.com/tgermain/grandRepositorySky/dht"                   // for makeDHTnode
 	"github.com/tgermain/grandRepositorySky/node"
-	"github.com/tgermain/grandRepositorySky/shared" // for makeDHTnode
+	"github.com/tgermain/grandRepositorySky/shared"
 	"net/http"
-	"os"
+
 	//"time" // to set a timer
 )
 
@@ -85,18 +83,6 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(js)
 }
 
-//TODO check if this one will be useful in the future, else discard
-func NodeHandler(w http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	idNoeud := vars["idNoeud"]
-	fmt.Println("GET /noeuds/" + idNoeud)
-	if idNoeud == "01" {
-		fmt.Fprintf(w, node1.ToString())
-	} else {
-		fmt.Fprintf(w, "noeud non trouve")
-	}
-}
-
 //TODO? launch lookup request
 
 //TODO post data
@@ -117,7 +103,6 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HelloHandler)
 	r.HandleFunc("/nodes", NodesHandler)
-	r.HandleFunc("/nodes/{idNoeud}", NodeHandler)
 	http.Handle("/", r)
 
 	http.ListenAndServe(receive, r)
