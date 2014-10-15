@@ -21,53 +21,74 @@
 		<div ng-class="{'panel-primary': nodeIsSelected, 'panel-info': !nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
 			<div  class="panel-heading">External node (by default successor of local)</div>
 			<div class="panel-body">
-				</br>
 				<button class="btn btn-default" ng-click="nodeIsSelected=true; selectedNode=distNode" ng-disabled="nodeIsSelected"> 
 				select
 				</button>
 				</br>
 				<label for="inputTest" class="col-sm-2 control-label">id</label>	
 				<input class="form-control" id="inputDistId" placeholder={{distNode.Id}} ng-model="distNode.Id">
-				
-				</br>
+
 				<label for="inputTest" class="col-sm-2 control-label">ip</label>	
 				<input class="form-control" id="inputDistIp" placeholder={{distNode.Ip}} ng-model="distNode.Ip">
 				
-				</br>
 				<label for="inputTest" class="col-sm-2 control-label">port</label>	
 				<input class="form-control" id="inputDistPort" placeholder={{distNode.Port}} ng-model="distNode.Port">
-							
-				</br>
 			</div>
 		</div>
 
 		<div ng-class="{'panel-primary': !nodeIsSelected, 'panel-default': nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
 			<div class="panel-heading">Personnal node</div>
 			<div class="panel-body">
-				</br>
 				<button class="btn btn-default" ng-disabled="!nodeIsSelected" ng-click="nodeIsSelected=false;selectedNode=localNode"> 
 					select
 				</button>
 				</br>
 
 				<label for="inputTest" class="col-sm-2 control-label">id</label>	
-				<input class="form-control" id="inputLocId" placeholder={{localNode.Id}} ng-model="localNode.Id">		
-				</br>
+				<input class="form-control" id="inputLocId" placeholder={{localNode.Id}} ng-model="localNode.Id">
+
 				<label for="inputTest" class="col-sm-2 control-label">ip</label>	
 				<input class="form-control" id="inputLocIp" placeholder={{localIp}} ng-model="localIp">
 				
-				</br>
 				<label for="inputTest" class="col-sm-2 control-label">port</label>	
 				<input class="form-control" id="inputLocPort" placeholder={{localPort}} ng-model="localPort">
 				
-				</br>
 				<label for="inputTest" class="col-sm-2 control-label">successor</label>	
 				<input class="form-control" id="inputLocSuc" placeholder={{localNode.Successor.Id}} ng-model="localNode.Successor.Id">
 				
-				</br>
 				<label for="inputTest" class="col-sm-2 control-label">predecessor</label>	
-				<input class="form-control" id="inputLocPre" placeholder={{localNode.Predecessor.Id}} ng-model="localNode.Predecessor.Id">				
-				</br>
+				<input class="form-control" id="inputLocPre" placeholder={{localNode.Predecessor.Id}} ng-model="localNode.Predecessor.Id">
+			</div>
+		</div>
+
+		
+		<div class="col-xs-12 col-md-8 panel panel-default">
+		<div class="panel-heading">datas control</div>
+			<div class="panel-body">
+			
+			<button class="btn btn-default" ng-click="addData()"> 
+				add
+			</button>
+
+			<button class="btn btn-default" ng-click="removeData()"> 
+				remove
+			</button>
+
+			<button class="btn btn-default" ng-click="majData()"> 
+				maj
+			</button>
+			<label for="inputTest" class="col-sm-2 control-label">key</label>	
+			<input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+
+			<label for="inputTest" class="col-sm-2 control-label">value</label>	
+			<input class="form-control" id="inputKey" placeholder={{valueFocus}} ng-model="valueFocus">
+
+			<ul>
+				<li class="animate-repeat" ng-repeat="data in selectedNode.Datas" ng-click="console.log('select this data later')">
+					{{data}}
+				</li>
+			</ul>
+			
 			</div>
 		</div>
 
@@ -83,8 +104,6 @@
 			</button>
 			</br>
 			nodes : {{nodes}}
-			</br>
-			local : {{localNode}}
 			</br>
 			
 			</div>
@@ -114,14 +133,12 @@ app.controller('MainCtrl', function($scope, $http) {
     }
 
     $scope.getAllNodes = function (isInit){
-
     	var urlReq;
     	if ($scope.nodeIsSelected){
     		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/nodes';
     	} else{
     		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/nodes';
-    	}
-    	
+    	}    	
 		$http({
 			method: 'GET', 
 			url: urlReq,
@@ -147,6 +164,8 @@ app.controller('MainCtrl', function($scope, $http) {
 				$scope.localIp = $scope.localNode.Ip;
 				$scope.localPort = $scope.localNode.Port;
 			}
+			$scope.keyFocus = selectedNode.Datas[0];
+			$scope.valueFocus = selectedNode.Datas[0];
 		}).
 		error(function(data, status, headers, config) {
 			console.log("error status : "+ status);
@@ -154,6 +173,20 @@ app.controller('MainCtrl', function($scope, $http) {
 			$scope.status = status;
 	  });
 	}
+
+	$scope.addData = function(){
+		
+	}
+
+	$scope.removeData = function(){
+
+	}
+
+	$scope.majData = function(){
+
+	}
+
+
 
 });
 </script>
