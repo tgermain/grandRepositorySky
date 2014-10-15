@@ -31,6 +31,10 @@ type NodeJson struct {
 	Fingers     []FingerJSON
 }
 
+type MyServer struct {
+	r *mux.Router
+}
+
 var node1 *node.DHTnode
 
 //Method parts ----------------------------------------------------------
@@ -76,10 +80,6 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
 	w.Write(js)
 }
 
@@ -95,6 +95,26 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 
 //TODO:POSTPONE manual areYouAlive request
 
+//wrap server handler function to activate CORS
+func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	//if origin := req.Header.Get("Origin"); origin != "" {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Accept", "application/json")
+	rw.Header().Set("Access-Control-Allow-Credentials", "true")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	rw.Header().Set("Access-Control-Allow-Headers",
+		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	//}
+	// Stop here if its Preflighted OPTIONS request
+	if req.Method == "OPTIONS" {
+		return
+	}
+	//the real library handler
+	s.r.ServeHTTP(rw, req)
+}
+
+//create a functionnal server
 func MakeServer(ip string, port string, nod *node.DHTnode) {
 	receive := ip + ":" + port
 	node1 = nod
@@ -103,7 +123,7 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HelloHandler)
 	r.HandleFunc("/nodes", NodesHandler)
-	http.Handle("/", r)
+	http.Handle("/", &MyServer{r})
 
-	http.ListenAndServe(receive, r)
+	http.ListenAndServe(receive, nil)
 }

@@ -16,7 +16,7 @@
 </head>
 <body>
 
-<div ng-app="" ng-controller="nodeController"> 			
+<div ng-app="myApp" ng-controller="MainCtrl"> 			
 	<div class="row">
 		<div ng-class="{'panel-primary': nodeIsSelected, 'panel-info': !nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
 			<div  class="panel-heading">External node (by default successor of local)</div>
@@ -93,7 +93,18 @@
 </div>
 
 <script>
-function nodeController($scope,$http) {
+
+var app = angular.module('myApp', []);
+
+app.config(function($httpProvider) {
+  //Enable cross domain calls
+  $httpProvider.defaults.useXDomain = true;
+
+  //Remove the header used to identify ajax call  that would prevent CORS from working
+  delete $httpProvider.defaults.headers.common['X-Requested-With'];
+});
+
+app.controller('MainCtrl', function($scope, $http) {
 	$scope.init = function () {           
         $scope.nodeIsSelected = false;
         $scope.localIp = "127.0.0.1";
@@ -114,13 +125,8 @@ function nodeController($scope,$http) {
 		$http({
 			method: 'GET', 
 			url: urlReq,
-			respondType: 'json',
-	        headers: {
-	             'Accept': 'application/json',
-	             'Content-Type': 'application/json',
-	             'Access-Control-Allow-Origin' : '*',
-	             'Access-Control-Allow-Credentials': true
-	        }}).
+			respondType: 'json'//optionnel
+        }).
 		success(function(data, status, headers, config) {
 			$scope.nodes = data;
 			$scope.status = status;
@@ -149,32 +155,7 @@ function nodeController($scope,$http) {
 	  });
 	}
 
-	$scope.getNode = function (ident, ip, port, local){
-        var urlReq = 'http://' + ip + ':' + port + '/nodes/' + ident;
-		$http({
-			method: 'GET', 
-			url: urlReq ,
-			respondType: 'json',
-	        headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin' : '*',
-				'Access-Control-Allow-Credentials': true
-        }}).
-		success(function(data, status, headers, config) {	
-			if (local){	
-				$scope.localNode = data;			
-			}else{
-				$scope.distNode = data;
-			}			
-			$scope.status = status;
-		}).
-		error(function(data, status, headers, config) {
-			console.log("error status : "+ status);
-			$scope.status = status;
-		});
-	}
-}
+});
 </script>
 
 </body>
