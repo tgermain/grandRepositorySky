@@ -6,6 +6,7 @@ import (
 	"github.com/tgermain/grandRepositorySky/dht"
 	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared"
+	"github.com/tgermain/grandRepositorySky/web"
 	"runtime"
 	"time"
 )
@@ -54,6 +55,8 @@ func main() {
 				time.Sleep(time.Second * 5)
 				node1.PrintRing()
 			}
+
+			go web.MakeServer(Ip, Port, node1)
 			// go func() {
 			for {
 				time.Sleep(time.Second)

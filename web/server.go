@@ -13,6 +13,7 @@ import (
 	//"time" // to set a timer
 )
 
+//Objects parts ---------------------------------------------------------
 type FingerJSON struct {
 	IdKey    string
 	NodeResp DistantNodeJSON
@@ -32,32 +33,9 @@ type NodeJson struct {
 	Fingers     []FingerJSON
 }
 
-//TODO remove this function and replace it by a working one in the lib
-func MakeDHTNode(NewId *string, NewIp, NewPort string) *node.DHTnode {
-	if NewId == nil || *NewId == "" {
-
-		tempId := dht.GenerateNodeId()
-		NewId = &tempId
-	}
-	shared.Logger.Info("Creating node : \nId %.10v \nIP %s Port %.10s \n", *NewId, NewIp, NewPort)
-	//Set the globally shared information
-	shared.LocalId = *NewId
-	shared.LocalIp = NewIp
-	shared.LocalPort = NewPort
-
-	// create node with its commInterface
-	newNode, newSenderLink := node.MakeNode()
-
-	receiverLink := receiver.MakeReceiver(newNode, newSenderLink)
-	//Make the commInterface listen to incomming messages on globalIp, globalPort
-	receiverLink.StartAndListen()
-
-	return newNode
-}
-
-//one node example
-var id1 string = "01"
 var node1 *node.DHTnode
+
+//Method parts ----------------------------------------------------------
 
 // Hello Handler
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
@@ -65,8 +43,8 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "Hello World too")
 }
 
-//TODO graph vizualisation => get all nodes ?
-//TODO client all nodes loop request
+//TODO refactor handler url (not really a get nodes)
+//TODO send datas informations too
 func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("GET /noeuds")
 	//gives the local node infos and fingertable
@@ -107,7 +85,7 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(js)
 }
 
-//TODO printInfo (fingerTable of a node) request => getNode ?
+//TODO check if this one will be useful in the future, else discard
 func NodeHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	idNoeud := vars["idNoeud"]
@@ -119,57 +97,28 @@ func NodeHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//TODO new node request
+//TODO? launch lookup request
 
-//TODO launch lookup request
+//TODO post data
 
-//TODO launch disconnect a node
+//TODO update data
 
-//TODO launch updateFingerTable request
+//TODO remove data
 
-//TODO launch areYouAlive request
+//TODO:POSTPONE disconnect a node
 
-func main() {
-	shared.SetupLogger()
+//TODO:POSTPONE manual areYouAlive request
 
-	args := os.Args
-	port := "3000"
-	ip := "127.0.0.1"
-	portDist := "5000"
-	ipDist := "127.0.0.1"
-	//args : ipDist portDist ip port
-	if len(args) > 1 {
-		if len(args) > 2 {
-			if len(args) > 4 {
-				// ipDist portDist ip port
-				port = args[2]
-				ip = args[1]
-				portDist = args[4]
-				ipDist = args[3]
-			} else {
-				// ipDist portDist def_ip def_port
-				port = args[2]
-				ip = args[1]
-			}
-		} else {
-			// def_ipDist portDist def_ip def_port
-			port = args[1]
-		}
-	}
-
-	send := ipDist + ":" + portDist
+func MakeServer(ip string, port string, nod *node.DHTnode) {
 	receive := ip + ":" + port
-	fmt.Printf("dist node : %s\n", send)
+	node1 = nod
 	fmt.Printf("server listen on : %s\n", receive)
 
-	node1 = MakeDHTNode(&id1, ip, port)
-	//TODO add node1 to ring with parameter given
 	r := mux.NewRouter()
 	r.HandleFunc("/", HelloHandler)
 	r.HandleFunc("/nodes", NodesHandler)
 	r.HandleFunc("/nodes/{idNoeud}", NodeHandler)
 	http.Handle("/", r)
 
-	http.ListenAndServe(receive, r) // adding go before with timer gives a timeout
-	//time.Sleep(300 * time.Second)
+	http.ListenAndServe(receive, r)
 }
