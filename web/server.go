@@ -32,7 +32,7 @@ var node1 *node.DHTnode
 
 // Hello Handler
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("GET /")
+	shared.Logger.Info("GET /")
 	fmt.Fprintf(w, "Hello World too")
 }
 
