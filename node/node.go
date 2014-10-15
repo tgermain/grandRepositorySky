@@ -27,6 +27,8 @@ const GETDATATIMEOUT = time.Second * 5
 
 const CLEANREPLICASPERIOD = time.Second * 30
 
+const REPLICATEDATAPERIOD = time.Second * 20
+
 const NOTFOUNDMSG = "Data not found"
 
 //Mutex part ------------------------------------------------------------
@@ -493,7 +495,26 @@ func (d *DHTnode) cleanReplicas() {
 			shared.Datas.DelData(key)
 		}
 	}
+}
 
+func (d *DHTnode) replicateOwnedDatas() {
+	shared.Logger.Notice("Auto replication of datas")
+	for key, dataPiece := range shared.Datas.GetSet() {
+		//if we own those data
+		if dataPiece.Tag == shared.LocalId {
+			//set data to other node
+			d.setDataToReplica(key, dataPiece.Value)
+		}
+	}
+}
+
+func (d *DHTnode) replicateDataRoutine() {
+	//sleep not to execute updateFinger and replicateData at the same time
+	time.Sleep(time.Second * 5)
+	for {
+		time.Sleep(REPLICATEDATAPERIOD)
+		d.replicateOwnedDatas()
+	}
 }
 
 func (d *DHTnode) cleanReplicaRoutine() {
@@ -526,6 +547,8 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 	go daNode.updateSuccSuccRoutine()
+	go daNode.cleanReplicaRoutine()
+	go daNode.replicateDataRoutine()
 
 	return &daNode, daComInterface
 }
