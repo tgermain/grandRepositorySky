@@ -136,9 +136,9 @@ app.controller('MainCtrl', function($scope, $http) {
     $scope.getAllNodes = function (isInit){
     	var urlReq;
     	if ($scope.nodeIsSelected){
-    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/nodes';
+    		urlReq = '/nodes';
     	} else{
-    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/nodes';
+    		urlReq = '/nodes';
     	}    	
 		$http({
 			method: 'GET', 
