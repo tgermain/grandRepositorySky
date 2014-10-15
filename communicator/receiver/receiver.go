@@ -238,9 +238,9 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 }
 
 func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
-	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched", "forced") {
-		idAnswer, _ := msg.Parameters["idAnswer"]
+	if checkRequiredParams(msg.Parameters, "keySearched", "idSearched") {
 		shared.Logger.Info("Receiving a get data from %s", msg.Origin.Id)
+		keySearched, _ := msg.Parameters["keySearched"]
 		idSearched, _ := msg.Parameters["idSearched"]
 		_, forced := msg.Parameters["forced"]
 
@@ -250,7 +250,7 @@ func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
 		} else {
 			result = r.node.GetData(idSearched)
 		}
-		r.sender.SendGetDataResponse(&msg.Origin, idAnswer, result)
+		r.sender.SendGetDataResponse(&msg.Origin, keySearched, result)
 	}
 }
 

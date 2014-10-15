@@ -249,7 +249,7 @@ func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnsw
 	sendTo(destination, newMessage)
 }
 
-func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched string, forced bool) chan string {
+func (s *SenderLink) SendGetData(destination *shared.DistantNode, keySearched string, forced bool) chan string {
 	shared.Logger.Warning("Send get data to %s , keySearched %s  with forcing %t", destination.Id, keySearched, forced)
 	idAnswer := communicator.GenerateId()
 
@@ -258,8 +258,8 @@ func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched str
 		getOrigin(),
 		*destination,
 		map[string]string{
-			"idAnswer":   idAnswer,
-			"idSearched": idSearched,
+			"idAnswer":    idAnswer,
+			"keySearched": keySearched,
 		},
 	}
 	//forced force the node to get data, even if is not responsible
