@@ -12,23 +12,14 @@ import (
 )
 
 //Objects parts ---------------------------------------------------------
-type FingerJSON struct {
-	IdKey    string
-	NodeResp DistantNodeJSON
-}
 
-type DistantNodeJSON struct {
-	Id   string
-	Ip   string
-	Port string
-}
 type NodeJson struct {
 	Id          string
 	Ip          string
 	Port        string
-	Successor   DistantNodeJSON
-	Predecessor DistantNodeJSON
-	Fingers     []FingerJSON
+	Successor   *shared.DistantNode
+	Predecessor *shared.DistantNode
+	Fingers     []*node.FingerEntry
 }
 
 type MyServer struct {
@@ -49,31 +40,33 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 //TODO send datas informations too
 func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("GET /noeuds")
-	//gives the local node infos and fingertable
-	fingers := node1.GetFingerTable()
-	fingersJSON := make([]FingerJSON, len(fingers))
-	for key, value := range fingers {
-		if value != nil {
-			nodeResp := value.NodeResp
-			var nodeRespJSON DistantNodeJSON
-			if nodeResp != nil {
-				nodeRespJSON = DistantNodeJSON{nodeResp.Id, nodeResp.Ip, nodeResp.Port}
-			} else {
-				nodeRespJSON = DistantNodeJSON{}
-			}
-			entry := FingerJSON{value.IdKey, nodeRespJSON}
-			fingersJSON[key] = entry
-		} else {
-			entry := FingerJSON{}
-			fingersJSON[key] = entry
-		}
-	}
-	succ := node1.GetSuccesor()
-	succJSON := DistantNodeJSON{succ.Id, succ.Ip, succ.Port}
-	pred := node1.GetPredecessor()
-	predJSON := DistantNodeJSON{pred.Id, pred.Ip, pred.Port}
+	// res, _ := json.Marshal(node1.GetFingerTable())
+	// shared.Logger.Warning("%s", res)
+	// //gives the local node infos and fingertable
+	// fingers := node1.GetFingerTable()
+	// fingersJSON := make([]FingerJSON, len(fingers))
+	// for key, value := range fingers {
+	// 	if value != nil {
+	// 		nodeResp := value.NodeResp
+	// 		var nodeRespJSON DistantNodeJSON
+	// 		if nodeResp != nil {
+	// 			nodeRespJSON = DistantNodeJSON{nodeResp.Id, nodeResp.Ip, nodeResp.Port}
+	// 		} else {
+	// 			nodeRespJSON = DistantNodeJSON{}
+	// 		}
+	// 		entry := FingerJSON{value.IdKey, nodeRespJSON}
+	// 		fingersJSON[key] = entry
+	// 	} else {
+	// 		entry := FingerJSON{}
+	// 		fingersJSON[key] = entry
+	// 	}
+	// }
+	// succ := node1.GetSuccesor()
+	// succJSON := DistantNodeJSON{succ.Id, succ.Ip, succ.Port}
+	// pred := node1.GetPredecessor()
+	// predJSON := DistantNodeJSON{pred.Id, pred.Ip, pred.Port}
 
-	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, succJSON, predJSON, fingersJSON}
+	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, node1.GetSuccesor(), node1.GetPredecessor(), node1.GetFingerTable()}
 	js, err := json.Marshal(node1Json)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
