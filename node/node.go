@@ -35,14 +35,14 @@ var mutexPred = &sync.Mutex{}
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	fingers     []*fingerEntry
+	fingers     []*FingerEntry
 	successor   *shared.DistantNode
 	succSucc    *shared.DistantNode
 	predecessor *shared.DistantNode
 	commLib     *sender.SenderLink
 }
 
-type fingerEntry struct {
+type FingerEntry struct {
 	IdKey    string
 	NodeResp *shared.DistantNode
 }
@@ -213,7 +213,7 @@ func (node *DHTnode) UpdateFingerTable() {
 				fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
 				responsibleNode := node.Lookup(fingerId)
 				if responsibleNode != nil {
-					node.fingers[i] = &fingerEntry{
+					node.fingers[i] = &FingerEntry{
 						fingerId,
 						&shared.DistantNode{
 							responsibleNode.Id,
@@ -273,7 +273,7 @@ func (d *DHTnode) GetSuccSucc() *shared.DistantNode {
 	return &temp
 }
 
-func (d *DHTnode) GetFingerTable() []*fingerEntry {
+func (d *DHTnode) GetFingerTable() []*FingerEntry {
 	temp := d.fingers
 	return temp
 }
@@ -484,7 +484,7 @@ func (d *DHTnode) cleanReplicaRoutine() {
 func MakeNode() (*DHTnode, *sender.SenderLink) {
 	daComInterface := sender.NewSenderLink()
 	daNode := DHTnode{
-		fingers: make([]*fingerEntry, SPACESIZE),
+		fingers: make([]*FingerEntry, SPACESIZE),
 		commLib: daComInterface,
 	}
 	mySelf := daNode.ToDistantNode()
