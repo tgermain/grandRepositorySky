@@ -67,7 +67,7 @@ func main() {
 	}
 	rootCmd.Flags().StringVarP(&Id, "Id of the node", "n", "", "Id you want for your node")
 	rootCmd.Flags().StringVarP(&Ip, "Ip of the node", "i", "localhost", "Ip you want for your node")
-	rootCmd.Flags().StringVarP(&Port, "Port of the node", "p", "2222", "port you want for your node")
+	rootCmd.Flags().StringVarP(&Port, "Port of the node", "p", "4321", "port you want for your node")
 	rootCmd.Flags().BoolVarP(&join, "joining ?", "j", false, "you wanna join ?")
 	rootCmd.Flags().StringVarP(&DistIp, "Ip of the distante node", "w", "localhost", "Ip you want for your node")
 	rootCmd.Flags().StringVarP(&DistPort, "Port of the distante node", "d", "4321", "port you want for your node")

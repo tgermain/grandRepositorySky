@@ -13,23 +13,14 @@ import (
 )
 
 //Objects parts ---------------------------------------------------------
-type FingerJSON struct {
-	IdKey    string
-	NodeResp DistantNodeJSON
-}
 
-type DistantNodeJSON struct {
-	Id   string
-	Ip   string
-	Port string
-}
 type NodeJson struct {
 	Id          string
 	Ip          string
 	Port        string
-	Successor   DistantNodeJSON
-	Predecessor DistantNodeJSON
-	Fingers     []FingerJSON
+	Successor   *shared.DistantNode
+	Predecessor *shared.DistantNode
+	Fingers     []*node.FingerEntry
 	Datas       dataSet.DataSet
 }
 
@@ -43,7 +34,7 @@ var node1 *node.DHTnode
 
 // Hello Handler
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("GET /")
+	shared.Logger.Info("GET /")
 	fmt.Fprintf(w, "Hello World too")
 }
 
@@ -51,31 +42,8 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 //TODO send datas informations too
 func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("GET /noeuds")
-	//gives the local node infos and fingertable
-	fingers := node1.GetFingerTable()
-	fingersJSON := make([]FingerJSON, len(fingers))
-	for key, value := range fingers {
-		if value != nil {
-			nodeResp := value.NodeResp
-			var nodeRespJSON DistantNodeJSON
-			if nodeResp != nil {
-				nodeRespJSON = DistantNodeJSON{nodeResp.Id, nodeResp.Ip, nodeResp.Port}
-			} else {
-				nodeRespJSON = DistantNodeJSON{}
-			}
-			entry := FingerJSON{value.IdKey, nodeRespJSON}
-			fingersJSON[key] = entry
-		} else {
-			entry := FingerJSON{}
-			fingersJSON[key] = entry
-		}
-	}
-	succ := node1.GetSuccesor()
-	succJSON := DistantNodeJSON{succ.Id, succ.Ip, succ.Port}
-	pred := node1.GetPredecessor()
-	predJSON := DistantNodeJSON{pred.Id, pred.Ip, pred.Port}
 
-	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, succJSON, predJSON, fingersJSON, shared.Datas}
+	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, node1.GetSuccesor(), node1.GetPredecessor(), node1.GetFingerTable(), shared.Datas}
 	js, err := json.Marshal(node1Json)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -122,6 +90,7 @@ func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	//if origin := req.Header.Get("Origin"); origin != "" {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Header().Set("Accept", "application/json")
+	rw.Header().Set("Accept-Charset", "utf-8")
 	rw.Header().Set("Access-Control-Allow-Credentials", "true")
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -143,7 +112,11 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	fmt.Printf("server listen on : %s\n", receive)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", HelloHandler)
+	// r.HandleFunc("/", HelloHandler)
+	//serv staticly index.html
+	fs := http.FileServer(http.Dir("web/client"))
+	r.Handle("/", fs)
+
 	r.HandleFunc("/nodes", NodesHandler)
 	r.HandleFunc("CHORDNODE/storage", DataPostHandler).Methods("POST")
 	r.HandleFunc("CHORDNODE/storage/{key]", DataPutHandler).Methods("PUT")
