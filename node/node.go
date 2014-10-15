@@ -27,6 +27,8 @@ const GETDATATIMEOUT = time.Second * 5
 
 const CLEANREPLICASPERIOD = time.Second * 30
 
+const REPLICATEDATAPERIOD = time.Second * 20
+
 const NOTFOUNDMSG = "Data not found"
 
 //Mutex part ------------------------------------------------------------
@@ -376,9 +378,36 @@ func (d *DHTnode) GetLocalData(hashedKey string) string {
 	return shared.Datas.GetData(hashedKey).Value
 }
 
-//if data are local
-//send setData to replicas
-//else find where is data -> lookup, relay request and prepare to response
+func (d *DHTnode) SetData(hashedKey, value string) {
+	if d.IsResponsible(hashedKey) {
+		//if data are local
+		//new data
+		d.SetLocalData(hashedKey, value, shared.LocalId)
+		//->send setData to replicas
+		d.setDataToReplica(hashedKey, value)
+	} else {
+		//else find where is data -> lookup, relay request NO RESPONSE
+
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendSetData(dest, hashedKey, value, false)
+	}
+}
+
+func (d *DHTnode) setDataToReplica(hashedKey, value string) {
+	//for each place where we want replicas
+	for _, v := range d.getReplicasPlaces() {
+		d.commLib.SendSetData(v, hashedKey, value, true)
+	}
+}
+
+//used in receiver
+func (d *DHTnode) SetLocalData(hashedKey, value, tag string) {
+
+	if !shared.Datas.SetData(hashedKey, tag, value) {
+		shared.Logger.Warning("Key %s already exist", hashedKey)
+	}
+}
 
 func (d *DHTnode) getReplicas(hashedKey string) []string {
 	//get the datas from both replica aka pred and succ
@@ -466,7 +495,26 @@ func (d *DHTnode) cleanReplicas() {
 			shared.Datas.DelData(key)
 		}
 	}
+}
 
+func (d *DHTnode) replicateOwnedDatas() {
+	shared.Logger.Notice("Auto replication of datas")
+	for key, dataPiece := range shared.Datas.GetSet() {
+		//if we own those data
+		if dataPiece.Tag == shared.LocalId {
+			//set data to other node
+			d.setDataToReplica(key, dataPiece.Value)
+		}
+	}
+}
+
+func (d *DHTnode) replicateDataRoutine() {
+	//sleep not to execute updateFinger and replicateData at the same time
+	time.Sleep(time.Second * 5)
+	for {
+		time.Sleep(REPLICATEDATAPERIOD)
+		d.replicateOwnedDatas()
+	}
 }
 
 func (d *DHTnode) cleanReplicaRoutine() {
@@ -499,6 +547,8 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	go daNode.heartBeatRoutine()
 	go daNode.updateFingersRoutine()
 	go daNode.updateSuccSuccRoutine()
+	go daNode.cleanReplicaRoutine()
+	go daNode.replicateDataRoutine()
 
 	return &daNode, daComInterface
 }

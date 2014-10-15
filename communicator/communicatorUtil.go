@@ -24,6 +24,7 @@ const (
 	GETSUCCESORERESPONSE                        //11
 	GETDATA                                     //12
 	GETDATARESPONSE                             //13
+	SETDATA                                     //14
 )
 
 var messageTypes = []string{
@@ -41,6 +42,7 @@ var messageTypes = []string{
 	"get successor response",
 	"get data",
 	"get data response",
+	"set data",
 }
 
 func (mt MessageType) String() string {
