@@ -41,22 +41,14 @@ func main() {
 	var Port string
 	var DistIp string
 	var DistPort string
+	var staticPath string
 	var join bool
 
 	rootCmd := &cobra.Command{Use: "grandRepositorySky",
 		Run: func(cmd *cobra.Command, args []string) {
-			node1 := MakeDHTNode(&Id, Ip, Port)
-			if join {
-				node1.JoinRing(&shared.DistantNode{
-					Id:   "A",
-					Ip:   DistIp,
-					Port: DistPort,
-				})
-				time.Sleep(time.Second * 5)
-				node1.PrintRing()
-			}
+			node := MakeDHTNode(&Id, Ip, Port)
 
-			go web.MakeServer(Ip, Port, node1)
+			go web.MakeServer(Ip, Port, node, staticPath)
 			// go func() {
 			for {
 				time.Sleep(time.Second)
@@ -66,10 +58,11 @@ func main() {
 		},
 	}
 	rootCmd.Flags().StringVarP(&Id, "Id of the node", "n", "", "Id you want for your node")
-	rootCmd.Flags().StringVarP(&Ip, "Ip of the node", "i", "localhost", "Ip you want for your node")
+	rootCmd.Flags().StringVarP(&Ip, "Ip of the node", "i", "", "Ip you want for your node")
 	rootCmd.Flags().StringVarP(&Port, "Port of the node", "p", "4321", "port you want for your node")
 	rootCmd.Flags().BoolVarP(&join, "joining ?", "j", false, "you wanna join ?")
 	rootCmd.Flags().StringVarP(&DistIp, "Ip of the distante node", "w", "localhost", "Ip you want for your node")
 	rootCmd.Flags().StringVarP(&DistPort, "Port of the distante node", "d", "4321", "port you want for your node")
+	rootCmd.Flags().StringVarP(&staticPath, "path to static ressources", "s", "web/client", "path to static ressources")
 	rootCmd.Execute()
 }

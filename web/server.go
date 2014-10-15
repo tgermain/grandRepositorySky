@@ -106,7 +106,7 @@ func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 //create a functionnal server
-func MakeServer(ip string, port string, nod *node.DHTnode) {
+func MakeServer(ip string, port string, nod *node.DHTnode, path string) {
 	receive := ip + ":" + port
 	node1 = nod
 	fmt.Printf("server listen on : %s\n", receive)
@@ -114,7 +114,7 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	r := mux.NewRouter()
 	// r.HandleFunc("/", HelloHandler)
 	//serv staticly index.html
-	fs := http.FileServer(http.Dir("web/client"))
+	fs := http.FileServer(http.Dir(path))
 	r.Handle("/", fs)
 
 	r.HandleFunc("/nodes", NodesHandler)
