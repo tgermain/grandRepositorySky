@@ -268,6 +268,21 @@ func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
 	}
 }
 
+func (r *ReceiverLink) receiveSetData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "key", "value") {
+		shared.Logger.Info("Receiving a set data from %s", msg.Origin.Id)
+		key, _ := msg.Parameters["key"]
+		value, _ := msg.Parameters["value"]
+		tag, forced := msg.Parameters["forced"]
+
+		if forced {
+			r.node.SetLocalData(key, value, tag)
+		} else {
+			r.node.SetData(key, value)
+		}
+	}
+}
+
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {
 		_, ok := params[v]

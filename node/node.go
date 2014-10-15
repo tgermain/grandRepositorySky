@@ -376,9 +376,35 @@ func (d *DHTnode) GetLocalData(hashedKey string) string {
 	return shared.Datas.GetData(hashedKey).Value
 }
 
-	//if data are local
-	//send setData to replicas
-	//else find where is data -> lookup, relay request and prepare to response
+func (d *DHTnode) SetData(hashedKey, value string) {
+	if d.IsResponsible(hashedKey) {
+		//if data are local
+		//new data
+		d.SetLocalData(hashedKey, value, shared.LocalId)
+		//->send setData to replicas
+		d.setDataToReplica(hashedKey, value)
+	} else {
+		//else find where is data -> lookup, relay request NO RESPONSE
+
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendSetData(dest, hashedKey, value, false)
+	}
+}
+
+func (d *DHTnode) setDataToReplica(hashedKey, value string) {
+	//for each place where we want replicas
+	for _, v := range d.getReplicasPlaces() {
+		d.commLib.SendSetData(v, hashedKey, value, true)
+	}
+}
+
+//used in receiver
+func (d *DHTnode) SetLocalData(hashedKey, value, tag string) {
+
+	if !shared.Datas.SetData(hashedKey, tag, value) {
+		shared.Logger.Warning("Key %s already exist", hashedKey)
+	}
 }
 
 func (d *DHTnode) getReplicas(hashedKey string) []string {

@@ -291,6 +291,29 @@ func (s *SenderLink) SendGetDataResponse(destination *shared.DistantNode, idAnsw
 	sendTo(destination, newMessage)
 }
 
+func (s *SenderLink) SendSetData(destination *shared.DistantNode, key, value string, forced bool) {
+	shared.Logger.Warning("Send Set data to %s , key %s , value %s with forcing %t", destination.Id, key, value, forced)
+
+	newMessage := &communicator.Message{
+		communicator.SETDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"key":   key,
+			"value": value,
+		},
+	}
+	//forced force the node to set the ata with given tag
+	//force true -> set data with the origin given tag (replica)
+	//force false -> set data with destination tag (ownership of data)
+	if forced {
+		newMessage.Parameters["forced"] = shared.LocalId
+	}
+
+	sendTo(destination, newMessage)
+
+}
+
 func NewSenderLink() *SenderLink {
 	shared.Logger.Info("New sender Link")
 	return new(SenderLink)
