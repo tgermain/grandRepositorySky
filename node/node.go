@@ -37,16 +37,16 @@ var mutexPred = &sync.Mutex{}
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	fingers     []*fingerEntry
+	fingers     []*FingerEntry
 	successor   *shared.DistantNode
 	succSucc    *shared.DistantNode
 	predecessor *shared.DistantNode
 	commLib     *sender.SenderLink
 }
 
-type fingerEntry struct {
+type FingerEntry struct {
 	IdKey    string
-	nodeResp *shared.DistantNode
+	NodeResp *shared.DistantNode
 }
 
 //Method parts ----------------------------------------------------------
@@ -162,13 +162,13 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 
 	for _, v := range currentNode.fingers {
 		if v != nil {
-			if dht.Between(v.nodeResp.Id, shared.LocalId, IdToSearch) {
+			if dht.Between(v.NodeResp.Id, shared.LocalId, IdToSearch) {
 
 				//If the finger lead the node to itself, it's not an optimization
-				if v.nodeResp.Id != shared.LocalId {
+				if v.NodeResp.Id != shared.LocalId {
 
 					//if a member of finger table brought closer than the actual one, we udate the value of minDistance and of the chosen finger
-					currentDistance := dht.Distance([]byte(v.nodeResp.Id), []byte(IdToSearch), SPACESIZE)
+					currentDistance := dht.Distance([]byte(v.NodeResp.Id), []byte(IdToSearch), SPACESIZE)
 
 					// x.cmp(y)
 					// -1 if x <  y
@@ -177,10 +177,10 @@ func (currentNode *DHTnode) FindClosestNode(IdToSearch string) *shared.DistantNo
 
 					if minDistance.Cmp(currentDistance) == 1 {
 
-						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.nodeResp.Id, bestFinger.Id)
+						shared.Logger.Notice("Better finger ellected ! Lookup for [%s] ->[%s] instead of [%s]", IdToSearch, v.NodeResp.Id, bestFinger.Id)
 
 						minDistance = currentDistance
-						bestFinger = v.nodeResp
+						bestFinger = v.NodeResp
 
 					}
 				}
@@ -203,9 +203,9 @@ func (node *DHTnode) UpdateFingerTable() {
 				responsibleNode := node.Lookup(node.fingers[i].IdKey)
 				if responsibleNode != nil {
 
-					if node.fingers[i].nodeResp.Id != responsibleNode.Id {
+					if node.fingers[i].NodeResp.Id != responsibleNode.Id {
 						shared.Logger.Info("Update of finger %d with value %s", i, responsibleNode.Id)
-						node.fingers[i].nodeResp = responsibleNode
+						node.fingers[i].NodeResp = responsibleNode
 					}
 
 				} else {
@@ -215,7 +215,7 @@ func (node *DHTnode) UpdateFingerTable() {
 				fingerId, _ := dht.CalcFinger([]byte(shared.LocalId), i+1, SPACESIZE)
 				responsibleNode := node.Lookup(fingerId)
 				if responsibleNode != nil {
-					node.fingers[i] = &fingerEntry{
+					node.fingers[i] = &FingerEntry{
 						fingerId,
 						&shared.DistantNode{
 							responsibleNode.Id,
@@ -275,7 +275,7 @@ func (d *DHTnode) GetSuccSucc() *shared.DistantNode {
 	return &temp
 }
 
-func (d *DHTnode) GetFingerTable() []*fingerEntry {
+func (d *DHTnode) GetFingerTable() []*FingerEntry {
 	temp := d.fingers
 	return temp
 }
@@ -378,7 +378,8 @@ func (d *DHTnode) GetLocalData(hashedKey string) string {
 	return shared.Datas.GetData(hashedKey).Value
 }
 
-func (d *DHTnode) SetData(hashedKey, value string) {
+func (d *DHTnode) SetData(key, value string) {
+	hashedKey := dht.Sha1hash(key)
 	if d.IsResponsible(hashedKey) {
 		//if data are local
 		//new data
@@ -556,7 +557,7 @@ func (d *DHTnode) cleanReplicaRoutine() {
 func MakeNode() (*DHTnode, *sender.SenderLink) {
 	daComInterface := sender.NewSenderLink()
 	daNode := DHTnode{
-		fingers: make([]*fingerEntry, SPACESIZE),
+		fingers: make([]*FingerEntry, SPACESIZE),
 		commLib: daComInterface,
 	}
 	mySelf := daNode.ToDistantNode()
@@ -573,6 +574,8 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	go daNode.updateSuccSuccRoutine()
 	go daNode.cleanReplicaRoutine()
 	go daNode.replicateDataRoutine()
+
+	go daNode.UpdateFingerTable()
 
 	return &daNode, daComInterface
 }
