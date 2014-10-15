@@ -211,7 +211,7 @@ func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAn
 }
 
 func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.DistantNode {
-	shared.Logger.Warning("Send get succ to %s ", destination.Id)
+	shared.Logger.Info("Send get succ to %s ", destination.Id)
 	//generate id for pending heartBeat
 	idAnswer := communicator.GenerateId()
 
@@ -234,7 +234,7 @@ func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.Di
 }
 
 func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnswer string, daSucc *shared.DistantNode) {
-	shared.Logger.Warning("Send get successor response to %s ", destination.Id)
+	shared.Logger.Info("Send get successor response to %s ", destination.Id)
 	newMessage := &communicator.Message{
 		communicator.GETSUCCESORERESPONSE,
 		getOrigin(),
@@ -250,7 +250,7 @@ func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnsw
 }
 
 func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched string, forced bool) chan string {
-	shared.Logger.Warning("Send get data to %s ", destination.Id)
+	shared.Logger.Warning("Send get data to %s , keySearched %s  with forcing %t", destination.Id, keySearched, forced)
 	idAnswer := communicator.GenerateId()
 
 	newMessage := &communicator.Message{
@@ -278,7 +278,7 @@ func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched str
 }
 
 func (s *SenderLink) SendGetDataResponse(destination *shared.DistantNode, idAnswer string, valueRequested string) {
-	shared.Logger.Info("Send get data response to %s ", destination.Id)
+	shared.Logger.Warning("Send get data response to %s ", destination.Id)
 	newMessage := &communicator.Message{
 		communicator.GETDATARESPONSE,
 		getOrigin(),

@@ -206,7 +206,7 @@ func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
 
 func (r *ReceiverLink) receiveGetSuccesor(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "idAnswer") {
-		shared.Logger.Warning("Receiving a get successor from %s", msg.Origin.Id)
+		shared.Logger.Info("Receiving a get successor from %s", msg.Origin.Id)
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
 		go r.sender.SendGetSuccResponse(&msg.Origin, idAnswer, r.node.GetSuccesor())
@@ -222,7 +222,7 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 		succSuccIp, _ := msg.Parameters["succSuccIp"]
 		succSuccPort, _ := msg.Parameters["succSuccPort"]
 
-		shared.Logger.Warning("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
+		shared.Logger.Info("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
 
 		succSucc := shared.DistantNode{
 			succSuccID,
@@ -239,8 +239,8 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 
 func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched", "forced") {
-		shared.Logger.Warning("Receiving a get data from %s", msg.Origin.Id)
 		idAnswer, _ := msg.Parameters["idAnswer"]
+		shared.Logger.Info("Receiving a get data from %s", msg.Origin.Id)
 		idSearched, _ := msg.Parameters["idSearched"]
 		_, forced := msg.Parameters["forced"]
 
@@ -259,7 +259,7 @@ func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
 		idAnswer, _ := msg.Parameters["idAnswer"]
 		value, _ := msg.Parameters["value"]
 
-		shared.Logger.Warning("Receiving a get data response from %s for %s", msg.Origin.Id, idAnswer)
+		shared.Logger.Info("Receiving a get data response from %s for %s", msg.Origin.Id, idAnswer)
 
 		chanResp, ok2 := communicator.PendingGetData[idAnswer]
 		if ok2 {
