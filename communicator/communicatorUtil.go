@@ -11,15 +11,19 @@ import (
 type MessageType int
 
 const (
-	LOOKUP            MessageType = iota + 1 //1
-	LOOKUPRESPONSE                           //2
-	UPDATESUCCESSOR                          //3
-	UPDATEPREDECESSOR                        //4
-	PRINTRING                                //5
-	JOINRING                                 //6
-	UPDATEFINGERTABLE                        //7
-	AREYOUALIVE                              //8
-	IAMALIVE                                 //9
+	LOOKUP               MessageType = iota + 1 //1
+	LOOKUPRESPONSE                              //2
+	UPDATESUCCESSOR                             //3
+	UPDATEPREDECESSOR                           //4
+	PRINTRING                                   //5
+	JOINRING                                    //6
+	UPDATEFINGERTABLE                           //7
+	AREYOUALIVE                                 //8
+	IAMALIVE                                    //9
+	GETSUCCESORE                                //10
+	GETSUCCESORERESPONSE                        //11
+	GETDATA                                     //12
+	GETDATARESPONSE                             //13
 )
 
 var messageTypes = []string{
@@ -33,6 +37,10 @@ var messageTypes = []string{
 	"update finger table",
 	"are you alive ?",
 	"i am alive",
+	"get successor",
+	"get successor response",
+	"get data",
+	"get data response",
 }
 
 func (mt MessageType) String() string {
@@ -51,6 +59,8 @@ type Message struct {
 //Global variable -------------------------------------------------------
 var PendingLookups = make(map[string]chan shared.DistantNode)
 var PendingHearBeat = make(map[string]chan shared.DistantNode)
+var PendingGetSucc = make(map[string]chan shared.DistantNode)
+var PendingGetData = make(map[string]chan string)
 
 //Exported methods ------------------------------------------------------
 func MarshallMessage(msg *Message) []byte {

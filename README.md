@@ -3,7 +3,7 @@ GrandRepositorySky
 
 Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DHT) based on _Chord_ protocol (see [This paper ](http://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf))
 
-:construction: Current objective :construction: : **2** :suspect:
+:construction: Current objective :construction: : **3** :godmode:
 ---------------------
 
 ### 6 objectives : 
@@ -13,9 +13,9 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 	- finger table
 2. :wrench:Fully working chord DHT
 	- separate nodes and makes them communicate
+	- Manage data when nodes leave or enter the network
 3. Replication
 	- Add data to nodes
-	- Manage data when nodes leave or enter the network
 4. Web service
 	- _POST_ : new key-value pair
 	- _GET_ : find value of a key
@@ -61,7 +61,7 @@ When a node enter the ring, we initialize its fingers table (to be sure that its
 Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for svg² output
 
 ## 2. Network communication
-### Ring stabilization TODO
+### Ring stabilization DONE
 To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
 **Goroutine** ?
 
@@ -69,10 +69,10 @@ SPRINT :
 - Make tests
 
 TODO (tim) :
-- Handle when a node quit the ring (not gracefuly)
 
 Done : 
--semaphore for critical part (predecessor, successor maybe others ...)
+- Handle when a node quit the ring (not gracefuly)
+- semaphore for critical part (predecessor, successor maybe others ...)
 - Make a library to send/receive messages 		
 - Do logs (with timestamps, colors ?) 		
 - Modify the existing code to make stuffs work 
@@ -89,15 +89,6 @@ Done :
 - (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
 
 
-###CLI interface
-Useful ? **Objective 4** provide a web service, we just have to do more things than just thoses (and make a page to visualize and act on the node)
-abilities : 
-- lookup
-- updateFingersTable
-- printInformation (fingerTable)
-- printGraphViz
-- areYouAlive
-
 ###message format
 - origin (first emiter of the message)
 	- IP
@@ -106,12 +97,14 @@ abilities :
 	- IP
 	- Port
 - type of operation :
-	- IAmNewHere *done*
-	- update successor/predecessor *done*
-	- updateFingerTable  *done*
-	- lookup / lookupResponse *done*
-	- gimmeInfo / IAmTheNSA **TODO**
-	- AreYouAlive / IAmAlive *done*
+	- LOOKUP / LOOKUPRESPONSE
+	- UPDATESUCCESSOR
+	- UPDATEPREDECESSOR
+	- UPDATEFINGERTABLE
+	- PRINTRING
+	- JOINRING
+	- AREYOUALIVE / IAMALIVE
+	- GETSUCCESORE / GETSUCCESORERESPONSE
 
 
 Work in progress (Al):
@@ -127,7 +120,9 @@ TODO :
 
 
 ## 3. Data & Replication
-facebook duplicate data of one node on 2 other nodes : enough ?
+facebook duplicate data of one node on 2 other nodes : enough !
+
+- Data place on node A is replicated to A.successor and A.predecessor
 
 ###launch parameters 
 - (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
@@ -138,3 +133,11 @@ facebook duplicate data of one node on 2 other nodes : enough ?
 
 ### new messages type
 - DataReplication
+
+TODO : 
+- methods in node.go to add, retreive, modify and delete a (key-value) data
+- new messages : 
+	- POSTDATA
+	- GETDATA / GETDATARESPONSE
+	- MODIFYDATA
+	- DELETEDATA

@@ -32,10 +32,12 @@ func settingUpUdpConnection(destination *shared.DistantNode) *net.UDPConn {
 func sendTo(destination *shared.DistantNode, msg *communicator.Message) {
 	conn := settingUpUdpConnection(destination)
 	// defer conn.Close()
+	go func() {
 
-	payload := communicator.MarshallMessage(msg)
-	conn.Write(payload)
-	shared.Logger.Debug("Sending %#v", msg)
+		payload := communicator.MarshallMessage(msg)
+		conn.Write(payload)
+		shared.Logger.Debug("Sending %#v", msg)
+	}()
 }
 
 //Convenient method to obtain a bare communicator.Message with only the origin set to global IP/port
@@ -136,7 +138,7 @@ func (s *SenderLink) SendLookup(destination *shared.DistantNode, idSearched stri
 }
 
 func (s *SenderLink) RelayLookup(destination *shared.DistantNode, msg *communicator.Message) {
-	shared.Logger.Info("Relay lookup from %s to %s", msg.Origin.Id, destination.Id)
+	shared.Logger.Info("Relay lookup for %s from %s to %s", msg.Parameters["idSearched"], msg.Origin.Id, destination.Id)
 
 	sendTo(destination, msg)
 }
@@ -147,14 +149,15 @@ func (s *SenderLink) RelayPrintRing(destination *shared.DistantNode, msg *commun
 	sendTo(destination, msg)
 }
 
-func (s *SenderLink) SendLookupResponse(destination *shared.DistantNode, idAnswer string) {
+func (s *SenderLink) SendLookupResponse(destination *shared.DistantNode, idAnswer string, idSearched string) {
 	shared.Logger.Info("Send lookup response to %s ", destination.Id)
 	newMessage := &communicator.Message{
 		communicator.LOOKUPRESPONSE,
 		getOrigin(),
 		*destination,
 		map[string]string{
-			"idAnswer": idAnswer,
+			"idAnswer":   idAnswer,
+			"idSearched": idSearched,
 		},
 	}
 	sendTo(destination, newMessage)
@@ -202,6 +205,87 @@ func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAn
 		*destination,
 		map[string]string{
 			"idAnswer": idAnswer,
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
+func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.DistantNode {
+	shared.Logger.Warning("Send get succ to %s ", destination.Id)
+	//generate id for pending heartBeat
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.GETSUCCESORE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+		},
+	}
+
+	//create an entry in the pendingLookup table
+	responseChan := make(chan shared.DistantNode)
+	communicator.PendingGetSucc[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnswer string, daSucc *shared.DistantNode) {
+	shared.Logger.Warning("Send get successor response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.GETSUCCESORERESPONSE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer":     idAnswer,
+			"succSuccID":   string(daSucc.Id),
+			"succSuccIp":   string(daSucc.Ip),
+			"succSuccPort": string(daSucc.Port),
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
+func (s *SenderLink) SendGetData(destination *shared.DistantNode, idSearched string, forced bool) chan string {
+	shared.Logger.Warning("Send get data to %s ", destination.Id)
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.GETDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer":   idAnswer,
+			"idSearched": idSearched,
+		},
+	}
+	//forced force the node to get data, even if is not responsible
+	//force true -> get replica
+	//force false -> get data
+	if forced {
+		newMessage.Parameters["forced"] = ""
+	}
+	//create an entry in the pendingLookup table
+	responseChan := make(chan string)
+	communicator.PendingGetData[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendGetDataResponse(destination *shared.DistantNode, idAnswer string, valueRequested string) {
+	shared.Logger.Info("Send get data response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.GETDATARESPONSE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+			"value":    valueRequested,
 		},
 	}
 	sendTo(destination, newMessage)

@@ -7,7 +7,7 @@ import (
 	"github.com/tgermain/grandRepositorySky/shared"
 	"net"
 	"runtime"
-	"time"
+	// "time"
 )
 
 //Objects parts ---------------------------------------------------------
@@ -60,6 +60,22 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveHeartBeatResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.GETSUCCESORE:
+		{
+			r.receiveGetSuccesor(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETSUCCESORERESPONSE:
+		{
+			r.receiveGetSuccesorResponse(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETDATA:
+		{
+			r.receiveGetData(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETDATARESPONSE:
+		{
+			r.receiveGetDataResponse(&msg)
+		}
 	default:
 		{
 			//rejected mesage
@@ -83,8 +99,6 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -101,8 +115,6 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -120,7 +132,7 @@ func (r *ReceiverLink) receivePrintRing(msg *communicator.Message) {
 			//pass the request around
 			r.node.PrintNodeName(&currentString)
 			msg.Parameters["currentString"] = currentString
-			r.sender.RelayPrintRing(r.node.GetSuccesor(), msg)
+			go r.sender.RelayPrintRing(r.node.GetSuccesor(), msg)
 		}
 	}
 }
@@ -140,32 +152,29 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 		//Am I responsible for the key requested  ?
 		if r.node.IsResponsible(idSearched) {
 			shared.Logger.Info("I'm responsible !")
-			r.sender.SendLookupResponse(&msg.Origin, idAnswer)
+			go r.sender.SendLookupResponse(&msg.Origin, idAnswer, idSearched)
 		} else {
 			//no -> sending the request to the closest node
 			shared.Logger.Info("relay the lookup")
-			r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
+			go r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
 		}
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 
 }
 
 func (r *ReceiverLink) receiveLookupResponse(msg *communicator.Message) {
 	//heck if everything required is here
-	if checkRequiredParams(msg.Parameters, "idAnswer") {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched") {
+		idSearched, _ := msg.Parameters["idSearched"]
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
-		shared.Logger.Info("Receive a lookup response for : %s", idAnswer)
+		shared.Logger.Info("Receive a lookup response for : %s", idSearched)
 
 		chanResp, ok2 := communicator.PendingLookups[idAnswer]
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -179,9 +188,7 @@ func (r *ReceiverLink) receiveHeartBeat(msg *communicator.Message) {
 		shared.Logger.Info("Receiving a heartBeat from %s", msg.Origin.Id)
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
-		r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
-	} else {
-		//error missing parameter, do nothing ?
+		go r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
 	}
 }
 
@@ -194,12 +201,73 @@ func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
-//TODO a test !
+func (r *ReceiverLink) receiveGetSuccesor(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer") {
+		shared.Logger.Warning("Receiving a get successor from %s", msg.Origin.Id)
+		idAnswer, _ := msg.Parameters["idAnswer"]
+
+		go r.sender.SendGetSuccResponse(&msg.Origin, idAnswer, r.node.GetSuccesor())
+	}
+}
+
+func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "succSuccID",
+		"succSuccIp",
+		"succSuccPort") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		succSuccID, _ := msg.Parameters["succSuccID"]
+		succSuccIp, _ := msg.Parameters["succSuccIp"]
+		succSuccPort, _ := msg.Parameters["succSuccPort"]
+
+		shared.Logger.Warning("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
+
+		succSucc := shared.DistantNode{
+			succSuccID,
+			succSuccIp,
+			succSuccPort,
+		}
+
+		chanResp, ok2 := communicator.PendingGetSucc[idAnswer]
+		if ok2 {
+			chanResp <- succSucc
+		}
+	}
+}
+
+func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "idSearched", "forced") {
+		shared.Logger.Warning("Receiving a get data from %s", msg.Origin.Id)
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		idSearched, _ := msg.Parameters["idSearched"]
+		_, forced := msg.Parameters["forced"]
+
+		var result string
+		if forced {
+			result = r.node.GetLocalData(idSearched)
+		} else {
+			result = r.node.GetData(idSearched)
+		}
+		r.sender.SendGetDataResponse(&msg.Origin, idAnswer, result)
+	}
+}
+
+func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "value") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		value, _ := msg.Parameters["value"]
+
+		shared.Logger.Warning("Receiving a get data response from %s for %s", msg.Origin.Id, idAnswer)
+
+		chanResp, ok2 := communicator.PendingGetData[idAnswer]
+		if ok2 {
+			chanResp <- value
+		}
+	}
+}
+
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {
 		_, ok := params[v]
@@ -241,7 +309,7 @@ func (r *ReceiverLink) StartAndListen() {
 			}
 			payload := buffer[0:bytesReads]
 			go r.handleRequest(payload)
-			time.Sleep(time.Millisecond * 10)
+			// time.Sleep(time.Millisecond * 10)
 			runtime.Gosched()
 		}
 	}()
