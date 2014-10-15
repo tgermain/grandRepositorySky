@@ -114,7 +114,11 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	fmt.Printf("server listen on : %s\n", receive)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", HelloHandler)
+	// r.HandleFunc("/", HelloHandler)
+	//serv staticly index.html
+	fs := http.FileServer(http.Dir("web/client"))
+	r.Handle("/", fs)
+
 	r.HandleFunc("/nodes", NodesHandler)
 	http.Handle("/", &MyServer{r})
 
