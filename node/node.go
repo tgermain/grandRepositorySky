@@ -378,7 +378,8 @@ func (d *DHTnode) GetLocalData(hashedKey string) string {
 	return shared.Datas.GetData(hashedKey).Value
 }
 
-func (d *DHTnode) SetData(hashedKey, value string) {
+func (d *DHTnode) SetData(key, value string) {
+	hashedKey := dht.Sha1hash(key)
 	if d.IsResponsible(hashedKey) {
 		//if data are local
 		//new data
