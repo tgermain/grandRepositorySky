@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/tgermain/grandRepositorySky/dataSet"
 	"github.com/tgermain/grandRepositorySky/node"
 	"github.com/tgermain/grandRepositorySky/shared"
 	"net/http"
@@ -29,6 +30,7 @@ type NodeJson struct {
 	Successor   DistantNodeJSON
 	Predecessor DistantNodeJSON
 	Fingers     []FingerJSON
+	Datas       dataSet.DataSet
 }
 
 type MyServer struct {
@@ -73,7 +75,7 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	pred := node1.GetPredecessor()
 	predJSON := DistantNodeJSON{pred.Id, pred.Ip, pred.Port}
 
-	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, succJSON, predJSON, fingersJSON}
+	node1Json := NodeJson{shared.LocalId, shared.LocalIp, shared.LocalPort, succJSON, predJSON, fingersJSON, shared.Datas}
 	js, err := json.Marshal(node1Json)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,6 +83,26 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Write(js)
+}
+
+func DataPostHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("POST new data")
+	fmt.Fprintf(w, "ok")
+}
+
+func DataPutHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("PUT data")
+	fmt.Fprintf(w, "ok")
+}
+
+func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("DELETE data")
+	fmt.Fprintf(w, "ok")
+}
+
+func DataGetHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("GET data")
+	fmt.Fprintf(w, "ok")
 }
 
 //TODO? launch lookup request
@@ -123,6 +145,10 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HelloHandler)
 	r.HandleFunc("/nodes", NodesHandler)
+	r.HandleFunc("CHORDNODE/storage", DataPostHandler).Methods("POST")
+	r.HandleFunc("CHORDNODE/storage/{key]", DataPutHandler).Methods("PUT")
+	r.HandleFunc("CHORDNODE/storage/{key}", DataDeleteHandler).Methods("DELETE")
+	r.HandleFunc("CHORDNODE/storage/{key}", DataGetHandler).Methods("GET")
 	http.Handle("/", &MyServer{r})
 
 	http.ListenAndServe(receive, nil)
