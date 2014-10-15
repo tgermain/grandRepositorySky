@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset="UTF-8"> 
 <html>
 <head>
 	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
@@ -108,7 +109,7 @@ app.controller('MainCtrl', function($scope, $http) {
 	$scope.init = function () {           
         $scope.nodeIsSelected = false;
         $scope.localIp = "127.0.0.1";
-        $scope.localPort = "3000";
+        $scope.localPort = "4321";
 
         $scope.getAllNodes(true);      
     }
