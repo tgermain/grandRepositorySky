@@ -9,12 +9,15 @@ type PieceOfData struct {
 	Value string //the data
 }
 
-func (d *DataSet) SetData(key string, value PieceOfData) bool {
+func (d *DataSet) SetData(key, value, tag string) bool {
 	_, exist := d.set[key]
 	if exist {
 		return false
 	} else {
-		d.set[key] = value
+		d.set[key] = PieceOfData{
+			tag,
+			value,
+		}
 		return true
 	}
 }
