@@ -1,4 +1,4 @@
-package grandRepositorySky
+package main
 
 import (
 	"fmt"
