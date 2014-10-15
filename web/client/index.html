@@ -66,7 +66,10 @@
 		<div class="col-xs-12 col-md-8 panel panel-default">
 		<div class="panel-heading">datas control</div>
 			<div class="panel-body">
-			
+			<button class="btn btn-default" ng-click="getData()"> 
+				get
+			</button>
+
 			<button class="btn btn-default" ng-click="addData()"> 
 				add
 			</button>
@@ -85,7 +88,7 @@
 			<input class="form-control" id="inputKey" placeholder={{valueFocus}} ng-model="valueFocus">
 
 			<ul>
-				<li class="animate-repeat" ng-repeat="data in selectedNode.Datas" ng-click="console.log('select this data later')">
+				<li class="animate-repeat" ng-repeat="(key, data) in selectedNode.Datas.Set" ng-click="changeDataFocus(key, data)">
 					{{data}}
 				</li>
 			</ul>
@@ -156,17 +159,24 @@ app.controller('MainCtrl', function($scope, $http) {
 				$scope.distNode = $scope.localNode.Successor
 			} else {
 				if (!$scope.nodeIsSelected){
-					$scope.localNode = $scope.nodes;				
+					$scope.localNode = $scope.nodes;
+					$scope.selectedNode = $scope.localNode;			
 				} else{
-					$scope.distNode = $scope.nodes;		
+					$scope.distNode = $scope.nodes;	
+					$scope.selectedNode = $scope.distNode;	
 				}
 			}
 			if($scope.localNode){
 				$scope.localIp = $scope.localNode.Ip;
 				$scope.localPort = $scope.localNode.Port;
 			}
-			$scope.keyFocus = selectedNode.Datas[0];
-			$scope.valueFocus = selectedNode.Datas[0];
+
+			for (key in $scope.selectedNode.Datas.Set){
+				$scope.keyFocus = key;
+				$scope.valueFocus = $scope.selectedNode.Datas.Set[key].Value;
+				break;
+			}
+					
 		}).
 		error(function(data, status, headers, config) {
 			console.log("error status : "+ status);
@@ -175,16 +185,104 @@ app.controller('MainCtrl', function($scope, $http) {
 	  });
 	}
 
+	$scope.getData = function(){
+		var urlReq;
+    	if ($scope.nodeIsSelected){
+    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
+    	} else{
+    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
+    	}    	
+		$http({
+			method: 'GET', 
+			url: urlReq,
+			respondType: 'json'//optionnel
+        }).
+		success(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.status = status;
+		}).
+		error(function(data, status, headers, config) {
+			console.log("error status : "+ status);
+			$scope.status = status;
+	  });
+	}
+
 	$scope.addData = function(){
-		
+		console.log("post !")
+		var urlReq;
+    	if ($scope.nodeIsSelected){
+    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
+    	} else{
+    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
+    	}    	
+		$http({
+			method: 'POST', 
+			url: urlReq,
+			respondType: 'json',//optionnel
+			data: {
+				Key: $scope.keyFocus,
+				Value: $scope.valueFocus
+			}
+        }).
+		success(function(data, status, headers, config) {
+			console.log("posted !")
+			$scope.status = status;
+			$scope.getAllNodes(false);
+		}).
+		error(function(data, status, headers, config) {
+			console.log("error status : "+ status);
+			$scope.status = status;
+	  });
 	}
 
 	$scope.removeData = function(){
-
+		var urlReq;
+    	if ($scope.nodeIsSelected){
+    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
+    	} else{
+    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
+    	}    	
+		$http({
+			method: 'DELETE', 
+			url: urlReq,
+			respondType: 'json'//optionnel
+        }).
+		success(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.status = status;
+		}).
+		error(function(data, status, headers, config) {
+			console.log("error status : "+ status);
+			$scope.status = status;
+	  });
 	}
 
 	$scope.majData = function(){
+		var urlReq;
+    	if ($scope.nodeIsSelected){
+    		urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
+    	} else{
+    		urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
+    	}    	
+		$http({
+			method: 'PUT', 
+			url: urlReq,
+			respondType: 'json'//optionnel
+        }).
+		success(function(data, status, headers, config) {
+			$scope.nodes = data;
+			$scope.status = status;
+		}).
+		error(function(data, status, headers, config) {
+			console.log("error status : "+ status);
+			$scope.status = status;
+	  });
+	}
 
+	$scope.changeDataFocus = function(key, data){
+		console.log(data);
+		$scope.keyFocus = key;
+		$scope.valueFocus = data.Value;		
 	}
 
 
