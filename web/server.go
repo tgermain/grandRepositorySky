@@ -88,7 +88,7 @@ func DataGetHandler(w http.ResponseWriter, req *http.Request) {
 //wrap server handler function to activate CORS
 func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	//if origin := req.Header.Get("Origin"); origin != "" {
-	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Content-Type", "application/json, text/html")
 	rw.Header().Set("Accept", "application/json")
 	rw.Header().Set("Accept-Charset", "utf-8")
 	rw.Header().Set("Access-Control-Allow-Credentials", "true")
