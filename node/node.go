@@ -500,5 +500,7 @@ func MakeNode() (*DHTnode, *sender.SenderLink) {
 	go daNode.updateFingersRoutine()
 	go daNode.updateSuccSuccRoutine()
 
+	go daNode.UpdateFingerTable()
+
 	return &daNode, daComInterface
 }
