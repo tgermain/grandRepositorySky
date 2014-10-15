@@ -347,7 +347,7 @@ func (d *DHTnode) GetData(key string) string {
 	hashedKey := dht.Sha1hash(key)
 	//if data are local
 	if d.IsResponsible(hashedKey) {
-		return d.GetDataDemocratic(key)
+		return d.GetDataDemocratic(hashedKey)
 	} else {
 		//else find where is data -> lookup, relay request and prepare to response
 		dest := d.Lookup(hashedKey)
@@ -474,10 +474,34 @@ func (d *DHTnode) theMajority(replicas []string) string {
 	return replicas[0]
 }
 
-func (d *DHTnode) ModifyData() {
+func (d *DHTnode) ModifyData(key string, newValue string) {
 	//tuple space style !
 	//remove the old data
 	//create a new one
+}
+
+func (d *DHTnode) DeleteData(key string) {
+	//exposed method
+
+	hashedKey := dht.Sha1hash(key)
+	//if data are local
+	if d.IsResponsible(hashedKey) {
+		d.DeleteLocalData(hashedKey)
+	} else {
+		//else find where is data -> lookup, relay request
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendDeleteData(dest, hashedKey)
+	}
+}
+
+//used in receiver
+func (d *DHTnode) DeleteLocalData(hashedKey string) {
+	shared.Datas.DelData(hashedKey)
+	//for each place where we have replicas
+	for _, v := range d.getReplicasPlaces() {
+		d.commLib.SendDeleteData(v, hashedKey)
+	}
 }
 
 func (d *DHTnode) cleanReplicas() {

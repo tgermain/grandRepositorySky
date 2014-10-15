@@ -76,6 +76,10 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveGetDataResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.DELETEDATA:
+		{
+			r.receiveDeleteData(&msg)
+		}
 	default:
 		{
 			//rejected mesage
@@ -270,16 +274,25 @@ func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
 
 func (r *ReceiverLink) receiveSetData(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "key", "value") {
-		shared.Logger.Info("Receiving a set data from %s", msg.Origin.Id)
 		key, _ := msg.Parameters["key"]
 		value, _ := msg.Parameters["value"]
 		tag, forced := msg.Parameters["forced"]
+		shared.Logger.Info("Receiving a set data from %s with data %s", msg.Origin.Id, value)
 
 		if forced {
 			r.node.SetLocalData(key, value, tag)
 		} else {
 			r.node.SetData(key, value)
 		}
+	}
+}
+
+func (r *ReceiverLink) receiveDeleteData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "key") {
+		key, _ := msg.Parameters["key"]
+		shared.Logger.Info("Receiving a delete data from %s for key %s", msg.Origin.Id, key)
+
+		r.node.DeleteLocalData(key)
 	}
 }
 

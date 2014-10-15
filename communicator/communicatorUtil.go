@@ -25,6 +25,7 @@ const (
 	GETDATA                                     //12
 	GETDATARESPONSE                             //13
 	SETDATA                                     //14
+	DELETEDATA                                  //15
 )
 
 var messageTypes = []string{
@@ -43,6 +44,7 @@ var messageTypes = []string{
 	"get data",
 	"get data response",
 	"set data",
+	"delete data",
 }
 
 func (mt MessageType) String() string {

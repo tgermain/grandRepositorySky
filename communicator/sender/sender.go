@@ -314,6 +314,22 @@ func (s *SenderLink) SendSetData(destination *shared.DistantNode, key, value str
 
 }
 
+func (s *SenderLink) SendDeleteData(destination *shared.DistantNode, key string) {
+	shared.Logger.Warning("Send Delete data to %s , key %s", destination.Id, key)
+
+	newMessage := &communicator.Message{
+		communicator.DELETEDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"key": key,
+		},
+	}
+
+	sendTo(destination, newMessage)
+
+}
+
 func NewSenderLink() *SenderLink {
 	shared.Logger.Info("New sender Link")
 	return new(SenderLink)
