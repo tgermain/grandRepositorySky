@@ -405,7 +405,7 @@ func (d *DHTnode) setDataToReplica(hashedKey, value string) {
 //used in receiver
 func (d *DHTnode) SetLocalData(hashedKey, value, tag string) {
 
-	if !shared.Datas.SetData(hashedKey, tag, value) {
+	if !shared.Datas.SetData(hashedKey, value, tag) {
 		shared.Logger.Warning("Key %s already exist", hashedKey)
 	}
 }
