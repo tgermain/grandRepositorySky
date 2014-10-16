@@ -76,6 +76,10 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveGetDataResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.SETDATA:
+		{
+			r.receiveSetData(&msg)
+		}
 	default:
 		{
 			//rejected mesage
