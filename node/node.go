@@ -252,7 +252,7 @@ func (node *DHTnode) PrintNodeInfo() {
 	shared.Logger.Notice(" 	Succesor	%s", node.successor.Id)
 	shared.Logger.Notice(" 	Predecesor	%s", node.predecessor.Id)
 	shared.Logger.Notice(" 	succSucc	%s", node.succSucc.Id)
-
+	shared.Logger.Notice("  Datas", shared.Datas)
 	shared.Logger.Notice("---------------------------------")
 }
 
