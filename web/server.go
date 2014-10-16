@@ -76,16 +76,30 @@ func DataPostHandler(w http.ResponseWriter, req *http.Request) {
 
 func DataPutHandler(w http.ResponseWriter, req *http.Request) {
 	shared.Logger.Notice("PUT data")
+
+	decoder := json.NewDecoder(req.Body)
+	var t DataReq
+	err := decoder.Decode(&t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	node1.ModifyData( /* t.Key, t.Value */)
+
 	fmt.Fprintf(w, "ok")
 }
 
 func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
 	shared.Logger.Notice("DELETE data")
+	shared.Logger.Warning("we will delete %s!", req.URL.Path[9:])
+	//node1.DeleteData(req.URL.Path[9:])
 	fmt.Fprintf(w, "ok")
 }
 
 func DataGetHandler(w http.ResponseWriter, req *http.Request) {
 	shared.Logger.Notice("GET data")
+	node1.GetData(req.URL.Path[9:])
 	fmt.Fprintf(w, "ok")
 }
 
@@ -136,7 +150,7 @@ func MakeServer(ip string, port string, nod *node.DHTnode) {
 
 	r.HandleFunc("/nodes", NodesHandler)
 	r.HandleFunc("/storage", DataPostHandler).Methods("POST")
-	r.HandleFunc("/storage/{key]", DataPutHandler).Methods("PUT")
+	r.HandleFunc("/storage/{key}", DataPutHandler).Methods("PUT")
 	r.HandleFunc("/storage/{key}", DataDeleteHandler).Methods("DELETE")
 	r.HandleFunc("/storage/{key}", DataGetHandler).Methods("GET")
 	http.Handle("/", &MyServer{r})
