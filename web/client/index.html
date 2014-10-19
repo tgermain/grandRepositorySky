@@ -6,6 +6,8 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
@@ -296,7 +298,7 @@ app.controller('MainCtrl', function($scope, $http) {
     $scope.getData = function() {
         $http({
             method: 'GET',
-            url: '/storage',
+            url: '/storage/'+ $scope.keyFocus,
             respondType: 'json' //optionnel
         }).
         success(function(data, status, headers, config) {
@@ -339,7 +341,7 @@ app.controller('MainCtrl', function($scope, $http) {
     $scope.removeData = function() {
         $http({
             method: 'DELETE',
-            url: '/storage',
+            url: '/storage/' + $scope.keyFocus,
             respondType: 'json' //optionnel
         }).
         success(function(data, status, headers, config) {
@@ -354,7 +356,7 @@ app.controller('MainCtrl', function($scope, $http) {
     $scope.majData = function() {
         $http({
             method: 'PUT',
-            url: '/storage',
+            url: '/storage/' + $scope.keyFocus,
             respondType: 'json', //optionnel
             data: {
                 Key: $scope.keyFocus,
