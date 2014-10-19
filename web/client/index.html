@@ -131,16 +131,13 @@
                                     <div>
                                         <div class="pull-right">
                                             <div ng-if="data.Tag == localNode.Id">
-                                                <div class="label label-success ">Own if</div>
+                                                <div class="label label-success ">Owned</div>
                                             </div>
-                                            <div ng-switch on="data.Tag">
-                                                <div ng-switch-when="localNode.Id">
-                                                    <div class="label label-success ">Own switch</div>
-                                                </div>
-                                                <div ng-switch-default>
-                                                    <!-- code to render the regular video block -->
-                                                    <div class="label label-default ">Other</div>
-                                                </div>
+                                            <div ng-if="(data.Tag == localNode.Successor.Id) || (data.Tag == localNode.Predecessor.Id)">
+                                                <div class="label label-primary ">Replica</div>
+                                            </div>
+                                            <div ng-if="(data.Tag != localNode.Successor.Id) && (data.Tag != localNode.Predecessor.Id) && data.Tag != localNode.Id">
+                                                <div class="label label-primary ">other</div>
                                             </div>
                                         </div>
                                         <div>
