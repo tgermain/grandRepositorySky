@@ -171,49 +171,60 @@
                         reinit datas from selected node
                     </button>
                     </br>
+                    <div class="form-group">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
+                        </label>
+                    </div>
                     <well>
                         <ul>
-                            <li class="panel panel-default" ng-repeat="finger in nodes.Fingers">
-                                <!-- <div> -->
+                            <div ng-repeat="finger in nodes.Fingers">
 
-                                <div class="panel-heading">
-                                    <div class="label label-default pull-right" ng-class="{'label-success' : finger.NodeResp.Id == localNode.Id}">{{$index+1}}</div>
-                                    <h3 class="panel-title">Key : {{finger.IdKey}}</h3>
-                                </div>
-                                <div class="panel-body">
-                                    <!-- <div class="form-group form-group-sm"> -->
-                                    <!-- <span class="input-group-addon">Id Resp</span> -->
-                                    <!-- <input type="text" class="form-control uneditable-input" uneditable placeholder="{{finger.NodeResp.Id}}"> -->
-                                    <div class="form-horizontal">
 
-                                        <div class="form-group">
-                                            <label class="control-label col-md-3">Id Resp</label>
-                                            <div class="col-md-8 form-control-static">
-                                                {{finger.NodeResp.Id}}
-                                            </div>
+                                <div ng-hide="hideObviousFinger && (finger.NodeResp.Id == localNode.Id || finger.NodeResp.Id == localNode.Successor.Id)">
+                                    <li class="panel panel-default">
+
+                                        <div class="panel-heading">
+                                            <div class="label label-default pull-right" ng-class="{'label-default' : finger.NodeResp.Id == localNode.Id,
+                                    'label-primary' : finger.NodeResp.Id == localNode.Successor.Id,
+                                    'label-success' : finger.NodeResp.Id != localNode.Successor.Id && finger.NodeResp.Id != localNode.Id}">{{$index+1}}</div>
+                                            <h3 class="panel-title">Key : {{finger.IdKey}}</h3>
                                         </div>
-                                        <!-- </div> -->
-                                        <!-- <div class="controls controls-row"> -->
-                                        <div class="col-lg-5">
-                                            <div class="input-group input-group-sm">
-                                                <label class="control-label col-md-2">Ip</label>
-                                                <div class="col-md-2 form-control-static">
-                                                    {{finger.NodeResp.Ip}}
+                                        <div class="panel-body">
+                                            <!-- <div class="form-group form-group-sm"> -->
+                                            <!-- <span class="input-group-addon">Id Resp</span> -->
+                                            <!-- <input type="text" class="form-control uneditable-input" uneditable placeholder="{{finger.NodeResp.Id}}"> -->
+                                            <div class="form-horizontal">
+
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Id Resp</label>
+                                                    <div class="col-md-8 form-control-static">
+                                                        {{finger.NodeResp.Id}}
+                                                    </div>
+                                                </div>
+                                                <!-- </div> -->
+                                                <!-- <div class="controls controls-row"> -->
+                                                <div class="col-lg-5">
+                                                    <div class="input-group input-group-sm">
+                                                        <label class="control-label col-md-2">Ip</label>
+                                                        <div class="col-md-2 form-control-static">
+                                                            {{finger.NodeResp.Ip}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <label class="control-label col-md-4">Port</label>
+                                                        <div class="col-md-2 form-control-static">
+                                                            {{finger.NodeResp.Port}}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <div class="input-group input-group-sm">
-                                                <label class="control-label col-md-4">Port</label>
-                                                <div class="col-md-2 form-control-static">
-                                                    {{finger.NodeResp.Port}}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- </div> -->
-                                    </div>
+                                    </li>
                                 </div>
-                            </li>
+                            </div>
                         </ul>
                     </well>
 
