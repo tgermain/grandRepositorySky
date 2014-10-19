@@ -306,7 +306,7 @@ app.controller('MainCtrl', function($scope, $http) {
     $scope.getData = function() {
         $http({
             method: 'GET',
-            url: '/storage/'+ $scope.keyFocus,
+            url: '/storage/' + $scope.keyFocus,
             respondType: 'json' //optionnel
         }).
         success(function(data, status, headers, config) {
