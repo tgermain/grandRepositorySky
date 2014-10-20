@@ -157,15 +157,13 @@
                 </div>
             </div>
 
-
+            <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
+               <i class="glyphicon glyphicon-refresh"></i>  maj node data
+            </button>
+            </br>
 
             <div class="col-xs-12 col-md-6 panel panel-default">
-                <div class="panel-body">
-                    </br>
-                    <button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()">
-                        maj data
-                    </button>
-                    </br>
+                <div class="panel-body">                   
                     <div class="form-group">
                         <label class="checkbox-inline">
                             <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
