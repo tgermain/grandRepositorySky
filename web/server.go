@@ -85,7 +85,7 @@ func DataPutHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	shared.Logger.Notice("PUT data key %s value %s", t.Key, t.Value)
 
-	node1.ModifyData( /* t.Key, t.Value */)
+	node1.ModifyData(t.Key, t.Value)
 
 	fmt.Fprintf(w, "ok")
 }
@@ -96,6 +96,8 @@ func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
 	key := params["key"]
 
 	shared.Logger.Notice("DELETE data %s", key)
+
+	node1.DeleteData(key)
 	fmt.Fprintf(w, "ok")
 }
 
@@ -103,7 +105,10 @@ func DataGetHandler(w http.ResponseWriter, req *http.Request) {
 	//get the url param
 	params := mux.Vars(req)
 	key := params["key"]
+
 	shared.Logger.Notice("GET data %s", key)
+	response := node1.GetData(key)
+	fmt.Fprintf(w, response)
 }
 
 //TODO? launch lookup request
