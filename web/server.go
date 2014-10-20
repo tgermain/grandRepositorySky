@@ -60,7 +60,6 @@ func NodesHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func DataPostHandler(w http.ResponseWriter, req *http.Request) {
-	shared.Logger.Notice("POST new data")
 
 	decoder := json.NewDecoder(req.Body)
 	var t DataReq
@@ -69,13 +68,13 @@ func DataPostHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	shared.Logger.Notice("POST new datakey %s value %s", t.Key, t.Value)
 
 	node1.SetData(t.Key, t.Value)
 	fmt.Fprintf(w, "ok")
 }
 
 func DataPutHandler(w http.ResponseWriter, req *http.Request) {
-	shared.Logger.Notice("PUT data")
 
 	decoder := json.NewDecoder(req.Body)
 	var t DataReq
@@ -84,6 +83,7 @@ func DataPutHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	shared.Logger.Notice("PUT data key %s value %s", t.Key, t.Value)
 
 	node1.ModifyData( /* t.Key, t.Value */)
 
@@ -91,16 +91,15 @@ func DataPutHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
-	shared.Logger.Notice("DELETE data")
-	shared.Logger.Warning("we will delete %s!", req.URL.Path[9:])
 	//node1.DeleteData(req.URL.Path[9:])
+	shared.Logger.Notice("DELETE data %s", key)
 	fmt.Fprintf(w, "ok")
 }
 
 func DataGetHandler(w http.ResponseWriter, req *http.Request) {
-	shared.Logger.Notice("GET data")
 	node1.GetData(req.URL.Path[9:])
 	fmt.Fprintf(w, "ok")
+	shared.Logger.Notice("GET data %s", key)
 }
 
 //TODO? launch lookup request
