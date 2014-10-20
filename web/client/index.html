@@ -23,6 +23,12 @@
         <div class="container">
             <!-- <div class="row"> -->
             <div class="page-header">
+                <div class="pull-right">
+
+                    <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
+                        <i class="glyphicon glyphicon-refresh"></i> maj node data
+                    </button>
+                </div>
                 <h1>Node interface</h1>
             </div>
             <div class="col-md-6 bs-docs-section">
@@ -159,10 +165,6 @@
                 </div>
             </div>
 
-            <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
-               <i class="glyphicon glyphicon-refresh"></i>  maj node data
-            </button>
-<<<<<<< HEAD
             <div class="col-xs-12 col-md-6 ">
                 <div class="panel panel-default">
 
@@ -171,17 +173,8 @@
                             <i class="glyphicon glyphicon-random"></i>
                             Finger Table
                         </h4>
-=======
-            <div class="col-xs-12 col-md-6 panel panel-default">
-                <div class="panel-body">                   
-                    <div class="form-group">
-                        <label class="checkbox-inline">
-                            <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
-                        </label>
->>>>>>> acc34d42032c0886e2c6a1baa5b6030912559567
                     </div>
                     <div class="panel-body">
-
                         future graph visualisation
                         </br>
                         <button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()">
