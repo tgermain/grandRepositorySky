@@ -126,20 +126,22 @@
                         </form>
                         <div class="well">
 
-                            <ul>
-                                <li class="alert alert-info" ng-repeat="(key, data) in selectedNode.Datas.Set" ng-click="changeDataFocus(key, data)">
-                                    <div>
-                                        <div class="pull-right">
-                                            <div ng-if="data.Tag == localNode.Id">
+                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div ng-switch="isMine(data.Tag)">
+                                            <div ng-switch-when="owned">
                                                 <div class="label label-success ">Owned</div>
                                             </div>
-                                            <div ng-if="(data.Tag == localNode.Successor.Id) || (data.Tag == localNode.Predecessor.Id)">
+                                            <div ng-switch-when="replica">
                                                 <div class="label label-primary ">Replica</div>
                                             </div>
-                                            <div ng-if="(data.Tag != localNode.Successor.Id) && (data.Tag != localNode.Predecessor.Id) && data.Tag != localNode.Id">
+                                            <div ng-switch-default>
                                                 <div class="label label-primary ">other</div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-10">
                                         <div>
                                             key : {{key}}
                                         </div>
@@ -148,8 +150,8 @@
                                             Value : {{data.Value}}
                                         </div>
                                     </div>
-                                </li>
-                            </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -256,6 +258,15 @@ app.controller('MainCtrl', function($scope, $http) {
         $scope.localPort = "4321";
 
         $scope.getAllNodes(true);
+    }
+
+    $scope.isMine = function(tag) {
+        if (tag == $scope.localNode.Id) {
+            return "owned"
+        }
+        if ((tag == $scope.localNode.Successor.Id) || (tag == $scope.localNode.Predecessor.Id)) {
+            return "replica"
+        };
     }
 
     $scope.getAllNodes = function(isInit) {
