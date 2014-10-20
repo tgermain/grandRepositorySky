@@ -479,6 +479,21 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 	//tuple space style !
 	//remove the old data
 	//create a new one
+
+	//exposed method
+
+	hashedKey := dht.Sha1hash(key)
+	//if data are local
+	if d.IsResponsible(hashedKey) {
+		d.DeleteData(hashedKey)
+		d.SetData(hashedKey, newValue)
+	} else {
+		//else find where is data -> lookup, relay request
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendDeleteData(dest, hashedKey)
+		d.commLib.SendSetData(dest, hashedKey, newValue, false)
+	}
 }
 
 func (d *DHTnode) DeleteData(key string) {
