@@ -1,196 +1,397 @@
 <!DOCTYPE html>
-<meta charset="UTF-8"> 
+<meta charset="UTF-8">
 <html>
+
 <head>
-	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
 </head>
+
 <body>
 
-<div ng-app="myApp" ng-controller="MainCtrl"> 			
-	<div class="row">
-		<div ng-class="{'panel-primary': nodeIsSelected, 'panel-info': !nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
-			<div  class="panel-heading">External node (by default successor of local)</div>
-			<div class="panel-body">
-				<button class="btn btn-default" ng-click="nodeIsSelected=true; selectedNode=distNode" ng-disabled="nodeIsSelected"> 
-				select
-				</button>
-				</br>
-				<label for="inputTest" class="col-sm-2 control-label">id</label>	
-				<input class="form-control" id="inputDistId" placeholder={{distNode.Id}} ng-model="distNode.Id">
+    <div ng-app="myApp" ng-controller="MainCtrl">
+        <div class="container">
+            <!-- <div class="row"> -->
+            <div class="page-header">
+                <h1>Node interface</h1>
+            </div>
+            <div class="col-md-6 bs-docs-section">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-info-sign"></i>
+                            Node Informations
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Id</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{localNode.Id}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Ip</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{localIp}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Port</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{localPort}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Successor</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{localNode.Successor.Id}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Predecessor</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{localNode.Predecessor.Id}}
+                                </div>
+                            </div>
+                        </form>
 
-				<label for="inputTest" class="col-sm-2 control-label">ip</label>	
-				<input class="form-control" id="inputDistIp" placeholder={{distNode.Ip}} ng-model="distNode.Ip">
-				
-				<label for="inputTest" class="col-sm-2 control-label">port</label>	
-				<input class="form-control" id="inputDistPort" placeholder={{distNode.Port}} ng-model="distNode.Port">
-			</div>
-		</div>
+                    </div>
+                </div>
 
-		<div ng-class="{'panel-primary': !nodeIsSelected, 'panel-default': nodeIsSelected, 'col-xs-6': true, 'col-md-5': true, 'panel': true}">
-			<div class="panel-heading">Personnal node</div>
-			<div class="panel-body">
-				<button class="btn btn-default" ng-disabled="!nodeIsSelected" ng-click="nodeIsSelected=false;selectedNode=localNode"> 
-					select
-				</button>
-				</br>
 
-				<label for="inputTest" class="col-sm-2 control-label">id</label>	
-				<input class="form-control" id="inputLocId" placeholder={{localNode.Id}} ng-model="localNode.Id">
 
-				<label for="inputTest" class="col-sm-2 control-label">ip</label>	
-				<input class="form-control" id="inputLocIp" placeholder={{localIp}} ng-model="localIp">
-				
-				<label for="inputTest" class="col-sm-2 control-label">port</label>	
-				<input class="form-control" id="inputLocPort" placeholder={{localPort}} ng-model="localPort">
-				
-				<label for="inputTest" class="col-sm-2 control-label">successor</label>	
-				<input class="form-control" id="inputLocSuc" placeholder={{localNode.Successor.Id}} ng-model="localNode.Successor.Id">
-				
-				<label for="inputTest" class="col-sm-2 control-label">predecessor</label>	
-				<input class="form-control" id="inputLocPre" placeholder={{localNode.Predecessor.Id}} ng-model="localNode.Predecessor.Id">
-			</div>
-		</div>
+                <div class=" panel panel-default">
+                    <div class="panel-heading clearfix">
+                        <div class="panel-title">
+                            <h3>
+                                <i class="glyphicon glyphicon-hdd"></i>
+                                Datas control
 
-		
-		<div class="col-xs-12 col-md-8 panel panel-default">
-		<div class="panel-heading">datas control</div>
-			<div class="panel-body">
-			
-			<button class="btn btn-default" ng-click="addData()"> 
-				add
-			</button>
+                                <div class="btn-group pull-right">
+                                    <button class="btn btn-success" ng-click="addData()">
+                                        <i class="glyphicon glyphicon-plus-sign"></i> add
+                                    </button>
 
-			<button class="btn btn-default" ng-click="removeData()"> 
-				remove
-			</button>
+                                    <button class="btn btn-primary" ng-click="getData()">
+                                        <i class="glyphicon glyphicon-search"></i> get
+                                    </button>
 
-			<button class="btn btn-default" ng-click="majData()"> 
-				maj
-			</button>
-			<label for="inputTest" class="col-sm-2 control-label">key</label>	
-			<input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                    <button class="btn btn-danger" ng-click="removeData()">
+                                        <i class="glyphicon glyphicon-remove"></i> remove
+                                    </button>
 
-			<label for="inputTest" class="col-sm-2 control-label">value</label>	
-			<input class="form-control" id="inputKey" placeholder={{valueFocus}} ng-model="valueFocus">
+                                    <button class="btn btn-info" ng-click="majData()">
+                                        <i class="glyphicon glyphicon-refresh"></i> maj
 
-			<ul>
-				<li class="animate-repeat" ng-repeat="data in selectedNode.Datas" ng-click="console.log('select this data later')">
-					{{data}}
-				</li>
-			</ul>
-			
-			</div>
-		</div>
+                                    </button>
+                                </div>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-horizontal">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                    <div class="col-lg-10">
+                                        <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                    </div>
+                                </div>
+                                <div class="form-group">
 
-		<div class="col-xs-12 col-md-8 panel panel-default">
-			<div class="panel-body">
-			future graph visualisation
-			</br>
-			<button class="btn btn-default" ng-click="getAllNodes(false)" ng-init="init()"> 
-				maj data of selected node
-			</button>
-			<button class="btn btn-default" ng-click="getAllNodes(true)"> 
-				reinit datas from selected node
-			</button>
-			</br>
-			nodes : {{nodes}}
-			</br>
-			
-			</div>
-		</div>
-	</div>
-</div>
+                                    <label for="inputValue" class="col-sm-2 control-label">value</label>
+                                    <div class="col-lg-10">
+                                        <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2">tag</label>
+                                    <div class="col-lg-10 form-control-static">
+                                        {{tagFocus}}
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="well">
+
+                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div ng-switch="isMine(data.Tag)">
+                                            <div ng-switch-when="owned">
+                                                <div class="label label-success ">Owned</div>
+                                            </div>
+                                            <div ng-switch-when="replica">
+                                                <div class="label label-primary ">Replica</div>
+                                            </div>
+                                            <div ng-switch-default>
+                                                <div class="label label-primary ">other</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div>
+                                            key : {{key}}
+                                        </div>
+                                        <div>
+
+                                            Value : {{data.Value}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
+
+            <div class="col-xs-12 col-md-6 ">
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-random"></i>
+                            Finger Table
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+
+                        future graph visualisation
+                        </br>
+                        <button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()">
+                            maj data of selected node
+                        </button>
+                        <button class="btn btn-default" ng-click="getAllNodes()">
+                            reinit datas from selected node
+                        </button>
+                        </br>
+                        <div class="form-group">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
+                            </label>
+                        </div>
+                        <well>
+                            <div ng-repeat="finger in nodes.Fingers">
+
+
+                                <div ng-hide="hideObviousFinger && (finger.NodeResp.Id == localNode.Id || finger.NodeResp.Id == localNode.Successor.Id)">
+                                    <div class="panel panel-default">
+
+                                        <div class="panel-heading">
+                                            <div class="label label-default pull-right" ng-class="{'label-default' : finger.NodeResp.Id == localNode.Id,
+                                    'label-primary' : finger.NodeResp.Id == localNode.Successor.Id,
+                                    'label-success' : finger.NodeResp.Id != localNode.Successor.Id && finger.NodeResp.Id != localNode.Id}">{{$index+1}}</div>
+                                            <h3 class="panel-title">Key : {{finger.IdKey}}</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <!-- <div class="form-group form-group-sm"> -->
+                                            <!-- <span class="input-group-addon">Id Resp</span> -->
+                                            <!-- <input type="text" class="form-control uneditable-input" uneditable placeholder="{{finger.NodeResp.Id}}"> -->
+                                            <div class="form-horizontal">
+
+                                                <div class="form-group">
+                                                    <label class="control-label col-md-3">Id Resp</label>
+                                                    <div class="col-md-8 form-control-static">
+                                                        {{finger.NodeResp.Id}}
+                                                    </div>
+                                                </div>
+                                                <!-- </div> -->
+                                                <!-- <div class="controls controls-row"> -->
+                                                <div class="col-lg-5">
+                                                    <div class="input-group input-group-sm">
+                                                        <label class="control-label col-md-2">Ip</label>
+                                                        <div class="col-md-2 form-control-static">
+                                                            {{finger.NodeResp.Ip}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="input-group input-group-sm">
+                                                        <label class="control-label col-md-4">Port</label>
+                                                        <div class="col-md-2 form-control-static">
+                                                            {{finger.NodeResp.Port}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </well>
+
+                        </br>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
 
 <script>
-
 var app = angular.module('myApp', []);
 
 app.config(function($httpProvider) {
-  //Enable cross domain calls
-  $httpProvider.defaults.useXDomain = true;
+    //Enable cross domain calls
+    $httpProvider.defaults.useXDomain = true;
 
-  //Remove the header used to identify ajax call  that would prevent CORS from working
-  delete $httpProvider.defaults.headers.common['X-Requested-With'];
+    //Remove the header used to identify ajax call  that would prevent CORS from working
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });
 
 app.controller('MainCtrl', function($scope, $http) {
-	$scope.init = function () {           
-        $scope.nodeIsSelected = false;
+    $scope.init = function() {
         $scope.localIp = "127.0.0.1";
         $scope.localPort = "4321";
 
-        $scope.getAllNodes(true);      
+        $scope.getAllNodes();
     }
 
-    $scope.getAllNodes = function (isInit){
-    	var urlReq;
-    	if ($scope.nodeIsSelected){
-    		urlReq = '/nodes';
-    	} else{
-    		urlReq = '/nodes';
-    	}    	
-		$http({
-			method: 'GET', 
-			url: urlReq,
-			respondType: 'json'//optionnel
+    $scope.isMine = function(tag) {
+        if (tag == $scope.localNode.Id) {
+            return "owned"
+        }
+        if ((tag == $scope.localNode.Successor.Id) || (tag == $scope.localNode.Predecessor.Id)) {
+            return "replica"
+        };
+    }
+
+    $scope.getAllNodes = function() {
+        var urlReq;
+        $http({
+            method: 'GET',
+            url: '/nodes',
+            respondType: 'json' //optionnel
         }).
-		success(function(data, status, headers, config) {
-			$scope.nodes = data;
-			$scope.status = status;
-			
-			if (isInit){
-				$scope.nodeIsSelected = false;
-				$scope.localNode = $scope.nodes;
-				$scope.selectedNode = $scope.localNode;
-				$scope.distNode = $scope.localNode.Successor
-			} else {
-				if (!$scope.nodeIsSelected){
-					$scope.localNode = $scope.nodes;				
-				} else{
-					$scope.distNode = $scope.nodes;		
-				}
-			}
-			if($scope.localNode){
-				$scope.localIp = $scope.localNode.Ip;
-				$scope.localPort = $scope.localNode.Port;
-			}
-			$scope.keyFocus = selectedNode.Datas[0];
-			$scope.valueFocus = selectedNode.Datas[0];
-		}).
-		error(function(data, status, headers, config) {
-			console.log("error status : "+ status);
-			$scope.nodes = data;
-			$scope.status = status;
-	  });
-	}
+        success(function(data, status, headers, config) {
+            $scope.nodes = data;
+            $scope.status = status;
 
-	$scope.addData = function(){
-		
-	}
+            $scope.localNode = $scope.nodes;
 
-	$scope.removeData = function(){
+            if ($scope.localNode) {
+                $scope.localIp = $scope.localNode.Ip;
+                $scope.localPort = $scope.localNode.Port;
+            }
 
-	}
+        }).
+        error(function(data, status, headers, config) {
+            console.log("error status : " + status);
+            $scope.nodes = data;
+            $scope.status = status;
+        });
+    }
 
-	$scope.majData = function(){
+    $scope.getData = function() {
+        $http({
+            method: 'GET',
+            url: '/storage/' + $scope.keyFocus,
+            respondType: 'json' //optionnel
+        }).
+        success(function(data, status, headers, config) {
+            $scope.status = status;
+            console.log(data);
 
-	}
+        }).
+        error(function(data, status, headers, config) {
+            console.log("error status : " + status);
+            $scope.status = status;
+        });
+    }
+
+    $scope.addData = function() {
+        $http({
+            method: 'POST',
+            url: '/storage',
+            respondType: 'json', //optionnel
+            data: {
+                Key: $scope.keyFocus,
+                Value: $scope.valueFocus
+            }
+        }).
+        success(function(data, status, headers, config) {
+            $scope.status = status;
+            $scope.getAllNodes();
+            $scope.keyFocus = ""
+            $scope.valueFocus = ""
+            $scope.tagFocus = ""
+        }).
+        error(function(data, status, headers, config) {
+            console.log("error status : " + status);
+            $scope.status = status;
+        });
+    }
+
+    $scope.removeData = function() {
+        $http({
+            method: 'DELETE',
+            url: '/storage/' + $scope.keyFocus,
+            respondType: 'json' //optionnel
+        }).
+        success(function(data, status, headers, config) {
+            $scope.status = status;
+            $scope.getAllNodes();
+            $scope.keyFocus = ""
+            $scope.valueFocus = ""
+            $scope.tagFocus = ""
+        }).
+        error(function(data, status, headers, config) {
+            console.log("error status : " + status);
+            $scope.status = status;
+        });
+    }
+
+    $scope.majData = function() {
+        $http({
+            method: 'PUT',
+            url: '/storage/' + $scope.keyFocus,
+            respondType: 'json', //optionnel
+            data: {
+                Key: $scope.keyFocus,
+                Value: $scope.valueFocus
+            }
+        }).
+        success(function(data, status, headers, config) {
+            $scope.status = status;
+            $scope.getAllNodes();
+        }).
+        error(function(data, status, headers, config) {
+            console.log("error status : " + status);
+            $scope.status = status;
+        });
+    }
+
+    $scope.changeDataFocus = function(key, data) {
+        console.log(data);
+        $scope.keyFocus = key;
+        $scope.valueFocus = data.Value;
+        $scope.tagFocus = data.Tag;
+    }
 
 
 
 });
 </script>
 
-</body>
+
+
 </html>
