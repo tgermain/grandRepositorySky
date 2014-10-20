@@ -13,11 +13,23 @@ import (
 
 //Const parts -----------------------------------------------------------
 const SPACESIZE = 160
+
 const UPDATEFINGERSPERIOD = time.Second * 30
+
 const UPDATESUCCSUCCERIOD = time.Second * 10
+
 const HEARTBEATPERIOD = time.Second * 5
 const HEARBEATTIMEOUT = time.Second * 2
+
 const LOOKUPTIMEOUT = time.Second * 4
+
+const GETDATATIMEOUT = time.Second * 5
+
+const CLEANREPLICASPERIOD = time.Second * 30
+
+const REPLICATEDATAPERIOD = time.Second * 20
+
+const NOTFOUNDMSG = "Data not found"
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -25,16 +37,16 @@ var mutexPred = &sync.Mutex{}
 
 //Objects parts ---------------------------------------------------------
 type DHTnode struct {
-	fingers     []*fingerEntry
+	fingers     []*FingerEntry
 	successor   *shared.DistantNode
 	succSucc    *shared.DistantNode
 	predecessor *shared.DistantNode
 	commLib     *sender.SenderLink
 }
 
-type fingerEntry struct {
+type FingerEntry struct {
 	IdKey    string
-	nodeResp *shared.DistantNode
+	NodeResp *shared.DistantNode
 }
 
 //Method parts ----------------------------------------------------------
@@ -225,7 +237,7 @@ func (node *DHTnode) UpdateFingerTable() {
 		}()
 
 	}
-	// fmt.Println("****************************************************************Fingers table init DONE : ")
+
 }
 
 func (node *DHTnode) PrintRing() {
@@ -242,20 +254,13 @@ func (node *DHTnode) PrintNodeInfo() {
 	shared.Logger.Notice("---------------------------------")
 	shared.Logger.Notice("Node info")
 	shared.Logger.Notice("---------------------------------")
-	shared.Logger.Notice("	Id			%s", shared.LocalId)
-	shared.Logger.Notice("	Ip			%s", shared.LocalIp)
-	shared.Logger.Notice("	Port		%s", shared.LocalPort)
-	shared.Logger.Notice(" 	Succesor	%s", node.successor.Id)
-	shared.Logger.Notice(" 	Predecesor	%s", node.predecessor.Id)
-	shared.Logger.Notice(" 	succSucc	%s", node.succSucc.Id)
-	// fmt.Println("  Fingers table :")
-	// fmt.Println("  ---------------------------------")
-	// fmt.Println("  Index		Idkey			IdNode ")
-	// for i, v := range node.fingers {
-	// 	if v != nil {
-	// 		fmt.Printf("  %d 		%s					%s\n", i, v.IdKey, v.IdResp)
-	// 	}
-	// }
+	shared.Logger.Notice("  Id          %s", shared.LocalId)
+	shared.Logger.Notice("  Ip          %s", shared.LocalIp)
+	shared.Logger.Notice("  Port        %s", shared.LocalPort)
+	shared.Logger.Notice("  Succesor    %s", node.successor.Id)
+	shared.Logger.Notice("  Predecesor  %s", node.predecessor.Id)
+	shared.Logger.Notice("  succSucc    %s", node.succSucc.Id)
+	shared.Logger.Notice("  Datas       %v", shared.Datas)
 	shared.Logger.Notice("---------------------------------")
 }
 
