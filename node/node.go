@@ -424,7 +424,6 @@ func (d *DHTnode) getReplicas(hashedKey string) []string {
 				}
 			case <-time.After(GETDATATIMEOUT):
 				shared.Logger.Error("Get replica for %s timeout", hashedKey)
-				//make the succ.succ must update pred and d must update succ
 			}
 		}()
 	}
@@ -484,6 +483,7 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 	hashedKey := dht.Sha1hash(key)
 	//if data are local
 	if d.IsResponsible(hashedKey) {
+		shared.Logger.Notice("Modifying data %s with new value %s", hashedKey, newValue)
 		d.DeleteData(hashedKey)
 		d.SetData(hashedKey, newValue)
 	} else {
@@ -495,10 +495,9 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 	}
 }
 
-func (d *DHTnode) DeleteData(key string) {
+func (d *DHTnode) DeleteData(hashedKey string) {
 	//exposed method
 
-	hashedKey := dht.Sha1hash(key)
 	//if data are local
 	if d.IsResponsible(hashedKey) {
 		d.DeleteLocalData(hashedKey)
