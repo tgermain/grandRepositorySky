@@ -44,13 +44,13 @@
                             <div class="form-group">
                                 <label class="control-label col-md-3">Ip</label>
                                 <div class="col-md-9 form-control-static">
-                                    {{localIp}}
+                                    {{localNode.Ip}}
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-3">Port</label>
                                 <div class="col-md-9 form-control-static">
-                                    {{localPort}}
+                                    {{localNode.Port}}
                                 </div>
                             </div>
                             <div class="form-group">
@@ -161,14 +161,9 @@
 
             <div class="col-xs-12 col-md-6 panel panel-default">
                 <div class="panel-body">
-
-                    future graph visualisation
                     </br>
-                    <button class="btn btn-default" ng-click="getAllNodes(false)" ng-init="init()">
-                        maj data of selected node
-                    </button>
-                    <button class="btn btn-default" ng-click="getAllNodes(true)">
-                        reinit datas from selected node
+                    <button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()">
+                        maj data
                     </button>
                     </br>
                     <div class="form-group">
@@ -252,13 +247,11 @@ app.config(function($httpProvider) {
 app.controller('MainCtrl', function($scope, $http) {
     $scope.init = function() {
         $scope.nodeIsSelected = false;
-        $scope.localIp = "127.0.0.1";
-        $scope.localPort = "4321";
 
-        $scope.getAllNodes(true);
+        $scope.getAllNodes();
     }
 
-    $scope.getAllNodes = function(isInit) {
+    $scope.getAllNodes = function() {
         var urlReq;
         $http({
             method: 'GET',
@@ -269,29 +262,14 @@ app.controller('MainCtrl', function($scope, $http) {
             $scope.nodes = data;
             $scope.status = status;
 
-            if (isInit) {
-                $scope.nodeIsSelected = false;
-                $scope.localNode = $scope.nodes;
-                $scope.selectedNode = $scope.localNode;
-                $scope.distNode = $scope.localNode.Successor
-            } else {
-                if (!$scope.nodeIsSelected) {
-                    $scope.localNode = $scope.nodes;
-                    $scope.selectedNode = $scope.localNode;
-                } else {
-                    $scope.distNode = $scope.nodes;
-                    $scope.selectedNode = $scope.distNode;
-                }
-            }
-            if ($scope.localNode) {
-                $scope.localIp = $scope.localNode.Ip;
-                $scope.localPort = $scope.localNode.Port;
-            }
 
-            for (key in $scope.selectedNode.Datas.Set) {
+            $scope.localNode = $scope.nodes;
+            
+
+            for (key in $scope.localNode.Datas.Set) {
                 $scope.keyFocus = key;
-                $scope.valueFocus = $scope.selectedNode.Datas.Set[key].Value;
-                $scope.tagFocus = $scope.selectedNode.Datas.Set[key].Tag;
+                $scope.valueFocus = $scope.localNode.Datas.Set[key].Value;
+                $scope.tagFocus = $scope.localNode.Datas.Set[key].Tag;
                 break;
             }
 
@@ -321,12 +299,6 @@ app.controller('MainCtrl', function($scope, $http) {
     }
 
     $scope.addData = function() {
-        var urlReq;
-        if ($scope.nodeIsSelected) {
-            urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
-        } else {
-            urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
-        }
         $http({
             method: 'POST',
             url: '/storage',
