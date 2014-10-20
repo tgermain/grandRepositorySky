@@ -301,7 +301,6 @@ func (d *DHTnode) heartBeatRoutine() {
 			d.successor = d.succSucc
 			mutexSucc.Unlock()
 		}
-		d.PrintNodeInfo()
 	}
 }
 
