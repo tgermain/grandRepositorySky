@@ -29,7 +29,7 @@ const CLEANREPLICASPERIOD = time.Second * 30
 
 const REPLICATEDATAPERIOD = time.Second * 20
 
-const NOTFOUNDMSG = "Data not found"
+const GETDATATIMEOUTMESSAGE = "get data timeout"
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -361,7 +361,7 @@ func (d *DHTnode) GetData(key string) string {
 			}
 		case <-time.After(GETDATATIMEOUT):
 			shared.Logger.Error("Get data for %s timeout", hashedKey)
-			return NOTFOUNDMSG
+			return GETDATATIMEOUTMESSAGE
 		}
 	}
 }
