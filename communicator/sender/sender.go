@@ -211,7 +211,7 @@ func (s *SenderLink) SendHeartBeatResponse(destination *shared.DistantNode, idAn
 }
 
 func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.DistantNode {
-	shared.Logger.Warning("Send get succ to %s ", destination.Id)
+	shared.Logger.Info("Send get succ to %s ", destination.Id)
 	//generate id for pending heartBeat
 	idAnswer := communicator.GenerateId()
 
@@ -234,7 +234,7 @@ func (s *SenderLink) SendGetSucc(destination *shared.DistantNode) chan shared.Di
 }
 
 func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnswer string, daSucc *shared.DistantNode) {
-	shared.Logger.Warning("Send get successor response to %s ", destination.Id)
+	shared.Logger.Info("Send get successor response to %s ", destination.Id)
 	newMessage := &communicator.Message{
 		communicator.GETSUCCESORERESPONSE,
 		getOrigin(),
@@ -247,6 +247,87 @@ func (s *SenderLink) SendGetSuccResponse(destination *shared.DistantNode, idAnsw
 		},
 	}
 	sendTo(destination, newMessage)
+}
+
+func (s *SenderLink) SendGetData(destination *shared.DistantNode, keySearched string, forced bool) chan string {
+	shared.Logger.Warning("Send get data to %s , keySearched %s  with forcing %t", destination.Id, keySearched, forced)
+	idAnswer := communicator.GenerateId()
+
+	newMessage := &communicator.Message{
+		communicator.GETDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer":    idAnswer,
+			"keySearched": keySearched,
+		},
+	}
+	//forced force the node to get data, even if is not responsible
+	//force true -> get replica
+	//force false -> get data
+	if forced {
+		newMessage.Parameters["forced"] = ""
+	}
+	//create an entry in the pendingLookup table
+	responseChan := make(chan string)
+	communicator.PendingGetData[idAnswer] = responseChan
+
+	sendTo(destination, newMessage)
+
+	return responseChan
+}
+
+func (s *SenderLink) SendGetDataResponse(destination *shared.DistantNode, idAnswer string, valueRequested string) {
+	shared.Logger.Warning("Send get data response to %s ", destination.Id)
+	newMessage := &communicator.Message{
+		communicator.GETDATARESPONSE,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"idAnswer": idAnswer,
+			"value":    valueRequested,
+		},
+	}
+	sendTo(destination, newMessage)
+}
+
+func (s *SenderLink) SendSetData(destination *shared.DistantNode, key, value string, forced bool) {
+	shared.Logger.Warning("Send Set data to %s , key %s , value %s with forcing %t", destination.Id, key, value, forced)
+
+	newMessage := &communicator.Message{
+		communicator.SETDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"key":   key,
+			"value": value,
+		},
+	}
+	//forced force the node to set the ata with given tag
+	//force true -> set data with the origin given tag (replica)
+	//force false -> set data with destination tag (ownership of data)
+	if forced {
+		newMessage.Parameters["forced"] = shared.LocalId
+	}
+
+	sendTo(destination, newMessage)
+
+}
+
+func (s *SenderLink) SendDeleteData(destination *shared.DistantNode, key string) {
+	shared.Logger.Warning("Send Delete data to %s , key %s", destination.Id, key)
+
+	newMessage := &communicator.Message{
+		communicator.DELETEDATA,
+		getOrigin(),
+		*destination,
+		map[string]string{
+			"key": key,
+		},
+	}
+
+	sendTo(destination, newMessage)
+
 }
 
 func NewSenderLink() *SenderLink {

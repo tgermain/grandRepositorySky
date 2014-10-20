@@ -8,7 +8,7 @@ import (
 
 //Global var -----------------------------------------------------------
 var LocalId, LocalIp, LocalPort string
-var datas = dataSet.MakeDataSet()
+var Datas = dataSet.MakeDataSet()
 
 //Objects parts ---------------------------------------------------------
 type DistantNode struct {
@@ -42,7 +42,7 @@ func SetupLogger() *logging.Logger {
 	logging.SetBackend(logBackend, logFileBackend)
 	logging.SetFormatter(logging.MustStringFormatter(format))
 
-	logging.SetLevel(logging.DEBUG, "main")
+	logging.SetLevel(logging.NOTICE, "main")
 
 	Logger = logging.MustGetLogger("main")
 	return Logger

@@ -1,32 +1,43 @@
 package dataSet
 
 type DataSet struct {
-	set map[string]pieceOfData
+	set map[string]PieceOfData
 }
 
-type pieceOfData struct {
-	tag   string //to which node the data is from
-	value string //the data
+type PieceOfData struct {
+	Tag   string //to which node the data is from
+	Value string //the data
 }
 
-func (d *DataSet) SetData(key string, value pieceOfData) bool {
+func (d *DataSet) SetData(key, value, tag string) bool {
 	_, exist := d.set[key]
 	if exist {
 		return false
 	} else {
-		d.set[key] = value
+		d.set[key] = PieceOfData{
+			tag,
+			value,
+		}
 		return true
 	}
 }
 
-func (d *DataSet) GetData(key string) pieceOfData {
+func (d *DataSet) GetData(key string) PieceOfData {
 	//can return nul
 	val, _ := d.set[key]
 	return val
 }
 
+func (d *DataSet) DelData(key string) {
+	delete(d.set, key)
+}
+
+func (d *DataSet) GetSet() map[string]PieceOfData {
+	return d.set
+}
+
 func MakeDataSet() DataSet {
 	return DataSet{
-		make(map[string]pieceOfData),
+		make(map[string]PieceOfData),
 	}
 }

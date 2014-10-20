@@ -68,6 +68,18 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveGetSuccesorResponse(&msg)
 		}
+	case msg.TypeOfMsg == communicator.GETDATA:
+		{
+			r.receiveGetData(&msg)
+		}
+	case msg.TypeOfMsg == communicator.GETDATARESPONSE:
+		{
+			r.receiveGetDataResponse(&msg)
+		}
+	case msg.TypeOfMsg == communicator.DELETEDATA:
+		{
+			r.receiveDeleteData(&msg)
+		}
 	default:
 		{
 			//rejected mesage
@@ -91,8 +103,6 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -109,8 +119,6 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 			newNodePort,
 		})
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -155,8 +163,6 @@ func (r *ReceiverLink) receiveLookup(msg *communicator.Message) {
 			go r.sender.RelayLookup(r.node.FindClosestNode(idSearched), msg)
 		}
 
-	} else {
-		//error missing parameter, do nothing ?
 	}
 
 }
@@ -173,8 +179,6 @@ func (r *ReceiverLink) receiveLookupResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -189,8 +193,6 @@ func (r *ReceiverLink) receiveHeartBeat(msg *communicator.Message) {
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
 		go r.sender.SendHeartBeatResponse(&msg.Origin, idAnswer)
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -203,19 +205,15 @@ func (r *ReceiverLink) receiveHeartBeatResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- msg.Origin
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
 func (r *ReceiverLink) receiveGetSuccesor(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "idAnswer") {
-		shared.Logger.Warning("Receiving a get successor from %s", msg.Origin.Id)
+		shared.Logger.Info("Receiving a get successor from %s", msg.Origin.Id)
 		idAnswer, _ := msg.Parameters["idAnswer"]
 
 		go r.sender.SendGetSuccResponse(&msg.Origin, idAnswer, r.node.GetSuccesor())
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
@@ -228,7 +226,7 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 		succSuccIp, _ := msg.Parameters["succSuccIp"]
 		succSuccPort, _ := msg.Parameters["succSuccPort"]
 
-		shared.Logger.Warning("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
+		shared.Logger.Info("Receiving a GetSuccesor response from %s for %s", msg.Origin.Id, idAnswer)
 
 		succSucc := shared.DistantNode{
 			succSuccID,
@@ -240,12 +238,64 @@ func (r *ReceiverLink) receiveGetSuccesorResponse(msg *communicator.Message) {
 		if ok2 {
 			chanResp <- succSucc
 		}
-	} else {
-		//error missing parameter, do nothing ?
 	}
 }
 
-//TODO a test !
+func (r *ReceiverLink) receiveGetData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "keySearched", "idSearched") {
+		shared.Logger.Info("Receiving a get data from %s", msg.Origin.Id)
+		keySearched, _ := msg.Parameters["keySearched"]
+		idSearched, _ := msg.Parameters["idSearched"]
+		_, forced := msg.Parameters["forced"]
+
+		var result string
+		if forced {
+			result = r.node.GetLocalData(idSearched)
+		} else {
+			result = r.node.GetData(idSearched)
+		}
+		r.sender.SendGetDataResponse(&msg.Origin, keySearched, result)
+	}
+}
+
+func (r *ReceiverLink) receiveGetDataResponse(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "idAnswer", "value") {
+		idAnswer, _ := msg.Parameters["idAnswer"]
+		value, _ := msg.Parameters["value"]
+
+		shared.Logger.Info("Receiving a get data response from %s for %s", msg.Origin.Id, idAnswer)
+
+		chanResp, ok2 := communicator.PendingGetData[idAnswer]
+		if ok2 {
+			chanResp <- value
+		}
+	}
+}
+
+func (r *ReceiverLink) receiveSetData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "key", "value") {
+		key, _ := msg.Parameters["key"]
+		value, _ := msg.Parameters["value"]
+		tag, forced := msg.Parameters["forced"]
+		shared.Logger.Info("Receiving a set data from %s with data %s", msg.Origin.Id, value)
+
+		if forced {
+			r.node.SetLocalData(key, value, tag)
+		} else {
+			r.node.SetData(key, value)
+		}
+	}
+}
+
+func (r *ReceiverLink) receiveDeleteData(msg *communicator.Message) {
+	if checkRequiredParams(msg.Parameters, "key") {
+		key, _ := msg.Parameters["key"]
+		shared.Logger.Info("Receiving a delete data from %s for key %s", msg.Origin.Id, key)
+
+		r.node.DeleteLocalData(key)
+	}
+}
+
 func checkRequiredParams(params map[string]string, p ...string) bool {
 	for _, v := range p {
 		_, ok := params[v]
