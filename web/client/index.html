@@ -26,7 +26,7 @@
                 <h1>Node interface</h1>
             </div>
             <div class="col-md-6 bs-docs-section">
-                <div ng-class="{'panel-primary': !nodeIsSelected, 'panel-default': nodeIsSelected, 'panel': true}">
+                <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4>
                             <i class="glyphicon glyphicon-info-sign"></i>
@@ -253,11 +253,10 @@ app.config(function($httpProvider) {
 
 app.controller('MainCtrl', function($scope, $http) {
     $scope.init = function() {
-        $scope.nodeIsSelected = false;
         $scope.localIp = "127.0.0.1";
         $scope.localPort = "4321";
 
-        $scope.getAllNodes(true);
+        $scope.getAllNodes();
     }
 
     $scope.isMine = function(tag) {
@@ -269,7 +268,7 @@ app.controller('MainCtrl', function($scope, $http) {
         };
     }
 
-    $scope.getAllNodes = function(isInit) {
+    $scope.getAllNodes = function() {
         var urlReq;
         $http({
             method: 'GET',
@@ -280,30 +279,11 @@ app.controller('MainCtrl', function($scope, $http) {
             $scope.nodes = data;
             $scope.status = status;
 
-            if (isInit) {
-                $scope.nodeIsSelected = false;
-                $scope.localNode = $scope.nodes;
-                $scope.selectedNode = $scope.localNode;
-                $scope.distNode = $scope.localNode.Successor
-            } else {
-                if (!$scope.nodeIsSelected) {
-                    $scope.localNode = $scope.nodes;
-                    $scope.selectedNode = $scope.localNode;
-                } else {
-                    $scope.distNode = $scope.nodes;
-                    $scope.selectedNode = $scope.distNode;
-                }
-            }
+            $scope.localNode = $scope.nodes;
+
             if ($scope.localNode) {
                 $scope.localIp = $scope.localNode.Ip;
                 $scope.localPort = $scope.localNode.Port;
-            }
-
-            for (key in $scope.selectedNode.Datas.Set) {
-                $scope.keyFocus = key;
-                $scope.valueFocus = $scope.selectedNode.Datas.Set[key].Value;
-                $scope.tagFocus = $scope.selectedNode.Datas.Set[key].Tag;
-                break;
             }
 
         }).
@@ -332,12 +312,6 @@ app.controller('MainCtrl', function($scope, $http) {
     }
 
     $scope.addData = function() {
-        var urlReq;
-        if ($scope.nodeIsSelected) {
-            urlReq = 'http://' + $scope.selectedNode.Ip + ':' + $scope.selectedNode.Port + '/storage';
-        } else {
-            urlReq = 'http://' + $scope.localIp + ':' + $scope.localPort + '/storage';
-        }
         $http({
             method: 'POST',
             url: '/storage',
@@ -349,7 +323,6 @@ app.controller('MainCtrl', function($scope, $http) {
         }).
         success(function(data, status, headers, config) {
             $scope.status = status;
-            $scope.getAllNodes(false);
         }).
         error(function(data, status, headers, config) {
             console.log("error status : " + status);
