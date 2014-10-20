@@ -91,14 +91,18 @@ func DataPutHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
-	//node1.DeleteData(req.URL.Path[9:])
+	//get the url param
+	params := mux.Vars(req)
+	key := params["key"]
+
 	shared.Logger.Notice("DELETE data %s", key)
 	fmt.Fprintf(w, "ok")
 }
 
 func DataGetHandler(w http.ResponseWriter, req *http.Request) {
-	node1.GetData(req.URL.Path[9:])
-	fmt.Fprintf(w, "ok")
+	//get the url param
+	params := mux.Vars(req)
+	key := params["key"]
 	shared.Logger.Notice("GET data %s", key)
 }
 
