@@ -89,19 +89,18 @@
                     <div class="panel-heading clearfix">
                         <div class="panel-title">
                             <h3>
-                                <i class="glyphicon glyphicon-hdd"></i>
                                 Datas control
 
                                 <div class="btn-group pull-right">
-                                    <button class="btn btn-success" ng-click="addData()">
+                                    <button class="btn btn-success" ng-click="dataOperation='add'">
                                         <i class="glyphicon glyphicon-plus-sign"></i> add
                                     </button>
 
-                                    <button class="btn btn-primary" ng-click="getData()">
+                                    <button class="btn btn-primary" ng-click="dataOperation='get'">
                                         <i class="glyphicon glyphicon-search"></i> get
                                     </button>
 
-                                    <button class="btn btn-danger" ng-click="removeData()">
+                                    <button class="btn btn-danger" ng-click="dataOperation='delete'">
                                         <i class="glyphicon glyphicon-remove"></i> remove
                                     </button>
 
@@ -114,32 +113,87 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <form class="form-horizontal">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label for="inputKey" class="col-sm-2 control-label">key</label>
-                                    <div class="col-lg-10">
-                                        <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
-                                    </div>
-                                </div>
-                                <div class="form-group">
+                        {{dataOperation}}
+                        <div ng-switch="dataOperation">
+                            <div ng-switch-when="add">
+                                <form novalidate class="form-horizontal">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
 
-                                    <label for="inputValue" class="col-sm-2 control-label">value</label>
-                                    <div class="col-lg-10">
-                                        <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                            <label for="inputValue" class="col-sm-2 control-label">value</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-sm-2">tag</label>
+                                            <div class="col-lg-10 form-control-static">
+                                                {{tagFocus}}
+
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <button class="btn btn-default" ng-click="addData(keyFocus,valueFocus)">Add a new key, value</button>
+                                </form>
+                            </div>
+                            <div ng-switch-when="get">
+                                <form novalidate class="form-horizontal">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <button class="btn btn-default" ng-click="getData(keyFocus)">Search for this key</button>
+                                    <div class="form-group" ng-show="foundSomething">
+                                        <label class="control-label col-md-3">Value</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{dataFounded}}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-sm-2">tag</label>
-                                    <div class="col-lg-10 form-control-static">
-                                        {{tagFocus}}
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
+                                </form>
+                            </div>
+                            <div ng-switch-when="delete">
+                                <form novalidate class="form-horizontal">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <button class="btn btn-default" ng-click="removeData(keyFocus)">Remove the entry</button>
+                                </form>
+                            </div>
+                            <div ng-switch-default>
+                                Default
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class=" panel panel-default">
+                    <div class="panel-heading clearfix">
+                        <div class="panel-title">
+                            <h3>
+                                <i class="glyphicon glyphicon-hdd"></i>
+                                Local Datas
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="panel-body">
                         <div class="well">
 
-                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set">
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div ng-switch="isMine(data.Tag)">
@@ -167,7 +221,6 @@
                             </div>
                         </div>
                     </div>
-
 
                 </div>
             </div>
@@ -267,24 +320,7 @@ app.config(['growlProvider', function(growlProvider) {
 app.controller('MainCtrl', ['$scope', 'growl', '$http',
     function($scope, growl, $http) {
 
-
-        $scope.basicUsage = function(type) {
-            var config = {};
-            switch (type) {
-                case "success":
-                    growl.success("<b>I'm</b> a success message", config);
-                    break;
-                case "info":
-                    growl.info("I'm an info message", config);
-                    break;
-                case "warning":
-                    growl.warning("I'm the warning message", config);
-                    break;
-                default:
-                    growl.error("Ups, error message here!", config);
-            }
-        }
-
+        $scope.foundSomething = false
         $scope.init = function() {
             $scope.getAllNodes();
         }
@@ -301,61 +337,71 @@ app.controller('MainCtrl', ['$scope', 'growl', '$http',
         $scope.getAllNodes = function() {
             var urlReq;
             $http({
+                    method: 'GET',
+                    url: '/nodes',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.localNode = data;
+                    $scope.status = status;
+
+                    if ($scope.localNode) {
+                        $scope.localIp = $scope.localNode.Ip;
+                        $scope.localPort = $scope.localNode.Port;
+                    }
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+                    //$scope.localNode = data;
+                    $scope.status = status;
+                })
+        }
+
+
+
+        $scope.getData = function(key) {
+            $http({
                 method: 'GET',
-                url: '/nodes',
+                url: '/storage/' + key,
                 respondType: 'json' //optionnel
             }).
             success(function(data, status, headers, config) {
-                $scope.localNode = data;
                 $scope.status = status;
-
-                if ($scope.localNode) {
-                    $scope.localIp = $scope.localNode.Ip;
-                    $scope.localPort = $scope.localNode.Port;
+                console.log(data);
+                if (data == "no data with this key") {
+                    growl.error("No data found with this key", config);
+                    $scope.dataFounded = {}
+                    $scope.foundSomething = false
+                } else {
+                    growl.success("Data found", config);
+                    $scope.dataFounded = data
+                    $scope.foundSomething = true
                 }
 
             }).
             error(function(data, status, headers, config) {
                 console.log("error status : " + status);
-                //$scope.localNode = data;
                 $scope.status = status;
             });
         }
 
-        $scope.getData = function() {
-            $http({
-                method: 'GET',
-                url: '/storage/' + $scope.keyFocus,
-                respondType: 'json' //optionnel
-            }).
-            success(function(data, status, headers, config) {
-                $scope.status = status;
-                growl.success("Data finded",config)
-                console.log(data);
-
-            }).
-            error(function(data, status, headers, config) {
-                console.log("error status : " + status);
-                $scope.status = status;
-            });
-        }
-
-        $scope.addData = function() {
+        $scope.addData = function(key, value) {
+            console.log(key)
+            console.log(value)
             $http({
                 method: 'POST',
                 url: '/storage',
                 respondType: 'json', //optionnel
                 data: {
-                    Key: $scope.keyFocus,
-                    Value: $scope.valueFocus
+                    Key: key,
+                    Value: value,
                 }
             }).
             success(function(data, status, headers, config) {
                 $scope.status = status;
                 $scope.getAllNodes();
-                $scope.keyFocus = ""
-                $scope.valueFocus = ""
-                $scope.tagFocus = ""
+                $scope.dataOperation = ""
+                    //TODO notification
+                growl.success("New data added", config);
             }).
             error(function(data, status, headers, config) {
                 console.log("error status : " + status);
@@ -363,18 +409,17 @@ app.controller('MainCtrl', ['$scope', 'growl', '$http',
             });
         }
 
-        $scope.removeData = function() {
+        $scope.removeData = function(key) {
             $http({
                 method: 'DELETE',
-                url: '/storage/' + $scope.keyFocus,
+                url: '/storage/' + key,
                 respondType: 'json' //optionnel
             }).
             success(function(data, status, headers, config) {
                 $scope.status = status;
                 $scope.getAllNodes();
-                $scope.keyFocus = ""
-                $scope.valueFocus = ""
-                $scope.tagFocus = ""
+                $scope.dataOperation = ""
+                growl.success("Data removed", config);
             }).
             error(function(data, status, headers, config) {
                 console.log("error status : " + status);
