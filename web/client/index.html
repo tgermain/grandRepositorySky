@@ -23,6 +23,12 @@
         <div class="container">
             <!-- <div class="row"> -->
             <div class="page-header">
+                <div class="pull-right">
+
+                    <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
+                        <i class="glyphicon glyphicon-refresh"></i> maj node data
+                    </button>
+                </div>
                 <h1>Node interface</h1>
             </div>
             <div class="col-md-6 bs-docs-section">
@@ -123,20 +129,23 @@
                             </fieldset>
                         </form>
                         <div class="well">
-                            <ul>
-                                <li class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
-                                    <div>
-                                        <div class="pull-right">
-                                            <div ng-if="data.Tag == localNode.Id">
+
+                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div ng-switch="isMine(data.Tag)">
+                                            <div ng-switch-when="owned">
                                                 <div class="label label-success ">Owned</div>
                                             </div>
-                                            <div ng-if="(data.Tag == localNode.Successor.Id) || (data.Tag == localNode.Predecessor.Id)">
+                                            <div ng-switch-when="replica">
                                                 <div class="label label-primary ">Replica</div>
                                             </div>
-                                            <div ng-if="(data.Tag != localNode.Successor.Id) && (data.Tag != localNode.Predecessor.Id) && data.Tag != localNode.Id">
+                                            <div ng-switch-default>
                                                 <div class="label label-primary ">other</div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-10">
                                         <div>
                                             key : {{key}}
                                         </div>
@@ -145,8 +154,8 @@
                                             Value : {{data.Value}}
                                         </div>
                                     </div>
-                                </li>
-                            </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -154,25 +163,28 @@
                 </div>
             </div>
 
-            <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
-               <i class="glyphicon glyphicon-refresh"></i>  maj node data
-            </button>
-            </br>
+            <div class="col-xs-12 col-md-6 ">
+                <div class="panel panel-default">
 
-            <div class="col-xs-12 col-md-6 panel panel-default">
-                <div class="panel-body">                   
-                    <div class="form-group">
-                        <label class="checkbox-inline">
-                            <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
-                        </label>
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-random"></i>
+                            Finger Table
+                        </h4>
                     </div>
-                    <well>
-                        <ul>
+
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
+                            </label>
+                        </div>
+                        <well>
                             <div ng-repeat="finger in localNode.Fingers">
 
 
                                 <div ng-hide="hideObviousFinger && (finger.NodeResp.Id == localNode.Id || finger.NodeResp.Id == localNode.Successor.Id)">
-                                    <li class="panel panel-default">
+                                    <div class="panel panel-default">
 
                                         <div class="panel-heading">
                                             <div class="label label-default pull-right" ng-class="{'label-default' : finger.NodeResp.Id == localNode.Id,
@@ -212,14 +224,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </li>
+                                    </div>
                                 </div>
                             </div>
-                        </ul>
-                    </well>
+                        </well>
 
-                    </br>
+                        </br>
 
+                    </div>
                 </div>
             </div>
 
@@ -244,6 +256,15 @@ app.controller('MainCtrl', function($scope, $http) {
         $scope.getAllNodes();
     }
 
+    $scope.isMine = function(tag) {
+        if (tag == $scope.localNode.Id) {
+            return "owned"
+        }
+        if ((tag == $scope.localNode.Successor.Id) || (tag == $scope.localNode.Predecessor.Id)) {
+            return "replica"
+        };
+    }
+
     $scope.getAllNodes = function() {
         var urlReq;
         $http({
@@ -254,13 +275,10 @@ app.controller('MainCtrl', function($scope, $http) {
         success(function(data, status, headers, config) {
             $scope.localNode = data;
             $scope.status = status;
-            
 
-            for (key in $scope.localNode.Datas.Set) {
-                $scope.keyFocus = key;
-                $scope.valueFocus = $scope.localNode.Datas.Set[key].Value;
-                $scope.tagFocus = $scope.localNode.Datas.Set[key].Tag;
-                break;
+            if ($scope.localNode) {
+                $scope.localIp = $scope.localNode.Ip;
+                $scope.localPort = $scope.localNode.Port;
             }
 
         }).
@@ -300,7 +318,10 @@ app.controller('MainCtrl', function($scope, $http) {
         }).
         success(function(data, status, headers, config) {
             $scope.status = status;
-            $scope.getAllNodes(false);
+            $scope.getAllNodes();
+            $scope.keyFocus = ""
+            $scope.valueFocus = ""
+            $scope.tagFocus = ""
         }).
         error(function(data, status, headers, config) {
             console.log("error status : " + status);
@@ -316,6 +337,10 @@ app.controller('MainCtrl', function($scope, $http) {
         }).
         success(function(data, status, headers, config) {
             $scope.status = status;
+            $scope.getAllNodes();
+            $scope.keyFocus = ""
+            $scope.valueFocus = ""
+            $scope.tagFocus = ""
         }).
         error(function(data, status, headers, config) {
             console.log("error status : " + status);

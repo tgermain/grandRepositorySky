@@ -1,5 +1,7 @@
 package dataSet
 
+const DATANOTFOUND = "no data with this key"
+
 type DataSet struct {
 	Set map[string]PieceOfData
 }
@@ -24,8 +26,16 @@ func (d *DataSet) SetData(key, value, tag string) bool {
 
 func (d *DataSet) GetData(key string) PieceOfData {
 	//can return nul
-	val, _ := d.Set[key]
-	return val
+	val, ok := d.Set[key]
+	if ok {
+		return val
+
+	} else {
+		return PieceOfData{
+			"",
+			DATANOTFOUND,
+		}
+	}
 }
 
 func (d *DataSet) DelData(key string) {

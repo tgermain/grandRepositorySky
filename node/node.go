@@ -29,7 +29,7 @@ const CLEANREPLICASPERIOD = time.Second * 30
 
 const REPLICATEDATAPERIOD = time.Second * 20
 
-const NOTFOUNDMSG = "Data not found"
+const GETDATATIMEOUTMESSAGE = "get data timeout"
 
 //Mutex part ------------------------------------------------------------
 var mutexSucc = &sync.Mutex{}
@@ -246,13 +246,13 @@ func (node *DHTnode) PrintNodeInfo() {
 	shared.Logger.Notice("---------------------------------")
 	shared.Logger.Notice("Node info")
 	shared.Logger.Notice("---------------------------------")
-	shared.Logger.Notice("	Id			%s", shared.LocalId)
-	shared.Logger.Notice("	Ip			%s", shared.LocalIp)
-	shared.Logger.Notice("	Port		%s", shared.LocalPort)
-	shared.Logger.Notice(" 	Succesor	%s", node.successor.Id)
-	shared.Logger.Notice(" 	Predecesor	%s", node.predecessor.Id)
-	shared.Logger.Notice(" 	succSucc	%s", node.succSucc.Id)
-	shared.Logger.Notice("  Datas", shared.Datas)
+	shared.Logger.Notice("  Id          %s", shared.LocalId)
+	shared.Logger.Notice("  Ip          %s", shared.LocalIp)
+	shared.Logger.Notice("  Port        %s", shared.LocalPort)
+	shared.Logger.Notice("  Succesor    %s", node.successor.Id)
+	shared.Logger.Notice("  Predecesor  %s", node.predecessor.Id)
+	shared.Logger.Notice("  succSucc    %s", node.succSucc.Id)
+	shared.Logger.Notice("  Datas       %v", shared.Datas)
 	shared.Logger.Notice("---------------------------------")
 }
 
@@ -301,7 +301,6 @@ func (d *DHTnode) heartBeatRoutine() {
 			d.successor = d.succSucc
 			mutexSucc.Unlock()
 		}
-		d.PrintNodeInfo()
 	}
 }
 
@@ -347,7 +346,7 @@ func (d *DHTnode) GetData(key string) string {
 	hashedKey := dht.Sha1hash(key)
 	//if data are local
 	if d.IsResponsible(hashedKey) {
-		return d.GetDataDemocratic(key)
+		return d.GetDataDemocratic(hashedKey)
 	} else {
 		//else find where is data -> lookup, relay request and prepare to response
 		dest := d.Lookup(hashedKey)
@@ -361,7 +360,7 @@ func (d *DHTnode) GetData(key string) string {
 			}
 		case <-time.After(GETDATATIMEOUT):
 			shared.Logger.Error("Get data for %s timeout", hashedKey)
-			return NOTFOUNDMSG
+			return GETDATATIMEOUTMESSAGE
 		}
 	}
 }
@@ -425,7 +424,6 @@ func (d *DHTnode) getReplicas(hashedKey string) []string {
 				}
 			case <-time.After(GETDATATIMEOUT):
 				shared.Logger.Error("Get replica for %s timeout", hashedKey)
-				//make the succ.succ must update pred and d must update succ
 			}
 		}()
 	}
@@ -475,10 +473,49 @@ func (d *DHTnode) theMajority(replicas []string) string {
 	return replicas[0]
 }
 
-func (d *DHTnode) ModifyData() {
+func (d *DHTnode) ModifyData(key string, newValue string) {
 	//tuple space style !
 	//remove the old data
 	//create a new one
+
+	//exposed method
+
+	hashedKey := dht.Sha1hash(key)
+	//if data are local
+	if d.IsResponsible(hashedKey) {
+		shared.Logger.Notice("Modifying data %s with new value %s", hashedKey, newValue)
+		d.DeleteData(hashedKey)
+		d.SetData(hashedKey, newValue)
+	} else {
+		//else find where is data -> lookup, relay request
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendDeleteData(dest, hashedKey)
+		d.commLib.SendSetData(dest, hashedKey, newValue, false)
+	}
+}
+
+func (d *DHTnode) DeleteData(hashedKey string) {
+	//exposed method
+
+	//if data are local
+	if d.IsResponsible(hashedKey) {
+		d.DeleteLocalData(hashedKey)
+	} else {
+		//else find where is data -> lookup, relay request
+		dest := d.Lookup(hashedKey)
+		//send message
+		d.commLib.SendDeleteData(dest, hashedKey)
+	}
+}
+
+//used in receiver
+func (d *DHTnode) DeleteLocalData(hashedKey string) {
+	shared.Datas.DelData(hashedKey)
+	//for each place where we have replicas
+	for _, v := range d.getReplicasPlaces() {
+		d.commLib.SendDeleteData(v, hashedKey)
+	}
 }
 
 func (d *DHTnode) cleanReplicas() {
