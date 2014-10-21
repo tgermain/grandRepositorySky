@@ -99,8 +99,9 @@ func DataDeleteHandler(w http.ResponseWriter, req *http.Request) {
 
 func DataGetHandler(w http.ResponseWriter, req *http.Request) {
 	shared.Logger.Notice("GET data")
-	node1.GetData(req.URL.Path[9:])
-	fmt.Fprintf(w, "ok")
+	respond := node1.GetData(req.URL.Path[9:])
+	shared.Logger.Warning("supposed to send %s!", respond)
+	fmt.Fprintf(w, respond)
 }
 
 //TODO? launch lookup request

@@ -26,7 +26,7 @@
                 <h1>Node interface</h1>
             </div>
             <div class="col-md-6 bs-docs-section">
-                <div ng-class="{'panel-primary': !nodeIsSelected, 'panel-default': nodeIsSelected, 'panel': true}">
+                <div class="panel-primary panel">
                     <div class="panel-heading">
                         <h4>
                             <i class="glyphicon glyphicon-info-sign"></i>
@@ -69,8 +69,6 @@
 
                     </div>
                 </div>
-
-
 
                 <div class=" panel panel-default">
                     <div class="panel-heading clearfix">
@@ -125,9 +123,8 @@
                             </fieldset>
                         </form>
                         <div class="well">
-
                             <ul>
-                                <li class="alert alert-info" ng-repeat="(key, data) in selectedNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                                <li class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
                                     <div>
                                         <div class="pull-right">
                                             <div ng-if="data.Tag == localNode.Id">
@@ -171,7 +168,7 @@
                     </div>
                     <well>
                         <ul>
-                            <div ng-repeat="finger in nodes.Fingers">
+                            <div ng-repeat="finger in localNode.Fingers">
 
 
                                 <div ng-hide="hideObviousFinger && (finger.NodeResp.Id == localNode.Id || finger.NodeResp.Id == localNode.Successor.Id)">
@@ -244,8 +241,6 @@ app.config(function($httpProvider) {
 
 app.controller('MainCtrl', function($scope, $http) {
     $scope.init = function() {
-        $scope.nodeIsSelected = false;
-
         $scope.getAllNodes();
     }
 
@@ -257,11 +252,8 @@ app.controller('MainCtrl', function($scope, $http) {
             respondType: 'json' //optionnel
         }).
         success(function(data, status, headers, config) {
-            $scope.nodes = data;
+            $scope.localNode = data;
             $scope.status = status;
-
-
-            $scope.localNode = $scope.nodes;
             
 
             for (key in $scope.localNode.Datas.Set) {
@@ -274,7 +266,7 @@ app.controller('MainCtrl', function($scope, $http) {
         }).
         error(function(data, status, headers, config) {
             console.log("error status : " + status);
-            $scope.nodes = data;
+            //$scope.localNode = data;
             $scope.status = status;
         });
     }
