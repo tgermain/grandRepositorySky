@@ -480,18 +480,17 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 
 	//exposed method
 
-	hashedKey := dht.Sha1hash(key)
 	//if data are local
-	if d.IsResponsible(hashedKey) {
-		shared.Logger.Notice("Modifying data %s with new value %s", hashedKey, newValue)
-		d.DeleteData(hashedKey)
-		d.SetData(hashedKey, newValue)
+	if d.IsResponsible(key) {
+		shared.Logger.Notice("Modifying data %s with new value %s", key, newValue)
+		d.DeleteData(key)
+		d.SetData(key, newValue)
 	} else {
 		//else find where is data -> lookup, relay request
-		dest := d.Lookup(hashedKey)
+		dest := d.Lookup(key)
 		//send message
-		d.commLib.SendDeleteData(dest, hashedKey)
-		d.commLib.SendSetData(dest, hashedKey, newValue, false)
+		d.commLib.SendDeleteData(dest, key)
+		d.commLib.SendSetData(dest, key, newValue, false)
 	}
 }
 
