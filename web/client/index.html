@@ -6,7 +6,7 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
@@ -15,18 +15,33 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-animate.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-sanitize.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-resource.min.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="//rawgit.com/JanStevens/angular-growl-2/master/build/angular-growl.css" />
+    <script src="//rawgit.com/JanStevens/angular-growl-2/master/build/angular-growl.js" type="text/javascript"></script>
+
+
 </head>
 
 <body>
 
     <div ng-app="myApp" ng-controller="MainCtrl">
+        <div growl></div>
         <div class="container">
             <!-- <div class="row"> -->
             <div class="page-header">
+                <div class="pull-right">
+
+                    <button class="btn btn-default btn-lg btn-info" ng-click="getAllNodes()" ng-init="init()">
+                        <i class="glyphicon glyphicon-refresh"></i> maj node data
+                    </button>
+                </div>
                 <h1>Node interface</h1>
             </div>
             <div class="col-md-6 bs-docs-section">
-                <div class="panel panel-default">
+                <div class="panel-primary panel">
                     <div class="panel-heading">
                         <h4>
                             <i class="glyphicon glyphicon-info-sign"></i>
@@ -44,13 +59,13 @@
                             <div class="form-group">
                                 <label class="control-label col-md-3">Ip</label>
                                 <div class="col-md-9 form-control-static">
-                                    {{localIp}}
+                                    {{localNode.Ip}}
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-3">Port</label>
                                 <div class="col-md-9 form-control-static">
-                                    {{localPort}}
+                                    {{localNode.Port}}
                                 </div>
                             </div>
                             <div class="form-group">
@@ -69,7 +84,116 @@
 
                     </div>
                 </div>
+                <div class=" panel panel-default">
+                    <div class="panel-heading clearfix">
+                        <div class="panel-title">
+                            <h3>
+                                <i class="glyphicon glyphicon-wrench"></i>
+                                Datas control
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    {{dataOperation}}
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a class="text-success" data-toggle="tab" href="#addData">
+                                <i class="glyphicon glyphicon-plus-sign"></i> add
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-primary" data-toggle="tab" href="#getData">
+                                <i class="glyphicon glyphicon-search"></i> get
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-danger" data-toggle="tab" href="#removeData">
+                                <i class="glyphicon glyphicon-remove"></i> remove
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-info" data-toggle="tab" href="#modifData">
+                                <i class="glyphicon glyphicon-refresh"></i> maj
+                            </a>
+                        </li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade active in" id="addData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
 
+                                        <label for="inputValue" class="col-sm-2 control-label">value</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="addData(keyFocus,valueFocus)">Add a new key, value</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="getData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="getData(keyFocus)">Search for this key</button>
+                                <div class="form-group" ng-show="foundSomething">
+                                    <label class="control-label col-md-2">Value</label>
+                                    <div class="col-md-9 form-control-static">
+                                        {{dataFounded}}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="removeData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="removeData(keyFocus)">Remove the entry</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="modifData">
+                            modifData
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+
+                                        <label for="inputValue" class="col-sm-2 control-label">new value</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="majData(keyFocus,valueFocus)">Modify value of this key</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
 
                 <div class=" panel panel-default">
@@ -77,56 +201,14 @@
                         <div class="panel-title">
                             <h3>
                                 <i class="glyphicon glyphicon-hdd"></i>
-                                Datas control
-
-                                <div class="btn-group pull-right">
-                                    <button class="btn btn-success" ng-click="addData()">
-                                        <i class="glyphicon glyphicon-plus-sign"></i> add
-                                    </button>
-
-                                    <button class="btn btn-primary" ng-click="getData()">
-                                        <i class="glyphicon glyphicon-search"></i> get
-                                    </button>
-
-                                    <button class="btn btn-danger" ng-click="removeData()">
-                                        <i class="glyphicon glyphicon-remove"></i> remove
-                                    </button>
-
-                                    <button class="btn btn-info" ng-click="majData()">
-                                        <i class="glyphicon glyphicon-refresh"></i> maj
-
-                                    </button>
-                                </div>
+                                Local Datas
                             </h3>
                         </div>
                     </div>
                     <div class="panel-body">
-                        <form class="form-horizontal">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label for="inputKey" class="col-sm-2 control-label">key</label>
-                                    <div class="col-lg-10">
-                                        <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-
-                                    <label for="inputValue" class="col-sm-2 control-label">value</label>
-                                    <div class="col-lg-10">
-                                        <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-sm-2">tag</label>
-                                    <div class="col-lg-10 form-control-static">
-                                        {{tagFocus}}
-                                    </div>
-                                </div>
-                            </fieldset>
-                        </form>
                         <div class="well">
 
-                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set" ng-click="changeDataFocus(key, data)">
+                            <div class="alert alert-info" ng-repeat="(key, data) in localNode.Datas.Set">
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div ng-switch="isMine(data.Tag)">
@@ -155,11 +237,8 @@
                         </div>
                     </div>
 
-
                 </div>
             </div>
-
-
 
             <div class="col-xs-12 col-md-6 ">
                 <div class="panel panel-default">
@@ -170,24 +249,15 @@
                             Finger Table
                         </h4>
                     </div>
-                    <div class="panel-body">
 
-                        future graph visualisation
-                        </br>
-                        <button class="btn btn-default" ng-click="getAllNodes()" ng-init="init()">
-                            maj data of selected node
-                        </button>
-                        <button class="btn btn-default" ng-click="getAllNodes()">
-                            reinit datas from selected node
-                        </button>
-                        </br>
+                    <div class="panel-body">
                         <div class="form-group">
                             <label class="checkbox-inline">
                                 <input type="checkbox" name="hideObvious" ng-model="hideObviousFinger">Hide obvious finger (itself, or successor)
                             </label>
                         </div>
                         <well>
-                            <div ng-repeat="finger in nodes.Fingers">
+                            <div ng-repeat="finger in localNode.Fingers">
 
 
                                 <div ng-hide="hideObviousFinger && (finger.NodeResp.Id == localNode.Id || finger.NodeResp.Id == localNode.Successor.Id)">
@@ -248,7 +318,7 @@
 
 
 <script>
-var app = angular.module('myApp', []);
+var app = angular.module('myApp', ['angular-growl', 'ngAnimate']);
 
 app.config(function($httpProvider) {
     //Enable cross domain calls
@@ -258,138 +328,152 @@ app.config(function($httpProvider) {
     delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });
 
-app.controller('MainCtrl', function($scope, $http) {
-    $scope.init = function() {
-        $scope.localIp = "127.0.0.1";
-        $scope.localPort = "4321";
+app.config(['growlProvider', function(growlProvider) {
+    growlProvider.globalTimeToLive(3000);
+}]);
 
-        $scope.getAllNodes();
-    }
+app.controller('MainCtrl', ['$scope', 'growl', '$http',
+    function($scope, growl, $http) {
 
-    $scope.isMine = function(tag) {
-        if (tag == $scope.localNode.Id) {
-            return "owned"
+        $scope.foundSomething = false
+        $scope.init = function() {
+            $scope.getAllNodes();
         }
-        if ((tag == $scope.localNode.Successor.Id) || (tag == $scope.localNode.Predecessor.Id)) {
-            return "replica"
-        };
-    }
 
-    $scope.getAllNodes = function() {
-        var urlReq;
-        $http({
-            method: 'GET',
-            url: '/nodes',
-            respondType: 'json' //optionnel
-        }).
-        success(function(data, status, headers, config) {
-            $scope.nodes = data;
-            $scope.status = status;
-
-            $scope.localNode = $scope.nodes;
-
-            if ($scope.localNode) {
-                $scope.localIp = $scope.localNode.Ip;
-                $scope.localPort = $scope.localNode.Port;
+        $scope.isMine = function(tag) {
+            if (tag == $scope.localNode.Id) {
+                return "owned"
             }
+            if ((tag == $scope.localNode.Successor.Id) || (tag == $scope.localNode.Predecessor.Id)) {
+                return "replica"
+            };
+        }
 
-        }).
-        error(function(data, status, headers, config) {
-            console.log("error status : " + status);
-            $scope.nodes = data;
-            $scope.status = status;
-        });
-    }
+        $scope.getAllNodes = function() {
+            var urlReq;
+            $http({
+                    method: 'GET',
+                    url: '/nodes',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.localNode = data;
+                    $scope.status = status;
 
-    $scope.getData = function() {
-        $http({
-            method: 'GET',
-            url: '/storage/' + $scope.keyFocus,
-            respondType: 'json' //optionnel
-        }).
-        success(function(data, status, headers, config) {
-            $scope.status = status;
+                    if ($scope.localNode) {
+                        $scope.localIp = $scope.localNode.Ip;
+                        $scope.localPort = $scope.localNode.Port;
+                    }
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+                    //$scope.localNode = data;
+                    $scope.status = status;
+                })
+        }
+
+
+
+        $scope.getData = function(key) {
+            $http({
+                method: 'GET',
+                url: '/storage/' + key,
+                respondType: 'json' //optionnel
+            }).
+            success(function(data, status, headers, config) {
+                $scope.status = status;
+                console.log(data);
+                if (data == "no data with this key") {
+                    growl.error("No data found with this key", config);
+                    $scope.dataFounded = {}
+                    $scope.foundSomething = false
+                } else {
+                    growl.success("Data found", config);
+                    $scope.dataFounded = data
+                    $scope.foundSomething = true
+                }
+
+            }).
+            error(function(data, status, headers, config) {
+                console.log("error status : " + status);
+                $scope.status = status;
+            });
+        }
+
+        $scope.addData = function(key, value) {
+            console.log(key)
+            console.log(value)
+            $http({
+                method: 'POST',
+                url: '/storage',
+                respondType: 'json', //optionnel
+                data: {
+                    Key: key,
+                    Value: value,
+                }
+            }).
+            success(function(data, status, headers, config) {
+                $scope.status = status;
+                $scope.getAllNodes();
+                $scope.dataOperation = ""
+                    //TODO notification
+                growl.success("New data added", config);
+            }).
+            error(function(data, status, headers, config) {
+                console.log("error status : " + status);
+                $scope.status = status;
+            });
+        }
+
+        $scope.removeData = function(key) {
+            $http({
+                method: 'DELETE',
+                url: '/storage/' + key,
+                respondType: 'json' //optionnel
+            }).
+            success(function(data, status, headers, config) {
+                $scope.status = status;
+                $scope.getAllNodes();
+                $scope.dataOperation = ""
+                growl.success("Data removed", config);
+            }).
+            error(function(data, status, headers, config) {
+                console.log("error status : " + status);
+                $scope.status = status;
+            });
+        }
+
+        $scope.majData = function(key,value) {
+            $http({
+                method: 'PUT',
+                url: '/storage/' + $scope.keyFocus,
+                respondType: 'json', //optionnel
+                data: {
+                    Key: key,
+                    Value: value
+                }
+            }).
+            success(function(data, status, headers, config) {
+                $scope.status = status;
+                $scope.getAllNodes();
+                growl.success("Data modified", config);
+            }).
+            error(function(data, status, headers, config) {
+                console.log("error status : " + status);
+                $scope.status = status;
+            });
+        }
+
+        $scope.changeDataFocus = function(key, data) {
             console.log(data);
+            $scope.keyFocus = key;
+            $scope.valueFocus = data.Value;
+            $scope.tagFocus = data.Tag;
+        }
 
-        }).
-        error(function(data, status, headers, config) {
-            console.log("error status : " + status);
-            $scope.status = status;
-        });
+
+
     }
-
-    $scope.addData = function() {
-        $http({
-            method: 'POST',
-            url: '/storage',
-            respondType: 'json', //optionnel
-            data: {
-                Key: $scope.keyFocus,
-                Value: $scope.valueFocus
-            }
-        }).
-        success(function(data, status, headers, config) {
-            $scope.status = status;
-            $scope.getAllNodes();
-            $scope.keyFocus = ""
-            $scope.valueFocus = ""
-            $scope.tagFocus = ""
-        }).
-        error(function(data, status, headers, config) {
-            console.log("error status : " + status);
-            $scope.status = status;
-        });
-    }
-
-    $scope.removeData = function() {
-        $http({
-            method: 'DELETE',
-            url: '/storage/' + $scope.keyFocus,
-            respondType: 'json' //optionnel
-        }).
-        success(function(data, status, headers, config) {
-            $scope.status = status;
-            $scope.getAllNodes();
-            $scope.keyFocus = ""
-            $scope.valueFocus = ""
-            $scope.tagFocus = ""
-        }).
-        error(function(data, status, headers, config) {
-            console.log("error status : " + status);
-            $scope.status = status;
-        });
-    }
-
-    $scope.majData = function() {
-        $http({
-            method: 'PUT',
-            url: '/storage/' + $scope.keyFocus,
-            respondType: 'json', //optionnel
-            data: {
-                Key: $scope.keyFocus,
-                Value: $scope.valueFocus
-            }
-        }).
-        success(function(data, status, headers, config) {
-            $scope.status = status;
-            $scope.getAllNodes();
-        }).
-        error(function(data, status, headers, config) {
-            console.log("error status : " + status);
-            $scope.status = status;
-        });
-    }
-
-    $scope.changeDataFocus = function(key, data) {
-        console.log(data);
-        $scope.keyFocus = key;
-        $scope.valueFocus = data.Value;
-        $scope.tagFocus = data.Tag;
-    }
-
-
-
-});
+]);
 </script>
 
 

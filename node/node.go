@@ -346,12 +346,12 @@ func (d *DHTnode) GetData(key string) string {
 	hashedKey := dht.Sha1hash(key)
 	//if data are local
 	if d.IsResponsible(hashedKey) {
-		return d.GetDataDemocratic(hashedKey)
+		return d.GetDataDemocratic(key)
 	} else {
 		//else find where is data -> lookup, relay request and prepare to response
 		dest := d.Lookup(hashedKey)
 		//send message
-		responseChan := d.commLib.SendGetData(dest, hashedKey, false)
+		responseChan := d.commLib.SendGetData(dest, key, false)
 		select {
 		case value := <-responseChan:
 			{
@@ -359,15 +359,15 @@ func (d *DHTnode) GetData(key string) string {
 				return value
 			}
 		case <-time.After(GETDATATIMEOUT):
-			shared.Logger.Error("Get data for %s timeout", hashedKey)
+			shared.Logger.Error("Get data for %s timeout", key)
 			return GETDATATIMEOUTMESSAGE
 		}
 	}
 }
 
-func (d *DHTnode) GetDataDemocratic(hashedKey string) string {
+func (d *DHTnode) GetDataDemocratic(key string) string {
 	//get replicas
-	allDatas := d.getReplicas(hashedKey)
+	allDatas := d.getReplicas(key)
 	//return the most frequent one
 	return d.theMajority(allDatas)
 }
@@ -382,48 +382,48 @@ func (d *DHTnode) SetData(key, value string) {
 	if d.IsResponsible(hashedKey) {
 		//if data are local
 		//new data
-		d.SetLocalData(hashedKey, value, shared.LocalId)
+		d.SetLocalData(key, value, shared.LocalId)
 		//->send setData to replicas
-		d.setDataToReplica(hashedKey, value)
+		d.setDataToReplica(key, value)
 	} else {
 		//else find where is data -> lookup, relay request NO RESPONSE
 
 		dest := d.Lookup(hashedKey)
 		//send message
-		d.commLib.SendSetData(dest, hashedKey, value, false)
+		d.commLib.SendSetData(dest, key, value, false)
 	}
 }
 
-func (d *DHTnode) setDataToReplica(hashedKey, value string) {
+func (d *DHTnode) setDataToReplica(key, value string) {
 	//for each place where we want replicas
 	for _, v := range d.getReplicasPlaces() {
-		d.commLib.SendSetData(v, hashedKey, value, true)
+		d.commLib.SendSetData(v, key, value, true)
 	}
 }
 
 //used in receiver
-func (d *DHTnode) SetLocalData(hashedKey, value, tag string) {
+func (d *DHTnode) SetLocalData(key, value, tag string) {
 
-	if !shared.Datas.SetData(hashedKey, value, tag) {
-		shared.Logger.Warning("Key %s already exist", hashedKey)
+	if !shared.Datas.SetData(key, value, tag) {
+		shared.Logger.Warning("Key %s already exist", key)
 	}
 }
 
-func (d *DHTnode) getReplicas(hashedKey string) []string {
+func (d *DHTnode) getReplicas(key string) []string {
 	//get the datas from both replica aka pred and succ
 	//case of successor AND predecessor=itself -> no replica
 	//case successor= predecessor -> replica on predecessor
-	results := []string{d.GetLocalData(hashedKey)}
+	results := []string{d.GetLocalData(key)}
 	for _, v := range d.getReplicasPlaces() {
 		go func() {
-			responseChan := d.commLib.SendGetData(v, hashedKey, true)
+			responseChan := d.commLib.SendGetData(v, key, true)
 			select {
 			case value := <-responseChan:
 				{
 					results = append(results, value)
 				}
 			case <-time.After(GETDATATIMEOUT):
-				shared.Logger.Error("Get replica for %s timeout", hashedKey)
+				shared.Logger.Error("Get replica for %s timeout", key)
 			}
 		}()
 	}
@@ -480,18 +480,17 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 
 	//exposed method
 
-	hashedKey := dht.Sha1hash(key)
 	//if data are local
-	if d.IsResponsible(hashedKey) {
-		shared.Logger.Notice("Modifying data %s with new value %s", hashedKey, newValue)
-		d.DeleteData(hashedKey)
-		d.SetData(hashedKey, newValue)
+	if d.IsResponsible(key) {
+		shared.Logger.Notice("Modifying data %s with new value %s", key, newValue)
+		d.DeleteData(key)
+		d.SetData(key, newValue)
 	} else {
 		//else find where is data -> lookup, relay request
-		dest := d.Lookup(hashedKey)
+		dest := d.Lookup(key)
 		//send message
-		d.commLib.SendDeleteData(dest, hashedKey)
-		d.commLib.SendSetData(dest, hashedKey, newValue, false)
+		d.commLib.SendDeleteData(dest, key)
+		d.commLib.SendSetData(dest, key, newValue, false)
 	}
 }
 
