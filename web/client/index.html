@@ -84,102 +84,117 @@
 
                     </div>
                 </div>
-
                 <div class=" panel panel-default">
                     <div class="panel-heading clearfix">
                         <div class="panel-title">
                             <h3>
+                                <i class="glyphicon glyphicon-wrench"></i>
                                 Datas control
-
-                                <div class="btn-group pull-right">
-                                    <button class="btn btn-success" ng-click="dataOperation='add'">
-                                        <i class="glyphicon glyphicon-plus-sign"></i> add
-                                    </button>
-
-                                    <button class="btn btn-primary" ng-click="dataOperation='get'">
-                                        <i class="glyphicon glyphicon-search"></i> get
-                                    </button>
-
-                                    <button class="btn btn-danger" ng-click="dataOperation='delete'">
-                                        <i class="glyphicon glyphicon-remove"></i> remove
-                                    </button>
-
-                                    <button class="btn btn-info" ng-click="majData()">
-                                        <i class="glyphicon glyphicon-refresh"></i> maj
-
-                                    </button>
-                                </div>
                             </h3>
                         </div>
                     </div>
-                    <div class="panel-body">
-                        {{dataOperation}}
-                        <div ng-switch="dataOperation">
-                            <div ng-switch-when="add">
-                                <form novalidate class="form-horizontal">
-                                    <fieldset>
-                                        <div class="form-group">
-                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
-                                            <div class="col-lg-10">
-                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-
-                                            <label for="inputValue" class="col-sm-2 control-label">value</label>
-                                            <div class="col-lg-10">
-                                                <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-2">tag</label>
-                                            <div class="col-lg-10 form-control-static">
-                                                {{tagFocus}}
-
-                                            </div>
-                                        </div>
-                                    </fieldset>
-                                    <button class="btn btn-default" ng-click="addData(keyFocus,valueFocus)">Add a new key, value</button>
-                                </form>
-                            </div>
-                            <div ng-switch-when="get">
-                                <form novalidate class="form-horizontal">
-                                    <fieldset>
-                                        <div class="form-group">
-                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
-                                            <div class="col-lg-10">
-                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
-                                            </div>
-                                        </div>
-                                    </fieldset>
-                                    <button class="btn btn-default" ng-click="getData(keyFocus)">Search for this key</button>
-                                    <div class="form-group" ng-show="foundSomething">
-                                        <label class="control-label col-md-3">Value</label>
-                                        <div class="col-md-9 form-control-static">
-                                            {{dataFounded}}
+                </div>
+                <div class="panel-body">
+                    {{dataOperation}}
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a class="text-success" data-toggle="tab" href="#addData">
+                                <i class="glyphicon glyphicon-plus-sign"></i> add
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-primary" data-toggle="tab" href="#getData">
+                                <i class="glyphicon glyphicon-search"></i> get
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-danger" data-toggle="tab" href="#removeData">
+                                <i class="glyphicon glyphicon-remove"></i> remove
+                            </a>
+                        </li>
+                        <li>
+                            <a class="text-info" data-toggle="tab" href="#modifData">
+                                <i class="glyphicon glyphicon-refresh"></i> maj
+                            </a>
+                        </li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade active in" id="addData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-                            <div ng-switch-when="delete">
-                                <form novalidate class="form-horizontal">
-                                    <fieldset>
-                                        <div class="form-group">
-                                            <label for="inputKey" class="col-sm-2 control-label">key</label>
-                                            <div class="col-lg-10">
-                                                <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
-                                            </div>
+                                    <div class="form-group">
+
+                                        <label for="inputValue" class="col-sm-2 control-label">value</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
                                         </div>
-                                    </fieldset>
-                                    <button class="btn btn-default" ng-click="removeData(keyFocus)">Remove the entry</button>
-                                </form>
-                            </div>
-                            <div ng-switch-default>
-                                Default
-                            </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="addData(keyFocus,valueFocus)">Add a new key, value</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="getData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="getData(keyFocus)">Search for this key</button>
+                                <div class="form-group" ng-show="foundSomething">
+                                    <label class="control-label col-md-2">Value</label>
+                                    <div class="col-md-9 form-control-static">
+                                        {{dataFounded}}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="removeData">
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="removeData(keyFocus)">Remove the entry</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade in" id="modifData">
+                            modifData
+                            <form novalidate class="form-horizontal">
+                                <fieldset>
+                                    <div class="form-group">
+                                        <label for="inputKey" class="col-sm-2 control-label">key</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputKey" placeholder={{keyFocus}} ng-model="keyFocus">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+
+                                        <label for="inputValue" class="col-sm-2 control-label">new value</label>
+                                        <div class="col-lg-10">
+                                            <input class="form-control" id="inputValue" placeholder={{valueFocus}} ng-model="valueFocus">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <button class="btn btn-default" ng-click="majData(keyFocus,valueFocus)">Modify value of this key</button>
+                            </form>
                         </div>
                     </div>
                 </div>
+
 
                 <div class=" panel panel-default">
                     <div class="panel-heading clearfix">
@@ -427,19 +442,20 @@ app.controller('MainCtrl', ['$scope', 'growl', '$http',
             });
         }
 
-        $scope.majData = function() {
+        $scope.majData = function(key,value) {
             $http({
                 method: 'PUT',
                 url: '/storage/' + $scope.keyFocus,
                 respondType: 'json', //optionnel
                 data: {
-                    Key: $scope.keyFocus,
-                    Value: $scope.valueFocus
+                    Key: key,
+                    Value: value
                 }
             }).
             success(function(data, status, headers, config) {
                 $scope.status = status;
                 $scope.getAllNodes();
+                growl.success("Data modified", config);
             }).
             error(function(data, status, headers, config) {
                 console.log("error status : " + status);
