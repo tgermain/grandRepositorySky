@@ -45,14 +45,14 @@ func main() {
 	//serv staticly index.html
 	fs := http.FileServer(http.Dir(path))
 	r.Handle("/", fs)
-	r.HandleFunc("/containers", getContinerHandler)
+	r.HandleFunc("/containers", getContainerHandler).Methods("GET")
 
 	http.Handle("/", &MyServer{r})
 
 	http.ListenAndServe(receive, nil)
 }
 
-func getContinerHandler(w http.ResponseWriter, req *http.Request) {
+func getContainerHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("on fait un gros GET")
 	resp, err := http.Get("http://localhost:4243/containers/json")
 	if err != nil {
