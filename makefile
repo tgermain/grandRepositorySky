@@ -1,6 +1,6 @@
 
 buildDocker:
-	docker build -t testator .
+	docker build -t tgermain/repo_sky .
 
 runDocker:
-	docker run --publish 4444:4321 --publish 4444:4321/udp --name draluca --rm testator:latest -n monNoeud
+	docker run --publish 4444:4321 --publish 4444:4321/udp --name draluca --rm tgermain/repo_sky:v2 -s /static/
