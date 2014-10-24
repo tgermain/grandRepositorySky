@@ -79,7 +79,7 @@
                                     </div>
                                 </div>
                             </fieldset>
-                            <button class="btn btn-default" ng-click="addData(newNode)">Add a newNode</button>
+                            <button class="btn btn-default" ng-click="addNode()">Add a newNode</button>
                         </form>
                     </div>
                 </div>
@@ -188,7 +188,18 @@ app.controller('MainCtrl', ['$scope', '$http',
         }
 
         $scope.addNode = function() {
+            $http({
+                    method: 'POST',
+                    url: '/containers',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    // $scope.containers = data
+                	console.log(data)
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
 
+                })
         }
 
     }
