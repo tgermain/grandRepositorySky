@@ -1,16 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/fsouza/go-dockerclient"
 	"github.com/gorilla/mux"
-	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 type MyServer struct {
 	r *mux.Router
 }
+
+var endpoint = "unix:///var/run/docker.sock"
+var client, _ = docker.NewClient(endpoint)
 
 //wrap server handler function to activate CORS
 func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
@@ -54,17 +57,14 @@ func main() {
 
 func getContainerHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("on fait un gros GET")
-	resp, err := http.Get("http://localhost:4243/containers/json")
+
+	containers, _ := client.ListContainers(docker.ListContainersOptions{All: false})
+	b, err := json.Marshal(containers)
 	if err != nil {
-		fmt.Printf("%s", err)
-		os.Exit(1)
-	} else {
-		defer resp.Body.Close()
-		contents, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Printf("%s", err)
-			os.Exit(1)
-		}
-		fmt.Fprintf(w, "%s", contents)
+		http.Error(w, err.Error(), 500)
 	}
+	fmt.Fprintf(w, "%s", b)
+
+}
+
 }
