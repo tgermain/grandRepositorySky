@@ -6,10 +6,13 @@
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!--      Optional theme
+    <link rel="stylesheet" href="http://bootswatch.com/darkly/bootstrap.min.css"> -->
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="http://bootswatch.com/darkly/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -20,18 +23,83 @@
 <body>
     <div ng-app="myApp" ng-controller="MainCtrl" ng-init="init()">
 
-        <div class="container">
+        <div class="container-fluid">
 
             <div class="page-header">
                 <h1>Hello</h1>
             </div>
-            <div class="col-md-6 bs-docs-section">
-                <button class="btn btn-default" ng-click="getLocalContainers()">Click</button>
+            <div class="col-md-3 bs-docs-section">
+                ToolBox general
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-info-sign"></i>
+                            Infos
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-md-7">Nodes running :</label>
+                                <div class="col-md-5 form-control-static">
+                                    {{countNodeContainers()}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-7">informations handled :</label>
+                                <div class="col-md-5 form-control-static">
+                                    numberOfData
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>
+                            <i class="glyphicon glyphicon-wrench"></i>
+                            ToolBox
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <form novalidate class="form-horizontal">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="CustomId" class="col-sm-3 control-label">CustomId</label>
+                                    <div class="col-lg-10">
+                                        <input class="form-control" id="CustomId" ng-model="newNode.CustomId">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label for="CustomPort" class="col-sm-3 control-label">CustomPort</label>
+                                    <div class="col-lg-10">
+                                        <input class="form-control" id="CustomPort" ng-model="newNode.CustomPort">
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <button class="btn btn-default" ng-click="addData(newNode)">Add a newNode</button>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-6">
+                Centre
+                <div class="panel panel-default">
+                    Magnificent D3
+                    <!-- Here goes the fancy D3 -->
+                </div>
+                <!-- Debug things -->
+                <button class="btn btn-default" ng-click="getLocalContainers()">Maj</button>
+                <button class="btn btn-default" ng-click="countNodeContainers()">Count</button>
                 <div ng-repeat="container in containers">
                     <form class="form-horizontal">
                         <div class="panel panel-default">
                             <div class="panel-body">
-                             <div class="form-group">
+                                <div class="form-group">
                                     <label class="control-label col-md-3">Command</label>
                                     <div class="col-md-9 form-control-static">
                                         {{container.Command}}
@@ -49,6 +117,9 @@
                                         {{container.Status}}
                                     </div>
                                 </div>
+                                <a ng-href="http://localhost:{{container.Ports[1].PublicPort}}">
+                                link to node
+                                </a>
                             </div>
                         </div>
                     </form>
@@ -57,6 +128,10 @@
                 	
                 {{containers | json}}
                 </pre>
+                <!-- end of debug things -->
+            </div>
+            <div class="col-md-3">
+                ToolBoxNoeud
             </div>
         </div>
     </div>
@@ -73,6 +148,9 @@ app.config(function($httpProvider) {
 
 app.controller('MainCtrl', ['$scope', '$http',
     function($scope, $http) {
+
+        $scope.containers = []
+
         $scope.init = function() {
             $scope.getLocalContainers();
         };
@@ -90,6 +168,29 @@ app.controller('MainCtrl', ['$scope', '$http',
 
                 })
         };
+
+        $scope.countNodeContainers = function() {
+        	//regeexp to check if it's the right name of container
+            var verif = new RegExp("^tgermain/repo_sky");
+
+            var count = 0;
+            for (var i = 0; i < $scope.containers.length; i++) {
+                // console.log($scope.containers[i])
+                if (verif.test($scope.containers[i].Image)) {
+                	count++
+                };
+            };
+            return count
+        }
+
+        $scope.validatePort = function(proposedPort) {
+            //check if port is in range and not already use
+        }
+
+        $scope.addNode = function() {
+
+        }
+
     }
 ])
 </script>
