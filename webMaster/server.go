@@ -49,6 +49,7 @@ func main() {
 	fs := http.FileServer(http.Dir(path))
 	r.Handle("/", fs)
 	r.HandleFunc("/containers", getContainerHandler).Methods("GET")
+	r.HandleFunc("/containers", createContainerHandler).Methods("Post")
 
 	http.Handle("/", &MyServer{r})
 
@@ -67,4 +68,55 @@ func getContainerHandler(w http.ResponseWriter, req *http.Request) {
 
 }
 
+func createContainerHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("on fait un gros POST")
+	id := "truc"
+	opts := docker.CreateContainerOptions{
+		Name: id,
+		Config: &docker.Config{
+
+			PortSpecs: []string{
+				"4444:4321",
+				"4444:4321/udp",
+			},
+			Cmd:   []string{"-s", "/static/"},
+			Image: "tgermain/repo_sky:v2",
+		},
+	}
+	container, err := client.CreateContainer(opts)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	fmt.Println("-------AVANT --------")
+	fmt.Println("ID: ", container.ID)
+	fmt.Println("Image: ", container.Image)
+	fmt.Println("Created: ", container.Created)
+	fmt.Println("hostConf: ", container.HostConfig)
+	err2 := client.StartContainer(id, &docker.HostConfig{
+		NetworkMode: "bridge",
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"4321/tcp": []docker.PortBinding{
+				docker.PortBinding{
+					HostPort: "5555",
+				},
+			},
+			"4321/udp": []docker.PortBinding{
+				docker.PortBinding{
+					HostPort: "5555",
+				},
+			},
+		},
+	})
+	if err2 != nil {
+		http.Error(w, err2.Error(), 500)
+		return
+	}
+	fmt.Println("-------Après --------")
+
+	fmt.Println("ID: ", container.ID)
+	fmt.Println("Image: ", container.Image)
+	fmt.Println("Created: ", container.Created)
+	fmt.Println("hostConf: ", container.HostConfig)
 }
