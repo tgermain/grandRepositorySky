@@ -123,6 +123,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <button class="btn btn-danger" ng-click="stopNode(container.Id)">Stop</button>
+                                    <button class="btn btn-default" ng-click="pauseNode(container.Id)">pause</button>
                                 </div>
                             </div>
                         </div>
@@ -237,6 +238,20 @@ app.controller('MainCtrl', ['$scope', '$http',
             $http({
                     method: 'GET',
                     url: '/containers/' + id + '/stop',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+                $scope.pauseNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/pause',
                     respondType: 'json' //optionnel
                 }).success(function(data, status, headers, config) {
                     $scope.getLocalContainers();

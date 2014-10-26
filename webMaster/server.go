@@ -56,6 +56,7 @@ func main() {
 	r.Handle("/", fs)
 	r.HandleFunc("/containers", getContainerHandler).Methods("GET")
 	r.HandleFunc("/containers", createContainerHandler).Methods("Post")
+	r.HandleFunc("/containers/{idContainer}/pause", pauseContainer)
 	r.HandleFunc("/containers/{idContainer}/stop", stopContainer)
 
 	http.Handle("/", &MyServer{r})
@@ -122,6 +123,18 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 	})
 	if err2 != nil {
 		http.Error(w, err2.Error(), 500)
+		return
+	}
+
+}
+
+func pauseContainer(w http.ResponseWriter, req *http.Request) {
+	//get the url param
+	params := mux.Vars(req)
+	idContainer := params["idContainer"]
+	err := client.PauseContainer(idContainer)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
