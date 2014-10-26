@@ -6,10 +6,16 @@ import (
 	"github.com/fsouza/go-dockerclient"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 )
 
 type MyServer struct {
 	r *mux.Router
+}
+
+type postParams struct {
+	Id   string
+	Port int64
 }
 
 var endpoint = "unix:///var/run/docker.sock"
@@ -70,9 +76,18 @@ func getContainerHandler(w http.ResponseWriter, req *http.Request) {
 
 func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("on fait un gros POST")
-	id := "truc"
+
+	decoder := json.NewDecoder(req.Body)
+	var parameters postParams
+	err := decoder.Decode(&parameters)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Println(parameters)
+	// id := "truc"
 	opts := docker.CreateContainerOptions{
-		Name: id,
+		Name: parameters.Id,
 		Config: &docker.Config{
 
 			PortSpecs: []string{
@@ -89,22 +104,17 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println("-------AVANT --------")
-	fmt.Println("ID: ", container.ID)
-	fmt.Println("Image: ", container.Image)
-	fmt.Println("Created: ", container.Created)
-	fmt.Println("hostConf: ", container.HostConfig)
-	err2 := client.StartContainer(id, &docker.HostConfig{
+	err2 := client.StartContainer(container.ID, &docker.HostConfig{
 		NetworkMode: "bridge",
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"4321/tcp": []docker.PortBinding{
 				docker.PortBinding{
-					HostPort: "5555",
+					HostPort: strconv.FormatInt(parameters.Port, 10),
 				},
 			},
 			"4321/udp": []docker.PortBinding{
 				docker.PortBinding{
-					HostPort: "5555",
+					HostPort: strconv.FormatInt(parameters.Port, 10),
 				},
 			},
 		},
@@ -113,10 +123,7 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err2.Error(), 500)
 		return
 	}
-	fmt.Println("-------Après --------")
 
-	fmt.Println("ID: ", container.ID)
-	fmt.Println("Image: ", container.Image)
-	fmt.Println("Created: ", container.Created)
-	fmt.Println("hostConf: ", container.HostConfig)
+}
+
 }

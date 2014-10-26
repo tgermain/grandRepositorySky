@@ -63,23 +63,16 @@
                         </h5>
                     </div>
                     <div class="panel-body">
-                        <form novalidate class="form-horizontal">
+                        <form name="addNodeForm" novalidate class="form-horizontal">
                             <fieldset>
                                 <div class="form-group">
                                     <label for="CustomId" class="col-sm-3 control-label">CustomId</label>
-                                    <div class="col-lg-10">
+                                    <div class="col-lg-9">
                                         <input class="form-control" id="CustomId" ng-model="newNode.CustomId">
                                     </div>
                                 </div>
-                                <div class="form-group">
-
-                                    <label for="CustomPort" class="col-sm-3 control-label">CustomPort</label>
-                                    <div class="col-lg-10">
-                                        <input class="form-control" id="CustomPort" ng-model="newNode.CustomPort">
-                                    </div>
-                                </div>
                             </fieldset>
-                            <button class="btn btn-default" ng-click="addNode()">Add a newNode</button>
+                            <button class="btn btn-default" ng-disabled="addNodeForm.$invalid || validatePort(newNode.CustomPort)" ng-click="addNode(newNode.CustomId)">Add a newNode</button>
                         </form>
                     </div>
                 </div>
@@ -170,14 +163,14 @@ app.controller('MainCtrl', ['$scope', '$http',
         };
 
         $scope.countNodeContainers = function() {
-        	//regeexp to check if it's the right name of container
+            //regeexp to check if it's the right name of container
             var verif = new RegExp("^tgermain/repo_sky");
 
             var count = 0;
             for (var i = 0; i < $scope.containers.length; i++) {
                 // console.log($scope.containers[i])
                 if (verif.test($scope.containers[i].Image)) {
-                	count++
+                    count++
                 };
             };
             return count
@@ -185,16 +178,43 @@ app.controller('MainCtrl', ['$scope', '$http',
 
         $scope.validatePort = function(proposedPort) {
             //check if port is in range and not already use
+            if (4440 <= proposedPort && proposedPort <= 4540) {
+                //is in range
+                for (var i = 0; i < $scope.containers.length; i++) {
+                    // console.log($scope.containers[i])
+                    if ($scope.containers[i].Ports[0].PublicPort == proposedPort) {
+                        return false
+                    };
+                };
+                return true;
+            };
         }
 
-        $scope.addNode = function() {
+        $scope.getValidePort = function() {
+            for (var port = 4440; port < 4540; port++) {
+
+                if ($scope.validatePort(port)) {
+                    return port
+                }
+
+            };
+        }
+
+        $scope.addNode = function(customId) {
+            daPort = $scope.getValidePort()
+            console.log(daPort)
             $http({
                     method: 'POST',
                     url: '/containers',
-                    respondType: 'json' //optionnel
+                    respondType: 'json', //optionnel
+                    data: {
+                        Port: daPort,
+                        Id: customId,
+                    }
                 }).success(function(data, status, headers, config) {
                     // $scope.containers = data
-                	console.log(data)
+                    console.log(data)
+                    $scope.getLocalContainers();
                 })
                 .error(function(data, status, headers, config) {
                     console.log("error status : " + status);
