@@ -92,27 +92,38 @@
                     <form class="form-horizontal">
                         <div class="panel panel-default">
                             <div class="panel-body">
-                                <div class="form-group">
-                                    <label class="control-label col-md-3">Command</label>
-                                    <div class="col-md-9 form-control-static">
-                                        {{container.Command}}
+                                <div class="col-md-9">
+                                    <div class="form-group ">
+                                        <label class="control-label col-md-3">Command</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Command}}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-md-3">Name</label>
-                                    <div class="col-md-9 form-control-static">
-                                        {{container.Names}}
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Name</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Names[0]}}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-md-3">Status</label>
-                                    <div class="col-md-9 form-control-static">
-                                        {{container.Status}}
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Port used</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Ports[0].PublicPort}}
+                                        </div>
                                     </div>
-                                </div>
-                                <a ng-href="http://localhost:{{container.Ports[1].PublicPort}}">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Status</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Status}}
+                                        </div>
+                                    </div>
+                                    <a ng-href="http://localhost:{{container.Ports[1].PublicPort}}">
                                 link to node
                                 </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-danger" ng-click="stopNode(container.Id)">Stop</button>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -222,6 +233,19 @@ app.controller('MainCtrl', ['$scope', '$http',
                 })
         }
 
+        $scope.stopNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/stop',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
     }
 ])
 </script>
