@@ -124,13 +124,14 @@
                                 <div class="col-md-3">
                                     <button class="btn btn-danger" ng-click="stopNode(container.Id)">Stop</button>
                                     <button class="btn btn-default" ng-click="pauseNode(container.Id)">pause</button>
+                                    <button class="btn btn-default" ng-click="unpauseNode(container.Id)">unpause</button>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
                 <pre>
-                	
+                    
                 {{containers | json}}
                 </pre>
                 <!-- end of debug things -->
@@ -261,6 +262,22 @@ app.controller('MainCtrl', ['$scope', '$http',
 
                 })
         }
+
+                $scope.unpauseNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/unpause',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+
     }
 ])
 </script>
