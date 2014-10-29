@@ -4,3 +4,6 @@ buildDocker:
 
 runDocker:
 	docker run --publish 4444:4321 --publish 4444:4321/udp --name draluca --rm tgermain/repo_sky:v2 -s /static/
+
+pushNewVersion:
+	docker push tgermain/repo_sky:latest 
