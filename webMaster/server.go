@@ -95,7 +95,7 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 				"4444:4321/udp",
 			},
 			Cmd:   []string{"-s", "/static/"},
-			Image: "tgermain/repo_sky:v2",
+			Image: "tgermain/repo_sky:latest",
 		},
 	}
 	container, err := client.CreateContainer(opts)
