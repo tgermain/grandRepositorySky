@@ -18,7 +18,7 @@ RUN go get github.com/spf13/cobra
 RUN go install github.com/tgermain/grandRepositorySky
 
 # Run the outyet command by default when the container starts.
-ENTRYPOINT ["/go/bin/grandRepositorySky -s /static/"]
+ENTRYPOINT ["/go/bin/grandRepositorySky"]
 
 # Document that the service listens on port 4321.
 EXPOSE 4321
