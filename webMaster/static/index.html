@@ -294,7 +294,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                 })
         }
 
-                $scope.pauseNode = function(id) {
+        $scope.pauseNode = function(id) {
             $http({
                     method: 'GET',
                     url: '/containers/' + id + '/pause',
@@ -308,7 +308,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                 })
         }
 
-                $scope.unpauseNode = function(id) {
+        $scope.unpauseNode = function(id) {
             $http({
                     method: 'GET',
                     url: '/containers/' + id + '/unpause',
