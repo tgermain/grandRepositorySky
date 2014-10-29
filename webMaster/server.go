@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -56,10 +57,36 @@ func main() {
 	r.HandleFunc("/containers/{idContainer}/pause", pauseContainer)
 	r.HandleFunc("/containers/{idContainer}/unpause", unpauseContainer)
 	r.HandleFunc("/containers/{idContainer}/stop", stopContainer)
+	r.HandleFunc("/containers/{idContainer}/info", getContainerInfo)
 
 	http.Handle("/", &MyServer{r})
 
 	http.ListenAndServe(receive, nil)
+}
+
+func getContainerInfo(w http.ResponseWriter, req *http.Request) {
+	//get the url param
+	params := mux.Vars(req)
+	idContainer := params["idContainer"]
+	container, err := client.InspectContainer(idContainer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// container.NetworkSettings.PortMappingAPI()[0]
+	fmt.Println(container.NetworkSettings.PortMappingAPI()[0])
+	resp, err2 := http.Get("http://" +
+		container.NetworkSettings.PortMappingAPI()[0].IP +
+		":" +
+		strconv.FormatInt(container.NetworkSettings.PortMappingAPI()[0].PublicPort, 10) +
+		"/nodes")
+	if err2 != nil {
+		http.Error(w, err2.Error(), 500)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Fprintf(w, "%s", body)
 }
 
 func getContainerHandler(w http.ResponseWriter, req *http.Request) {
@@ -69,6 +96,7 @@ func getContainerHandler(w http.ResponseWriter, req *http.Request) {
 	b, err := json.Marshal(containers)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+		return
 	}
 	fmt.Fprintf(w, "%s", b)
 
