@@ -51,7 +51,7 @@ func main() {
 				DistIp,
 				DistPort,
 			})
-			go web.MakeServer(Ip, Port, node, staticPath)
+			go web.MakeServer("", Port, node, staticPath)
 			// go func() {
 			for {
 				time.Sleep(time.Second)
