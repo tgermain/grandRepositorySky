@@ -141,3 +141,7 @@ TODO :
 	- GETDATA / GETDATARESPONSE
 	- MODIFYDATA
 	- DELETEDATA
+
+DEMO : 
+go run main.go
+go run main.go -p 4322 -d 4321  
