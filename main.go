@@ -47,7 +47,11 @@ func main() {
 	rootCmd := &cobra.Command{Use: "grandRepositorySky",
 		Run: func(cmd *cobra.Command, args []string) {
 			node := MakeDHTNode(&Id, Ip, Port)
-
+			node.JoinRing(&shared.DistantNode{
+				"",
+				DistIp,
+				DistPort,
+			})
 			go web.MakeServer(Ip, Port, node, staticPath)
 			// go func() {
 			for {
