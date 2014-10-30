@@ -88,6 +88,7 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			//rejected mesage
 			shared.Logger.Error("Message rejected")
+			shared.Logger.Error("Handle Request receive something : %#v", msg)
 		}
 	}
 	// multiple launch a go routine
@@ -99,7 +100,7 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Info("Receive an update Predecessor to %s", newNodeID)
+		shared.Logger.Error("Receive an update Predecessor to %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdatePredecessor(&shared.DistantNode{
 			newNodeID,
@@ -115,7 +116,7 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Info("Receive an update Successor %s", newNodeID)
+		shared.Logger.Error("Receive an update Successor %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdateSuccessor(&shared.DistantNode{
 			newNodeID,
@@ -318,7 +319,7 @@ func (r *ReceiverLink) StartAndListen() {
 	//launch a go routine and start to listen on local address
 	//handle incoming communicator.Message
 
-	addr, err := net.ResolveUDPAddr("udp", (shared.LocalIp + ":" + shared.LocalPort))
+	addr, err := net.ResolveUDPAddr("udp", ("" + ":" + shared.LocalPort))
 	if err != nil {
 		shared.Logger.Critical("error when resolving udp address:", err)
 		panic(err)

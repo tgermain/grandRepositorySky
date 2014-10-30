@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+
+<head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!--      Optional theme
+    <link rel="stylesheet" href="http://bootswatch.com/darkly/bootstrap.min.css"> -->
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+</head>
+
+<body>
+    <div ng-app="myApp" ng-controller="MainCtrl" ng-init="init()">
+
+        <div class="container-fluid">
+
+            <div class="page-header">
+                <h1>Hello</h1>
+            </div>
+            <div class="col-md-3 bs-docs-section">
+                ToolBox general
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-info-sign"></i>
+                            Infos
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-md-7">Nodes running :</label>
+                                <div class="col-md-5 form-control-static">
+                                    {{countNodeContainers()}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-7">informations handled :</label>
+                                <div class="col-md-5 form-control-static">
+                                    numberOfData
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h5>
+                            <i class="glyphicon glyphicon-wrench"></i>
+                            ToolBox
+                        </h5>
+                    </div>
+                    <div class="panel-body">
+                        <form name="addNodeForm" novalidate class="form-horizontal">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="CustomId" class="col-sm-3 control-label">CustomId</label>
+                                    <div class="col-lg-9">
+                                        <input class="form-control" id="CustomId" ng-model="newNode.CustomId">
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <button class="btn btn-default" ng-disabled="addNodeForm.$invalid || validatePort(newNode.CustomPort)" ng-click="addNode(newNode.CustomId)">Add a newNode</button>
+                        </form>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-6">
+                Centre
+                <div class="panel panel-default">
+                    Magnificent D3
+                    <!-- Here goes the fancy D3 -->
+                </div>
+                <!-- Debug things -->
+                <button class="btn btn-default" ng-click="getLocalContainers()">Maj</button>
+                <button class="btn btn-default" ng-click="countNodeContainers()">Count</button>
+                <div ng-repeat="container in containers">
+                    <form class="form-horizontal" ng-click="focusContainer(container)">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="col-md-9">
+                                    <div class="form-group ">
+                                        <label class="control-label col-md-3">Command</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Command}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Name</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Names[0]}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Port used</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{getContainerPort(container)}}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-3">Status</label>
+                                        <div class="col-md-9 form-control-static">
+                                            {{container.Status}}
+                                        </div>
+                                    </div>
+                                    <a ng-href="http://localhost:{{getContainerPort(container)}}">
+                                link to node
+                                </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-danger" ng-click="stopNode(container.Id)">Stop</button>
+                                    <button class="btn btn-default" ng-click="pauseNode(container.Id)">pause</button>
+                                    <button class="btn btn-default" ng-click="unpauseNode(container.Id)">unpause</button>
+                                    <button class="btn btn-default" ng-click="getContainerPort(container)">getPort</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <pre>
+                    
+                {{containers | json}}
+                </pre>
+                <!-- end of debug things -->
+            </div>
+            <div class="col-md-3" ng-show="selectedNode">
+                ToolBoxNoeud
+                <div class="panel-primary panel">
+                    <div class="panel-heading">
+                        <h4>
+                            <i class="glyphicon glyphicon-info-sign"></i>
+                            Node Informations
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Id</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{selectedNode.Id}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Ip</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{selectedNode.Ip}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Port</label>
+                                <div class="col-md-9 form-control-static">
+                                    {{selectedNode.Port}}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Successor</label>
+                                <div class="col-md-9 form-control-static">
+                                    <a ng-href="http://localhost:{{selectedNode.Successor.Port}}">
+                                    {{selectedNode.Successor.Id}}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3">Predecessor</label>
+                                <div class="col-md-9 form-control-static">
+                                    <a ng-href="http://localhost:{{selectedNode.Predecessor.Port}}">
+                                    {{selectedNode.Predecessor.Id}}
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+var app = angular.module('myApp', []);
+
+app.config(function($httpProvider) {
+    //Enable cross domain calls
+    $httpProvider.defaults.useXDomain = true;
+
+    //Remove the header used to identify ajax call  that would prevent CORS from working
+    delete $httpProvider.defaults.headers.common['X-Requested-With'];
+});
+
+app.controller('MainCtrl', ['$scope', '$http',
+    function($scope, $http) {
+
+        $scope.containers = []
+
+        $scope.focusedContainer = {}
+
+        $scope.init = function() {
+            $scope.getLocalContainers();
+        };
+
+        $scope.getLocalContainers = function() {
+            $http({
+                    method: 'GET',
+                    url: '/containers',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.containers = data
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        };
+
+        $scope.countNodeContainers = function() {
+            //regeexp to check if it's the right name of container
+            var verif = new RegExp("^tgermain/repo_sky");
+
+            var count = 0;
+            for (var i = 0; i < $scope.containers.length; i++) {
+                // console.log($scope.containers[i])
+                if (verif.test($scope.containers[i].Image)) {
+                    count++
+                };
+            };
+            return count
+        }
+
+        $scope.getContainerPort = function(container) {
+            //parse the command string and find the port parameter
+            var findRegExp = new RegExp(".*-p (\\d+)");
+            return findRegExp.exec(container.Command)[1]
+        }
+
+        $scope.validatePort = function(proposedPort) {
+            //check if port is in range and not already use
+            if (4440 <= proposedPort && proposedPort <= 4540) {
+                //is in range
+                for (var i = 0; i < $scope.containers.length; i++) {
+                    // console.log($scope.containers[i])
+                    if ($scope.getContainerPort($scope.containers[i]) == proposedPort) {
+                        return false
+                    };
+                };
+                return true;
+            };
+        }
+
+        $scope.getValidePort = function() {
+            for (var port = 4440; port < 4540; port++) {
+
+                if ($scope.validatePort(port)) {
+                    return port
+                }
+
+            };
+        }
+
+        $scope.addNode = function(customId) {
+            daPort = $scope.getValidePort()
+            console.log("Port of the nod to be ceated")
+            console.log(daPort)
+            var portToContact;
+            if (!$scope.containers[0]) {
+                console.log("No previously created node")
+                portToContact = 0
+            } else {
+                portToContact = parseInt($scope.getContainerPort($scope.containers[0]))
+            };
+            console.log("Port to contact after")
+            console.log(portToContact)
+
+            if (!customId) {
+                console.log("fuch no id ");
+                customId="";
+            }else{
+                console.log("YES an id ! ");
+            };
+            $http({
+                    method: 'POST',
+                    url: '/containers',
+                    respondType: 'json', //optionnel
+                    data: {
+                        Port: daPort,
+                        Id: customId,
+                        JoinPort: portToContact
+                    }
+                }).success(function(data, status, headers, config) {
+                    // $scope.containers = data
+                    console.log(data)
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+        $scope.stopNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/stop',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                    $scope.focusedContainer = {}
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+        $scope.pauseNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/pause',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+        $scope.unpauseNode = function(id) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + id + '/unpause',
+                    respondType: 'json' //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.getLocalContainers();
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+
+                })
+        }
+
+        $scope.focusContainer = function(container) {
+            $scope.focusedContainer = container
+            $scope.getContainerInfo(container)
+        }
+
+        $scope.getContainerInfo = function(container) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + container.Id + '/' + $scope.getContainerPort(container) + '/info',
+                    respondType: 'json', //optionnel
+                }).success(function(data, status, headers, config) {
+                    $scope.selectedNode = data;
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+                    //$scope.selectedNode = data;
+                    $scope.status = status;
+                })
+        }
+
+    }
+])
+</script>
+
+</html>
