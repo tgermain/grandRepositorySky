@@ -168,13 +168,17 @@
                             <div class="form-group">
                                 <label class="control-label col-md-3">Successor</label>
                                 <div class="col-md-9 form-control-static">
+                                    <a ng-href="http://localhost:{{selectedNode.Successor.Port}}">
                                     {{selectedNode.Successor.Id}}
+                                    </a>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-3">Predecessor</label>
                                 <div class="col-md-9 form-control-static">
+                                    <a ng-href="http://localhost:{{selectedNode.Predecessor.Port}}">
                                     {{selectedNode.Predecessor.Id}}
+                                    </a>
                                 </div>
                             </div>
                         </form>
