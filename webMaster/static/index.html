@@ -108,7 +108,7 @@
                                     <div class="form-group">
                                         <label class="control-label col-md-3">Port used</label>
                                         <div class="col-md-9 form-control-static">
-                                            {{container.Ports[0].PublicPort}}
+                                            {{getContainerPort(container)}}
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -117,7 +117,7 @@
                                             {{container.Status}}
                                         </div>
                                     </div>
-                                    <a ng-href="http://localhost:{{container.Ports[1].PublicPort}}">
+                                    <a ng-href="http://localhost:{{getContainerPort(container)}}">
                                 link to node
                                 </a>
                                 </div>
@@ -125,6 +125,7 @@
                                     <button class="btn btn-danger" ng-click="stopNode(container.Id)">Stop</button>
                                     <button class="btn btn-default" ng-click="pauseNode(container.Id)">pause</button>
                                     <button class="btn btn-default" ng-click="unpauseNode(container.Id)">unpause</button>
+                                    <button class="btn btn-default" ng-click="getContainerPort(container)">getPort</button>
                                 </div>
                             </div>
                         </div>
@@ -136,9 +137,9 @@
                 </pre>
                 <!-- end of debug things -->
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3" ng-show="selectedNode">
                 ToolBoxNoeud
-                                <div class="panel-primary panel">
+                <div class="panel-primary panel">
                     <div class="panel-heading">
                         <h4>
                             <i class="glyphicon glyphicon-info-sign"></i>
@@ -191,6 +192,7 @@
 </body>
 <script type="text/javascript">
 var app = angular.module('myApp', []);
+
 app.config(function($httpProvider) {
     //Enable cross domain calls
     $httpProvider.defaults.useXDomain = true;
@@ -315,6 +317,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                     respondType: 'json' //optionnel
                 }).success(function(data, status, headers, config) {
                     $scope.getLocalContainers();
+                    $scope.focusedContainer = {}
                 })
                 .error(function(data, status, headers, config) {
                     console.log("error status : " + status);
