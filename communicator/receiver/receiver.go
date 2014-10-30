@@ -80,6 +80,10 @@ func (r *ReceiverLink) handleRequest(payload []byte) {
 		{
 			r.receiveDeleteData(&msg)
 		}
+	case msg.TypeOfMsg == communicator.SETDATA:
+		{
+			r.receiveSetData(&msg)
+		}
 	default:
 		{
 			//rejected mesage
