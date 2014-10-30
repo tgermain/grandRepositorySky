@@ -238,13 +238,19 @@ app.controller('MainCtrl', ['$scope', '$http',
             return count
         }
 
+        $scope.getContainerPort = function(container) {
+            //parse the command string and find the port parameter
+            var findRegExp = new RegExp(".*-p (\\d+)");
+            return findRegExp.exec(container.Command)[1]
+        }
+
         $scope.validatePort = function(proposedPort) {
             //check if port is in range and not already use
             if (4440 <= proposedPort && proposedPort <= 4540) {
                 //is in range
                 for (var i = 0; i < $scope.containers.length; i++) {
                     // console.log($scope.containers[i])
-                    if ($scope.containers[i].Ports[0].PublicPort == proposedPort) {
+                    if ($scope.getContainerPort($scope.containers[i]) == proposedPort) {
                         return false
                     };
                 };
@@ -264,7 +270,24 @@ app.controller('MainCtrl', ['$scope', '$http',
 
         $scope.addNode = function(customId) {
             daPort = $scope.getValidePort()
+            console.log("Port of the nod to be ceated")
             console.log(daPort)
+            var portToContact;
+            if (!$scope.containers[0]) {
+                console.log("No previously created node")
+                portToContact = 0
+            } else {
+                portToContact = parseInt($scope.getContainerPort($scope.containers[0]))
+            };
+            console.log("Port to contact after")
+            console.log(portToContact)
+
+            if (!customId) {
+                console.log("fuch no id ");
+                customId="";
+            }else{
+                console.log("YES an id ! ");
+            };
             $http({
                     method: 'POST',
                     url: '/containers',
@@ -272,6 +295,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                     data: {
                         Port: daPort,
                         Id: customId,
+                        JoinPort: portToContact
                     }
                 }).success(function(data, status, headers, config) {
                     // $scope.containers = data
@@ -332,12 +356,10 @@ app.controller('MainCtrl', ['$scope', '$http',
         }
 
         $scope.getContainerInfo = function(container) {
-            var urlReq = "http://" + container.Ports[0].IP + ':' + container.Ports[0].PrivatePort;
-            console.log("try to contact : " + urlReq)
             $http({
                     method: 'GET',
-                    url: '/containers/' + container.Id + '/info',
-                    respondType: 'json' //optionnel
+                    url: '/containers/' + container.Id + '/' + $scope.getContainerPort(container) + '/info',
+                    respondType: 'json', //optionnel
                 }).success(function(data, status, headers, config) {
                     $scope.selectedNode = data;
                 })
