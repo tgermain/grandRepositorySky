@@ -15,7 +15,12 @@ type MyServer struct {
 }
 
 type postParams struct {
-	Id   string
+	Port     int64
+	Id       string
+	JoinPort int64
+}
+
+type getInfoParams struct {
 	Port int64
 }
 
@@ -57,14 +62,20 @@ func main() {
 	r.HandleFunc("/containers/{idContainer}/pause", pauseContainer)
 	r.HandleFunc("/containers/{idContainer}/unpause", unpauseContainer)
 	r.HandleFunc("/containers/{idContainer}/stop", stopContainer)
-	r.HandleFunc("/containers/{idContainer}/info", getContainerInfo)
+	r.HandleFunc("/containers/{idContainer}/{containerPort}/info", getContainerInfo)
 
 	http.Handle("/", &MyServer{r})
 
-	http.ListenAndServe(receive, nil)
+	err := http.ListenAndServe(receive, nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
 
 func getContainerInfo(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Try to get node info")
+
 	//get the url param
 	params := mux.Vars(req)
 	idContainer := params["idContainer"]
@@ -73,12 +84,9 @@ func getContainerInfo(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// container.NetworkSettings.PortMappingAPI()[0]
-	fmt.Println(container.NetworkSettings.PortMappingAPI()[0])
-	resp, err2 := http.Get("http://" +
-		container.NetworkSettings.PortMappingAPI()[0].IP +
-		":" +
-		strconv.FormatInt(container.NetworkSettings.PortMappingAPI()[0].PublicPort, 10) +
+
+	resp, err2 := http.Get("http://localhost:" +
+		findContainerPort(container) +
 		"/nodes")
 	if err2 != nil {
 		http.Error(w, err2.Error(), 500)
@@ -87,6 +95,15 @@ func getContainerInfo(w http.ResponseWriter, req *http.Request) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	fmt.Fprintf(w, "%s", body)
+}
+
+func findContainerPort(container *docker.Container) string {
+	for i, v := range container.Args {
+		if v == "-p" {
+			return container.Args[i+1]
+		}
+	}
+	return ""
 }
 
 func getContainerHandler(w http.ResponseWriter, req *http.Request) {
@@ -113,6 +130,12 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fmt.Println(parameters)
+
+	daCmd := []string{"-s", "/static/", "-p", strconv.FormatInt(parameters.Port, 10)}
+	if parameters.JoinPort != 0 {
+		//given joinPort
+		daCmd = append(daCmd, "-d", strconv.FormatInt(parameters.JoinPort, 10))
+	}
 	// id := "truc"
 	opts := docker.CreateContainerOptions{
 		Name: parameters.Id,
@@ -122,7 +145,7 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 				"4444:4321",
 				"4444:4321/udp",
 			},
-			Cmd:   []string{"-s", "/static/"},
+			Cmd:   daCmd,
 			Image: "tgermain/repo_sky:latest",
 		},
 	}
@@ -133,7 +156,7 @@ func createContainerHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	err2 := client.StartContainer(container.ID, &docker.HostConfig{
-		NetworkMode: "bridge",
+		NetworkMode: "host",
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"4321/tcp": []docker.PortBinding{
 				docker.PortBinding{
