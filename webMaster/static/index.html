@@ -18,11 +18,42 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-animate.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-sanitize.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular-resource.min.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="//rawgit.com/JanStevens/angular-growl-2/master/build/angular-growl.css" />
+    <script src="//rawgit.com/JanStevens/angular-growl-2/master/build/angular-growl.js" type="text/javascript"></script>
+
+    <style>
+        .link line.separator {
+          stroke: #fff;
+          stroke-width: 2px;
+        }
+
+        .node circle {
+          stroke: #000;
+          stroke-width: 1.5px;
+          padding:7px;
+        }
+
+        .node text {
+          font: 10px sans-serif;
+          pointer-events: none;
+        }
+
+        .graph{
+            width: 400px;
+            height: 250px;
+        }
+</style>
 </head>
 
 <body>
     <div ng-app="myApp" ng-controller="MainCtrl" ng-init="init()">
-
+        <div growl></div>
         <div class="container-fluid">
 
             <div class="page-header">
@@ -81,11 +112,13 @@
             </div>
             <div class="col-md-6">
                 Centre
-                <div class="panel panel-default">
-                    Magnificent D3
+                <div class="graph panel panel-default">
+                    
                     <!-- Here goes the fancy D3 -->
                 </div>
                 <!-- Debug things -->
+                <button class="btn btn-default" ng-click="majGraph()">Collect infos for Graph</button>
+                <button class="btn btn-default" ng-click="hello();draw();">(re)DrawGraph</button>
                 <button class="btn btn-default" ng-click="getLocalContainers()">Maj</button>
                 <button class="btn btn-default" ng-click="countNodeContainers()">Count</button>
                 <div ng-repeat="container in containers">
@@ -132,8 +165,8 @@
                     </form>
                 </div>
                 <pre>
-                    
-                {{containers | json}}
+                containers : {{containers | json}}
+
                 </pre>
                 <!-- end of debug things -->
             </div>
@@ -191,7 +224,7 @@
     </div>
 </body>
 <script type="text/javascript">
-var app = angular.module('myApp', []);
+var app = angular.module('myApp', ['angular-growl', 'ngAnimate']);
 
 app.config(function($httpProvider) {
     //Enable cross domain calls
@@ -201,12 +234,29 @@ app.config(function($httpProvider) {
     delete $httpProvider.defaults.headers.common['X-Requested-With'];
 });
 
-app.controller('MainCtrl', ['$scope', '$http',
-    function($scope, $http) {
+app.config(['growlProvider', function(growlProvider) {
+    growlProvider.globalTimeToLive(3000);
+}]);
 
-        $scope.containers = []
+app.controller('MainCtrl', ['$scope', 'growl', '$http',
+    function($scope, growl, $http) {
 
-        $scope.focusedContainer = {}
+        $scope.selected = "L5";
+        $scope.next = "";
+        $scope.previous = "";
+
+        var width, height, rules, map, tasks, links, nodes, svg, tick, radius, force, link, node;
+        width = 400;
+        height = 250;
+
+        $scope.containers = [];
+
+        $scope.nameMap = [];
+        $scope.fullRing = [];
+        var indexRules;
+
+
+        $scope.focusedContainer = {};
 
         $scope.init = function() {
             $scope.getLocalContainers();
@@ -272,7 +322,7 @@ app.controller('MainCtrl', ['$scope', '$http',
 
         $scope.addNode = function(customId) {
             daPort = $scope.getValidePort()
-            console.log("Port of the nod to be ceated")
+            console.log("Port of the node to be ceated")
             console.log(daPort)
             var portToContact;
             if (!$scope.containers[0]) {
@@ -285,10 +335,10 @@ app.controller('MainCtrl', ['$scope', '$http',
             console.log(portToContact)
 
             if (!customId) {
-                console.log("fuch no id ");
+                //console.log("fuch no id ");
                 customId="";
             }else{
-                console.log("YES an id ! ");
+                //console.log("YES an id ! ");
             };
             $http({
                     method: 'POST',
@@ -301,7 +351,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                     }
                 }).success(function(data, status, headers, config) {
                     // $scope.containers = data
-                    console.log(data)
+                    //console.log(data)
                     $scope.getLocalContainers();
                 })
                 .error(function(data, status, headers, config) {
@@ -364,6 +414,7 @@ app.controller('MainCtrl', ['$scope', '$http',
                     url: '/containers/' + container.Id + '/' + $scope.getContainerPort(container) + '/info',
                     respondType: 'json', //optionnel
                 }).success(function(data, status, headers, config) {
+                    //console.log("info ok");
                     $scope.selectedNode = data;
                 })
                 .error(function(data, status, headers, config) {
@@ -372,6 +423,192 @@ app.controller('MainCtrl', ['$scope', '$http',
                     $scope.status = status;
                 })
         }
+
+        $scope.collectContainerInfo = function(container,index) {
+            $http({
+                    method: 'GET',
+                    url: '/containers/' + container.Id + '/' + $scope.getContainerPort(container) + '/info',
+                    respondType: 'json', //optionnel
+                }).success(function(data, status, headers, config) {
+                    
+                    $scope.nameMap[index]= [container.Names[0], data.Id, container.Id];
+                    $scope.fullRing[index] = data;
+                    growl.success("infos collected ", container.Names[0]);
+
+                })
+                .error(function(data, status, headers, config) {
+                    console.log("error status : " + status);
+                    //$scope.selectedNode = data;
+                    $scope.status = status;
+                })
+        }
+
+    $scope.idToName = function (id){
+        var indexName = "";
+        for (var j = 0; j < $scope.nameMap.length; j++) {
+            if ($scope.nameMap[j]){
+                if ($scope.nameMap[j][1] == id){
+                    indexName = $scope.nameMap[j][0];
+                    break;
+                }
+            }
+        }
+        return indexName;
+    }
+
+
+    $scope.majGraph = function() { 
+        $scope.nameMap = [];
+        $scope.fullRing = [];
+        rules = [];
+        indexRules= 0;
+        for (var i = 0; i < $scope.containers.length; i++) {
+            $scope.collectContainerInfo($scope.containers[i], i);  
+        };
+    }  
+
+    $scope.hello = function() {        
+
+        for (var i = 0; i < $scope.fullRing.length; i++) {
+            if($scope.fullRing[i]) {       
+                var indexID = $scope.fullRing[i].Id;
+                var indexName = $scope.idToName(indexID);
+
+                var nodeID = $scope.fullRing[i].Successor.Id;
+                var nodeName = $scope.idToName(nodeID);
+
+                rules[indexRules] = [indexName, nodeName, "0"];
+                indexRules++;
+
+                for (var j = 0; j < $scope.fullRing[i].Fingers.length; j++) {
+                    nodeID = $scope.fullRing[i].Fingers[j].NodeResp.Id;
+                    nodeName = $scope.idToName(nodeID);
+
+                    rules[indexRules] = [indexName, nodeName, "1"];
+                    indexRules++;                
+                }
+            }
+
+            
+        };
+
+        map = d3.map();
+        rules.forEach(function(rule) {
+            map.set(rule[0], {
+                fixed: false
+            });
+            return map.set(rule[1], false);
+        });
+        map.set(rules[0][0], {
+            fixed: true,
+            x: width / 2,
+            y: height / 2
+        });
+        tasks = map.keys();
+        links = rules.map(function(rule) {
+            return {
+                source: tasks.indexOf(rule[0]),
+                target: tasks.indexOf(rule[1]),
+                str: rule[2]
+            };
+        });
+        nodes = tasks.map(function(k) {
+            var entry;
+            entry = {
+                name: k
+            };
+            if (map.get(k).fixed) {
+                entry.fixed = true;
+                entry.x = map.get(k).x;
+                entry.y = map.get(k).y;
+            }
+            return entry;
+        });
+    }
+    $scope.draw = function() {
+        d3.select("svg").remove();
+        $scope.selected ="";
+        if($scope.selectedNode){
+            $scope.selected =  $scope.idToName($scope.selectedNode.Id);
+        }
+        svg = d3.select(".graph").append("svg").attr("width", width).attr("height", height);
+
+        tick = function() {
+            link.selectAll("line").attr("x1", function(d) {
+                return d.source.x;
+            }).attr("y1", function(d) {
+                return d.source.y;
+            }).attr("x2", function(d) {
+                return d.target.x;
+            }).attr("y2", function(d) {
+                return d.target.y;
+            }).attr("marker-end", "url(#arrow)");
+            node.attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
+        };
+        radius = d3.scale.sqrt().range([0, 6]);
+        force = d3.layout.force().size([width / 2, height]).charge(-400);
+        force.nodes(nodes).links(links).linkStrength(function(d) {
+            var str = 1 - d.str;
+            return str;
+        }).linkDistance(function(d) {
+            var lg = 4 - 10 * d.str;
+            return lg;
+        }).on("tick", tick).start();
+        link = svg.selectAll(".link").data(links).enter().append("g").attr("class", "link");
+
+
+        node = svg.selectAll(".node").data(nodes).enter().append("g").attr("class", "node").call(force.drag);
+
+        node.on("click", function(d) {
+            //console.log("click on " + d.name);
+            $scope.selected = d.name;
+            for (var i = 0; i < $scope.containers.length; i++) {
+            if($scope.containers[i].Names[0] == d.name){
+               $scope.getContainerInfo($scope.containers[i]);
+            }
+        };
+            
+            //TODO maj $scope.previous and $scope.next too
+            $scope.majSelGraph();
+        });
+        $scope.majSelGraph();
+    }
+
+    $scope.majSelGraph = function() {
+        node.append("circle").attr("r", 10).style("fill", function(d) {
+            var color = "#0040FF";
+            if (d.name == $scope.selected) {
+                color = "#FF00FF";
+            }
+            if (d.name == $scope.next || d.name == $scope.previous) {
+                color = "#BF00FF";
+            }
+            
+            return color;
+        });
+
+        link.append("line").style("stroke-width", 1).style("stroke", function(d) {
+            var color = "#2E64FE";
+            if(d.str != '0'){ //finger
+                if (d.source.name == $scope.selected || d.target.name == $scope.selected) {
+                    color = "#EE22EE";
+                }
+            } else { //previous and next
+                if (d.source.name == $scope.selected || d.target.name == $scope.selected) {
+                    color = "#CC2EFA";
+                }
+            }
+            
+            return color;
+        }).attr("marker-end", "url(#arrow)");
+
+        node.append("text").attr("dy", ".35em").attr("text-anchor", "middle").text(function(d) {
+            return d.name;
+        }).style("fill", "#AAAAAA");
+
+    }
 
     }
 ])
