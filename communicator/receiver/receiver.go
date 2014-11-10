@@ -100,7 +100,7 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Error("Receive an update Predecessor to %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
+		shared.Logger.Info("Receive an update Predecessor to %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdatePredecessor(&shared.DistantNode{
 			newNodeID,
@@ -116,7 +116,7 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Error("Receive an update Successor %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
+		shared.Logger.Info("Receive an update Successor %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdateSuccessor(&shared.DistantNode{
 			newNodeID,
@@ -295,9 +295,14 @@ func (r *ReceiverLink) receiveSetData(msg *communicator.Message) {
 func (r *ReceiverLink) receiveDeleteData(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "key") {
 		key, _ := msg.Parameters["key"]
+		_, forced := msg.Parameters["forced"]
 		shared.Logger.Info("Receiving a delete data from %s for key %s", msg.Origin.Id, key)
 
-		r.node.DeleteLocalData(key)
+		if forced {
+			r.node.DeleteLocalData(key)
+		} else {
+			r.node.DeleteData(key)
+		}
 	}
 }
 

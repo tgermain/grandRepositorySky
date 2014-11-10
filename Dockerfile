@@ -9,18 +9,19 @@ ADD ./web/client /static/
 
 
 # Build the outyet command inside the container.
-# (You may fetch or manage dependencies here,
-# either manually or with a tool like "godep".)
+# fetching dependencies
 RUN go get github.com/nu7hatch/gouuid
 RUN go get github.com/op/go-logging
 RUN go get github.com/gorilla/mux
 RUN go get github.com/spf13/cobra
+
+# install the main project
 RUN go install github.com/tgermain/grandRepositorySky
+
 
 # Run the outyet command by default when the container starts.
 ENTRYPOINT ["/go/bin/grandRepositorySky"]
 
-# Document that the service listens on port 4321.
-EXPOSE 4321
 
+# default command
 CMD ["--help"]

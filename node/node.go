@@ -489,7 +489,7 @@ func (d *DHTnode) ModifyData(key string, newValue string) {
 		//else find where is data -> lookup, relay request
 		dest := d.Lookup(key)
 		//send message
-		d.commLib.SendDeleteData(dest, key)
+		d.commLib.SendDeleteData(dest, key, false)
 		d.commLib.SendSetData(dest, key, newValue, false)
 	}
 }
@@ -500,21 +500,24 @@ func (d *DHTnode) DeleteData(hashedKey string) {
 	//if data are local
 	if d.IsResponsible(hashedKey) {
 		d.DeleteLocalData(hashedKey)
+		//for each place where we have replicas
+		for _, v := range d.getReplicasPlaces() {
+			d.commLib.SendDeleteData(v, hashedKey, true)
+		}
 	} else {
 		//else find where is data -> lookup, relay request
 		dest := d.Lookup(hashedKey)
 		//send message
-		d.commLib.SendDeleteData(dest, hashedKey)
+		if dest.Id != shared.LocalId {
+			d.commLib.SendDeleteData(dest, hashedKey, false)
+		}
 	}
 }
 
 //used in receiver
 func (d *DHTnode) DeleteLocalData(hashedKey string) {
+	shared.Logger.Notice("Delete data with key %v", hashedKey)
 	shared.Datas.DelData(hashedKey)
-	//for each place where we have replicas
-	for _, v := range d.getReplicasPlaces() {
-		d.commLib.SendDeleteData(v, hashedKey)
-	}
 }
 
 func (d *DHTnode) cleanReplicas() {
@@ -528,7 +531,7 @@ func (d *DHTnode) cleanReplicas() {
 				dataPiece.Tag = shared.LocalId
 			}
 		} else {
-			shared.Logger.Info("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
+			shared.Logger.Warning("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
 			shared.Datas.DelData(key)
 		}
 	}
