@@ -3,7 +3,9 @@ GrandRepositorySky
 
 Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DHT) based on _Chord_ protocol (see [This paper ](http://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf))
 
-:construction: Current objective :construction: : **3** :godmode:
+The final goal of the project is to deploy a node inside a docker container
+
+:construction: Current objective :construction: : **5** :godmode:
 ---------------------
 
 ### 6 objectives : 
@@ -37,9 +39,6 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 to run the playground test : 
 `go test dhtPlayground_test.go dhtPlayground.go -v`
 
-###TODO : 
-- Upgrade the lookup function to take advantage of the fingers table (***+test***)
-
 ###DONE:
 - Extract the next real node from the fingers table (fingers[0] became a new atribut of DHTNode)
 - implement the function to create finger table (the primitive are already done)
@@ -58,17 +57,12 @@ When a node enter the ring, we initialize its fingers table (to be sure that its
 
 
 ### Ring visualization
-Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for svg² output
+Call the method ``gimmeGraph`` on any node, export the result to a file and process with your best graphviz, I recommend circo. ``circo graph.gv -Tsvg -o viz`` for svg output
 
 ## 2. Network communication
 ### Ring stabilization DONE
 To avoid the depreciation of all the fingers table after some new nodes join the ring, there's a mecanism to update the fingers table each 5min (pifometric value).
 **Goroutine** ?
-
-SPRINT : 
-- Make tests
-
-TODO (tim) :
 
 Done : 
 - Handle when a node quit the ring (not gracefuly)
@@ -82,11 +76,9 @@ Done :
 - All methods which return a `*DHTNode` must return an **id** and we have to perform a `lookup(id)`
 
 ###launch parameters DONE
-*done* except for data
 - IP, PORT 
 - (IP, PORT of an existing node)
 - (ID)
-- (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
 
 
 ###message format
@@ -113,7 +105,7 @@ Work in progress (Al):
 - Web controls
 
 
-TODO :
+Done :
 - Multiple instances server
 - Graph interface
 
@@ -123,18 +115,14 @@ TODO :
 facebook duplicate data of one node on 2 other nodes : enough !
 
 - Data place on node A is replicated to A.successor and A.predecessor
-
-###launch parameters 
-- (Data already owned by the node (dump of json), to simulate the case when a node already holding data quit temporarily the ring)
-
-###Choice of underlying database
-- Redis
-- mongodb, too heavy
+- Special case when there is:
+  - only 1 node -> data are not replicated
+  - only 2 node -> data are only replicated to the predecessor
 
 ### new messages type
 - DataReplication
 
-TODO : 
+DONE : 
 - methods in node.go to add, retreive, modify and delete a (key-value) data
 - new messages : 
 	- POSTDATA
@@ -142,6 +130,22 @@ TODO :
 	- MODIFYDATA
 	- DELETEDATA
 
-DEMO : 
-go run main.go
-go run main.go -p 4322 -d 4321  
+
+Local DEMO : 
+
+```bash
+#launch the first node with default parameters (localhost:4321)
+go run main.go 
+#launch the second node on (localhost:4322) and connect to the first one 
+go run main.go -p 4322 -d 4321 
+```
+
+
+## 5. Virtualization
+
+Problem with openStach API -> we did not use it.
+
+###Docker usage
+See the docker file to see how the image is built.
+
+**Important** : due to the dynamic connection of the node on the same virtual machine (it's not a use case), we do not isolate the network interface of containers. They all use the *host network interface* via `NetworkMode: "host"` when starting a container.
