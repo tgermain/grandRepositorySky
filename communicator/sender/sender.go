@@ -314,8 +314,8 @@ func (s *SenderLink) SendSetData(destination *shared.DistantNode, key, value str
 
 }
 
-func (s *SenderLink) SendDeleteData(destination *shared.DistantNode, key string) {
-	shared.Logger.Warning("Send Delete data to %s , key %s", destination.Id, key)
+func (s *SenderLink) SendDeleteData(destination *shared.DistantNode, key string, forced bool) {
+	shared.Logger.Warning("Send Delete data to %s , key %s with forcing %t", destination.Id, key, forced)
 
 	newMessage := &communicator.Message{
 		communicator.DELETEDATA,
@@ -325,7 +325,12 @@ func (s *SenderLink) SendDeleteData(destination *shared.DistantNode, key string)
 			"key": key,
 		},
 	}
-
+	//forced force the node to delete the data with given only locally
+	// forced true -> local delete( use to clean replica)
+	// forced false -> remove a data from the ring (API)
+	if forced {
+		newMessage.Parameters["forced"] = shared.LocalId
+	}
 	sendTo(destination, newMessage)
 
 }

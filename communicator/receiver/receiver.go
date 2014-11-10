@@ -295,9 +295,14 @@ func (r *ReceiverLink) receiveSetData(msg *communicator.Message) {
 func (r *ReceiverLink) receiveDeleteData(msg *communicator.Message) {
 	if checkRequiredParams(msg.Parameters, "key") {
 		key, _ := msg.Parameters["key"]
+		_, forced := msg.Parameters["forced"]
 		shared.Logger.Info("Receiving a delete data from %s for key %s", msg.Origin.Id, key)
 
-		r.node.DeleteLocalData(key)
+		if forced {
+			r.node.DeleteLocalData(key)
+		} else {
+			r.node.DeleteData(key)
+		}
 	}
 }
 
