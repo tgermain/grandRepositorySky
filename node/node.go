@@ -531,7 +531,7 @@ func (d *DHTnode) cleanReplicas() {
 				dataPiece.Tag = shared.LocalId
 			}
 		} else {
-			shared.Logger.Info("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
+			shared.Logger.Warning("Tag %s, key %s, dataPiece %s removed", dataPiece.Tag, key, dataPiece.Value)
 			shared.Datas.DelData(key)
 		}
 	}

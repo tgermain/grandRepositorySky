@@ -100,7 +100,7 @@ func (r *ReceiverLink) receiveUpdatePredecessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Error("Receive an update Predecessor to %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
+		shared.Logger.Info("Receive an update Predecessor to %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdatePredecessor(&shared.DistantNode{
 			newNodeID,
@@ -116,7 +116,7 @@ func (r *ReceiverLink) receiveUpdateSuccessor(msg *communicator.Message) {
 		newNodeID, _ := msg.Parameters["newNodeID"]
 		newNodeIp, _ := msg.Parameters["newNodeIp"]
 		newNodePort, _ := msg.Parameters["newNodePort"]
-		shared.Logger.Error("Receive an update Successor %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
+		shared.Logger.Info("Receive an update Successor %s from %s : %s", newNodeID, msg.Origin.Ip, msg.Origin.Port)
 
 		r.node.UpdateSuccessor(&shared.DistantNode{
 			newNodeID,
