@@ -63,8 +63,8 @@ func main() {
 	rootCmd.Flags().StringVarP(&Id, "id", "n", "", "Id you want for your node")
 	rootCmd.Flags().StringVarP(&Ip, "ip", "i", "", "Ip you want for your node. Localhost by default")
 	rootCmd.Flags().StringVarP(&Port, "port", "p", "4321", "port you want for your node. 4321 by default")
-	rootCmd.Flags().StringVarP(&DistIp, "distIp", "w", "localhost", "Ip you want for your node")
-	rootCmd.Flags().StringVarP(&DistPort, "distPort", "d", "4321", "port you want for your node")
+	rootCmd.Flags().StringVarP(&DistIp, "distIp", "w", "localhost", "Ip to an existing node you want to contact")
+	rootCmd.Flags().StringVarP(&DistPort, "distPort", "d", "4321", "port to an existing node you want to contact")
 	rootCmd.Flags().StringVarP(&staticPath, "path to static ressources", "s", "web/client", "path to static ressources")
 	rootCmd.Execute()
 }
