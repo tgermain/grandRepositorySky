@@ -5,6 +5,41 @@ Grand Repository in the Sky : POC implementation of _Distributed Hash Table_ (DH
 
 The final goal of the project is to deploy a node inside a docker container
 
+Installation :
+----
+Assuming that you already have Go install, with a `GOPATH` variable set : 
+```
+go get github.com/tgermain/grandRepositorySky 
+```
+
+Run the project : 
+----
+
+Local demo : 
+```bash
+#launch the first node with default parameters (localhost:4321)
+go run main.go 
+#launch the second node on (localhost:4322) and connect to the first one 
+go run main.go -p 4322 -d 4321 
+```
+
+There are web page interface at `localhost:4321` and `localhost:4322`.
+
+Docker demo:
+Assuming you already have docker install :
+```bash
+# get the latest version of a node container
+docker pull tgermain/repo_sky:latest
+# run the orchestrator
+go run webMaster/server.go
+```
+The web interface to launch new container is server on `localhost:8080`.
+
+
+Documentation :
+----
+see `doc/d7024-lab-report.pdf`
+
 :construction: Current objective :construction: : **5** :godmode:
 ---------------------
 
@@ -129,16 +164,6 @@ DONE :
 	- GETDATA / GETDATARESPONSE
 	- MODIFYDATA
 	- DELETEDATA
-
-
-Local DEMO : 
-
-```bash
-#launch the first node with default parameters (localhost:4321)
-go run main.go 
-#launch the second node on (localhost:4322) and connect to the first one 
-go run main.go -p 4322 -d 4321 
-```
 
 
 ## 5. Virtualization
