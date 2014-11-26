@@ -46,7 +46,7 @@ func (s *MyServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 func main() {
 	ip := ""
-	port := "80"
+	port := "8080"
 	path := "./static/"
 
 	receive := ip + ":" + port
